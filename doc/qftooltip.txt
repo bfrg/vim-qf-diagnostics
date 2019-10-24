@@ -1,0 +1,55 @@
+*qftooltip.txt*  Display quickfix errors in a popup window (like a tooltip).
+
+Author:     bfrg <http://github.com/bfrg>
+Website:    https://github.com/bfrg/vim-qf-tooltip
+License:    Same terms as Vim itself (see |license|)
+
+
+==============================================================================
+INTRODUCTION                                   *qf-tooltip* *qf-tooltip-intro*
+
+Display the |quickfix| error in the current line in a |popup| window (like a
+tooltip).
+
+The plugin checks if the current |quickfix| list contains any errors for the
+current line and displays them in a popup window at the current cursor
+position.
+
+==============================================================================
+USAGE                                                       *qf-tooltip-usage*
+
+<plug>(qf-tooltip-show)                              *<plug>(qf-tooltip-show)*
+            Display a |popup| window (like a tooltip) at the current cursor
+            position.
+
+            The plugin checks if the current |quickfix| list contains any
+            errors for the current line using a linear search. If the line
+            contains several errors, all errors will be listed in the same
+            popup window.
+
+            Example mapping: >
+                nmap <leader>ee <plug>(qf-tooltip-show)
+<
+==============================================================================
+CONFIGURATION                                              *qf-tooltip-config*
+
+The appearance of the popup window can be configured through the following
+highlight groups:
+
+QfTooltip                                                       *hl-QfTooltip*
+                Popup window background and error text. This is the equivalent
+                of the |hl-Normal| highlight group in regular windows.
+                Default: |hl-Pmenu|
+
+QfTooltipTitle                                             *hl-QfTooltipTitle*
+                Title (top line) of popup window.
+                Default: |hl-Title|
+
+                Note: The title of the popup window is set to the
+                |quickfix-title| of the current quickfix list.
+
+QfTooltipLineNr                                           *hl-QfTooltipLineNr*
+                Line and column number.
+                Default: |hl-Directory|
+
+ vim:tw=78:et:ft=help:norl:
