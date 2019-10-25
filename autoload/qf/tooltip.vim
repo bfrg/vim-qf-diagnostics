@@ -3,7 +3,7 @@
 " File:         autoload/qf/tooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Oct 24, 2019
+" Last Change:  Oct 25, 2019
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -33,7 +33,7 @@ function! qf#tooltip#show() abort
     for item in entries
         let length = len(printf('%d:%d', item.lnum, item.col))
         call add(text, {
-                \ 'text': printf("%d:%d %s", item.lnum, item.col, trim(item.text)),
+                \ 'text': printf('%d:%d %s', item.lnum, item.col, trim(item.text)),
                 \ 'props': [{'col': 1, 'length': length, 'type': 'popup_prop_qftooltip'}]
                 \ })
     endfor
