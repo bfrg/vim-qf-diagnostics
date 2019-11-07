@@ -23,6 +23,7 @@ current cursor position.
   ```vim
   " mnemonic: popup quickfix error
   nmap <leader>pq <plug>(qf-tooltip-qflist)
+
   " mnemonic: popup location-list error
   nmap <leader>pl <plug>(qf-tooltip-loclist)
   ```
@@ -32,13 +33,16 @@ current cursor position.
 The appearance of the popup window can be configured through the following
 highlight groups:
 
-| Highlight group   | Description                             | Default     |
-| ----------------- | --------------------------------------- | ----------- |
-| `QfTooltip`       | Popup window background and error text. | `Pmenu`     |
-| `QfTooltipTitle`  | Title of popup window.                  | `Title`     |
-| `QfTooltipLineNr` | Line and column number.                 | `Directory` |
+| Highlight group     | Description                             | Default     |
+| ------------------- | --------------------------------------- | ----------- |
+| `QfTooltip`         | Popup window background and error text. | `Pmenu`     |
+| `QfTooltipTitle`    | Title of popup window.                  | `Title`     |
+| `QfTooltipLineNr`   | Line and column number.                 | `Directory` |
+| `QfTooltipScrollbar`| Scrollbar of popup window.              | `PmenuSbar` |
+| `QfTooltipThumb`    | Thumb of scrollbar.                     | `PmenuThumb`|
 
-The title of the popup window is set to the title of the current quickfix list.
+The title of the popup window is set to the title of the current quickfix (or
+location) list.
 
 
 ## Installation

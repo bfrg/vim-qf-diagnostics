@@ -34,6 +34,8 @@ function! qf#tooltip#show(dict) abort
     hi def link QfTooltip           Pmenu
     hi def link QfTooltipTitle      Title
     hi def link QfTooltipLineNr     Directory
+    hi def link QfTooltipScrollbar  PmenuSbar
+    hi def link QfTooltipThumb      PmenuThumb
 
     " Highlighting for line:column part in popup window
     let prop = prop_type_add('popup_prop_qftooltip', {'highlight': 'QfTooltipLineNr'})
@@ -53,6 +55,9 @@ function! qf#tooltip#show(dict) abort
             \ 'borderhighlight': ['QfTooltipTitle'],
             \ 'highlight': 'QfTooltip',
             \ 'title': a:dict.title,
+            \ 'scrollbar': v:true,
+            \ 'scrollbarhighlight': 'QfTooltipScrollbar',
+            \ 'thumbhighlight': 'QfTooltipThumb',
             \ 'callback': {... -> prop_type_delete('popup_prop_qftooltip')}
             \ })
 endfunction

@@ -68,19 +68,31 @@ The appearance of the popup window can be configured through the following
 highlight groups:
 
 QfTooltip                                                       *hl-QfTooltip*
-                Popup window background and error text. This is the equivalent
-                of the |hl-Normal| highlight group in regular windows.
-                Default: |hl-Pmenu|
+                    Popup window background and error text. This is the
+                    equivalent of the |hl-Normal| highlight group in regular
+                    windows.
+                    Default: |hl-Pmenu|
 
 QfTooltipTitle                                             *hl-QfTooltipTitle*
-                Title (top line) of popup window.
-                Default: |hl-Title|
+                    Title (top line) of popup window.
+                    Default: |hl-Title|
 
-                Note: The title of the popup window is set to the
-                |quickfix-title| of the current quickfix list.
+                    Note: The title of the popup window is set to the
+                    |quickfix-title| of the current quickfix (or location)
+                    list.
 
 QfTooltipLineNr                                           *hl-QfTooltipLineNr*
-                Line and column number.
-                Default: |hl-Directory|
+                    Line and column number.
+                    Default: |hl-Directory|
+
+QfTooltipScrollbar                                     *hl-QfTooltipScrollbar*
+                    Highlight group name for the |popup-scrollbar|. The
+                    background color is what matters.
+                    Default: |hl-PmenuSbar|
+
+QfTooltipThumb                                             *hl-QfTooltipThumb*
+                    Highlight group name for the |popup-scrollbar| thumb. The
+                    background color is what matters.
+                    Default: |hl-PmenuThumb|
 
  vim:tw=78:et:ft=help:norl:
