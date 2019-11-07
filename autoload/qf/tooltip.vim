@@ -10,9 +10,24 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+let s:type = {'e': 'error', 'w': 'warning', 'i': 'info'}
+let s:props = {
+        \ 'num': 'prop_qftooltip',
+        \ 'e': 'prop_qftooltip_error',
+        \ 'w': 'prop_qftooltip_warning',
+        \ 'i': 'prop_qftooltip_info'
+        \ }
+
 function! s:error(msg) abort
     echohl ErrorMsg | echomsg a:msg | echohl None
     return 0
+endfunction
+
+function! s:popup_cb(winid, result) abort
+    call prop_type_delete(s:props.num)
+    call prop_type_delete(s:props.w)
+    call prop_type_delete(s:props.e)
+    call prop_type_delete(s:props.i)
 endfunction
 
 " FIXME currently only one popup window can be shown
@@ -34,19 +49,39 @@ function! qf#tooltip#show(dict) abort
     hi def link QfTooltip           Pmenu
     hi def link QfTooltipTitle      Title
     hi def link QfTooltipLineNr     Directory
+    hi def link QfTooltipError      ErrorMsg
+    hi def link QfTooltipWarning    WarningMsg
+    hi def link QfTooltipInfo       MoreMsg
     hi def link QfTooltipScrollbar  PmenuSbar
     hi def link QfTooltipThumb      PmenuThumb
 
-    " Highlighting for line:column part in popup window
-    let prop = prop_type_add('popup_prop_qftooltip', {'highlight': 'QfTooltipLineNr'})
+    call prop_type_add(s:props.num, {'highlight': 'QfTooltipLineNr'})
+    call prop_type_add(s:props.e, {'highlight': 'QfTooltipError'})
+    call prop_type_add(s:props.w, {'highlight': 'QfTooltipWarning'})
+    call prop_type_add(s:props.i, {'highlight': 'QfTooltipInfo'})
 
     let text = []
     for item in entries
-        let length = len(printf('%d:%d', item.lnum, item.col))
-        call add(text, {
-                \ 'text': printf('%d:%d %s', item.lnum, item.col, trim(item.text)),
-                \ 'props': [{'col': 1, 'length': length, 'type': 'popup_prop_qftooltip'}]
-                \ })
+        let loc_len = len(printf('%d:%d', item.lnum, item.col))
+        let props = [{'col': 1, 'length': loc_len, 'type': s:props.num}]
+        if empty(item.type)
+            let line = printf('%d:%d %s', item.lnum, item.col, trim(item.text))
+        else
+            if item.nr == -1
+                let type = printf('%s', s:type[tolower(item.type)])
+                let type_len = len(type)
+            else
+                let type = printf('%s %d', s:type[tolower(item.type)], item.nr)
+                let type_len = len(type)
+            endif
+            call add(props, {
+                    \ 'col': loc_len + 1,
+                    \ 'length': type_len + 1,
+                    \ 'type': s:props[tolower(item.type)]
+                    \ })
+            let line = printf('%d:%d %s %s', item.lnum, item.col, type, trim(item.text))
+        endif
+        call add(text, {'text': line, 'props': props})
     endfor
 
     return popup_atcursor(text, {
@@ -58,7 +93,7 @@ function! qf#tooltip#show(dict) abort
             \ 'scrollbar': v:true,
             \ 'scrollbarhighlight': 'QfTooltipScrollbar',
             \ 'thumbhighlight': 'QfTooltipThumb',
-            \ 'callback': {... -> prop_type_delete('popup_prop_qftooltip')}
+            \ 'callback': funcref('s:popup_cb')
             \ })
 endfunction
 

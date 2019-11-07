@@ -38,6 +38,9 @@ highlight groups:
 | `QfTooltip`         | Popup window background and error text. | `Pmenu`     |
 | `QfTooltipTitle`    | Title of popup window.                  | `Title`     |
 | `QfTooltipLineNr`   | Line and column number.                 | `Directory` |
+| `QfTooltipError`    | Error text and number.                  | `ErrorMsg`  |
+| `QfTooltipWarning`  | Warning text and number.                | `WarningMsg`|
+| `QfTooltipInfo`     | Info text and number.                   | `MoreMsg`   |
 | `QfTooltipScrollbar`| Scrollbar of popup window.              | `PmenuSbar` |
 | `QfTooltipThumb`    | Thumb of scrollbar.                     | `PmenuThumb`|
 

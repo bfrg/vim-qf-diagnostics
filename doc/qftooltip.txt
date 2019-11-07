@@ -56,6 +56,8 @@ qf#tooltip#show({what})                                    *qf#tooltip#show()*
                             bufnr (buffer number)
                             lnum  (line number)
                             col   (column number)
+                            type  (type of error: "e", "w", "i", or "")
+                            nr    (error number, or -1)
                             text  (error message)
 
                             See |getqflist()| for a more detailed explanation
@@ -84,6 +86,26 @@ QfTooltipTitle                                             *hl-QfTooltipTitle*
 QfTooltipLineNr                                           *hl-QfTooltipLineNr*
                     Line and column number.
                     Default: |hl-Directory|
+
+QfTooltipError                                             *hl-QfTooltipError*
+                    Highlight group name for error messages. Error messages
+                    will be marked with an "error" and an optional error
+                    number. Example: >
+                        6:8 error 1073 Couldn't parse this backtick expansion
+<
+                    Default: |hl-ErrorMsg|
+
+                    For more details on error types, see |getqflist()|, the
+                    item "%t" below |errorformat|, and items "%E", "%W" and
+                    "%I" below |errorformat-multi-line|.
+
+QfTooltipWarning                                         *hl-QfTooltipWarning*
+                    Same as |QfTooltipError| but for warning messages.
+                    Default: |hl-WarningMsg|
+
+QfTooltipInfo                                               *hl-QfTooltipInfo*
+                    Same as |QfTooltipError| but for informational messages.
+                    Default: |hl-MoreMsg|
 
 QfTooltipScrollbar                                     *hl-QfTooltipScrollbar*
                     Highlight group name for the |popup-scrollbar|. The
