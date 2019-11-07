@@ -7,6 +7,12 @@ The plugin checks if the current `quickfix` list (or `location-list`) contains
 any errors for the current line and displays them in a popup window at the
 current cursor position.
 
+<dl>
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6266600/68424841-2a5a1600-01a5-11ea-8535-ce7bf50ce37a.png" width="480"/>
+</p>
+</dl>
+
 
 ## Usage
 
