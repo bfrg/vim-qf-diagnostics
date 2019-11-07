@@ -1,22 +1,31 @@
 # vim-qf-tooltip
 
-Display the `quickfix` error in the current line in a popup window (like a
+Display the error message for the current line in a popup window (like a
 tooltip).
 
-The plugin checks if the current `quickfix` list contains any errors for the
-current line and displays them in a popup window at the current cursor position.
+The plugin checks if the current `quickfix` list (or `location-list`) contains
+any errors for the current line and displays them in a popup window at the
+current cursor position.
+
 
 ## Usage
 
-`<plug>(qf-tooltip-show)` will popup a small tooltip at the current cursor
-position. If the line contains several errors, all errors will be listed in the
-same popup window.
+#### `<Plug>` mappings
 
-Example:
-```vim
-" Mnemonic: Echo Error
-nmap <leader>ee <plug>(qf-tooltip-show)
-```
+* `<plug>(qf-tooltip-qflist)` will popup a small tooltip at the current cursor
+  position with the error message found in the _current_ `quickfix` list. If the
+  line contains several errors, all will be collected and displayed in the same
+  popup window.
+* `<plug>(qf-tooltip-loclist)` same as above but uses the _current_
+  `location-list`.
+
+ Examples:
+  ```vim
+  " mnemonic: popup quickfix error
+  nmap <leader>pq <plug>(qf-tooltip-qflist)
+  " mnemonic: popup location-list error
+  nmap <leader>pl <plug>(qf-tooltip-loclist)
+  ```
 
 #### Popup highlightings
 
@@ -55,7 +64,9 @@ Plug 'bfrg/vim-qf-tooltip'
 
 ## Related plugins
 
-[vim-qf-preview][qf-preview]
+[vim-qf-preview][qf-preview]: A plugin for the quickfix and location list
+windows to quickly preview the file with the quickfix item under the cursor in a
+popup window.
 
 
 ## License

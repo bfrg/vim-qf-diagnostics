@@ -3,15 +3,25 @@
 " File:         plugin/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Oct 24, 2019
+" Last Change:  Nov 7, 2019
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
+
+if exists('g:loaded_qftooltip')
+    finish
+endif
+let g:loaded_qftooltip = 1
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-" Display quickfix errors in current line in a popup window
-nnoremap <silent> <plug>(qf-tooltip-show) :<c-u>call qf#tooltip#show()<cr>
+" Display quickfix errors for current line in a popup window
+nnoremap <silent> <plug>(qf-tooltip-qflist)
+        \ :<c-u>call qf#tooltip#show(getqflist({'items': 0, 'title': 0}))<cr>
+
+" Display location-list errors for current line in a popup window
+nnoremap <silent> <plug>(qf-tooltip-loclist)
+        \ :<c-u>call qf#tooltip#show(getloclist(0, {'items': 0, 'title': 0}))<cr>
 
 let &cpoptions = s:save_cpo
 unlet s:save_cpo

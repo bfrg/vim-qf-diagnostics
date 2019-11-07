@@ -3,20 +3,29 @@
 " File:         autoload/qf/tooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Oct 25, 2019
+" Last Change:  Nov 7, 2019
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+function! s:error(msg) abort
+    echohl ErrorMsg | echomsg a:msg | echohl None
+    return 0
+endfunction
+
 " FIXME currently only one popup window can be shown
-function! qf#tooltip#show() abort
-    if !getqflist({'size': 0}).size
+function! qf#tooltip#show(dict) abort
+    if !has_key(a:dict, 'title') || !has_key(a:dict, 'items')
+        s:error('qftooltip: dict requires "title" and "items" keys.')
+    endif
+
+    if empty(a:dict.items)
         return
     endif
 
-    let entries = filter(getqflist(), {_,i -> i.bufnr == bufnr('%') && i.lnum == line('.')})
+    let entries = filter(a:dict.items, {_,i -> i.bufnr == bufnr('%') && i.lnum == line('.')})
 
     if empty(entries)
         return
@@ -43,7 +52,7 @@ function! qf#tooltip#show() abort
             \ 'borderchars': [' '],
             \ 'borderhighlight': ['QfTooltipTitle'],
             \ 'highlight': 'QfTooltip',
-            \ 'title': getqflist({'title': 0}).title,
+            \ 'title': a:dict.title,
             \ 'callback': {... -> prop_type_delete('popup_prop_qftooltip')}
             \ })
 endfunction
