@@ -19,7 +19,7 @@ endfunction
 
 function! qf#tooltip#show(dict) abort
     if !has_key(a:dict, 'title') || !has_key(a:dict, 'items')
-        s:error('qftooltip: dict requires "title" and "items" keys.')
+        return s:error('qftooltip: dict requires "title" and "items" keys.')
     endif
 
     if empty(a:dict.items)
