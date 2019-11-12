@@ -3,12 +3,18 @@
 " File:         autoload/qf/tooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Nov 9, 2019
+" Last Change:  Nov 12, 2019
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim
+
+hi def link QfTooltip           Pmenu
+hi def link QfTooltipTitle      Title
+hi def link QfTooltipLineNr     Directory
+hi def link QfTooltipScrollbar  PmenuSbar
+hi def link QfTooltipThumb      PmenuThumb
 
 let s:type = {'e': 'error', 'w': 'warning', 'i': 'info'}
 
@@ -31,12 +37,6 @@ function! qf#tooltip#show(dict) abort
     if empty(entries)
         return
     endif
-
-    hi def link QfTooltip           Pmenu
-    hi def link QfTooltipTitle      Title
-    hi def link QfTooltipLineNr     Directory
-    hi def link QfTooltipScrollbar  PmenuSbar
-    hi def link QfTooltipThumb      PmenuThumb
 
     let text = []
     for item in entries
