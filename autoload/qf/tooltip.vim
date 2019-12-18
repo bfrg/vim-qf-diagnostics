@@ -3,7 +3,7 @@
 " File:         autoload/qf/tooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Nov 12, 2019
+" Last Change:  Dec 18, 2019
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -32,7 +32,7 @@ function! qf#tooltip#show(dict) abort
         return
     endif
 
-    let entries = filter(a:dict.items, {_,i -> i.bufnr == bufnr('%') && i.lnum == line('.')})
+    let entries = filter(a:dict.items, "v:val.bufnr == bufnr('%') && v:val.lnum == line('.')")
 
     if empty(entries)
         return
