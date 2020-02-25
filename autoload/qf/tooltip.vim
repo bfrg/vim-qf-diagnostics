@@ -3,7 +3,7 @@
 " File:         autoload/qf/tooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Dec 18, 2019
+" Last Change:  Feb 25, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -16,11 +16,16 @@ hi def link QfTooltipLineNr     Directory
 hi def link QfTooltipScrollbar  PmenuSbar
 hi def link QfTooltipThumb      PmenuThumb
 
-let s:type = {'e': 'error', 'w': 'warning', 'i': 'info'}
+let s:type = {
+        \ 'e': 'error',
+        \ 'w': 'warning',
+        \ 'i': 'info',
+        \ 'n': 'note',
+        \ 'h': 'hint'
+        \ }
 
 function! s:error(msg) abort
     echohl ErrorMsg | echomsg a:msg | echohl None
-    return 0
 endfunction
 
 function! qf#tooltip#show(dict) abort
@@ -44,9 +49,9 @@ function! qf#tooltip#show(dict) abort
             call add(text, printf('%d:%d %s', item.lnum, item.col, trim(item.text)))
         else
             if item.nr == -1
-                let type = printf('%s', s:type[tolower(item.type)])
+                let type = printf('%s', get(s:type, tolower(item.type), ''))
             else
-                let type = printf('%s %d', s:type[tolower(item.type)], item.nr)
+                let type = printf('%s %d', get(s:type, tolower(item.type), ''), item.nr)
             endif
             call add(text, printf('%d:%d %s %s', item.lnum, item.col, type, trim(item.text)))
         endif
