@@ -46,14 +46,14 @@ function! qf#tooltip#show(dict) abort
     let text = []
     for item in entries
         if empty(item.type)
-            call add(text, printf('%d:%d %s', item.lnum, item.col, trim(item.text)))
+            call extend(text, split(printf('%d:%d %s', item.lnum, item.col, trim(item.text)), '\n'))
         else
             if item.nr == -1
                 let type = printf('%s', get(s:type, tolower(item.type), ''))
             else
                 let type = printf('%s %d', get(s:type, tolower(item.type), ''), item.nr)
             endif
-            call add(text, printf('%d:%d %s %s', item.lnum, item.col, type, trim(item.text)))
+            call extend(text, split(printf('%d:%d %s %s', item.lnum, item.col, type, trim(item.text)), '\n'))
         endif
     endfor
 
