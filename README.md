@@ -8,21 +8,21 @@ any errors for the current line and displays them in a popup window at the
 current cursor position.
 
 <dl>
-<p align="center">
-<img src="https://user-images.githubusercontent.com/6266600/68424841-2a5a1600-01a5-11ea-8535-ce7bf50ce37a.png" width="480"/>
-</p>
+  <p align="center">
+  <img src="https://user-images.githubusercontent.com/6266600/75208558-58775c00-577c-11ea-9ffc-9d8e587b39b0.png" width="480"/>
+  </p>
 </dl>
 
 
 ## Usage
 
-#### `<Plug>` mappings
+### `<Plug>` mappings
 
-* `<plug>(qf-tooltip-qflist)` will popup a small tooltip at the current cursor
-  position with the error message found in the _current_ `quickfix` list. If the
-  line contains several errors, all will be collected and displayed in the same
-  popup window.
-* `<plug>(qf-tooltip-loclist)` same as above but uses the _current_
+* <kbd>\<plug>(qf-tooltip-qflist)</kbd> will popup a small tooltip at the
+  current cursor position with the error message found in the _current_
+  `quickfix` list. If the line contains several errors, all will be collected
+  and displayed in the same popup window.
+* <kbd>\<plug>(qf-tooltip-loclist)</kbd> same as above but uses the current
   `location-list`.
 
  Examples:
@@ -34,7 +34,7 @@ current cursor position.
   nmap <leader>pl <plug>(qf-tooltip-loclist)
   ```
 
-#### Popup highlightings
+### Popup highlightings
 
 The appearance of the popup window can be configured through the following
 highlight groups:
@@ -64,12 +64,12 @@ $ git clone https://github.com/bfrg/vim-qf-tooltip
 $ vim -u NONE -c "helptags vim-qf-tooltip/doc" -c q
 ```
 **Note:** The directory name `git-plugins` is arbitrary, you can pick any other
-name. For more details see `:help packages`.
+name. For more details see <kbd>:help packages</kbd>.
 
 #### Plugin Managers
 
 Assuming [vim-plug][plug] is your favorite plugin manager, add the following to
-your `.vimrc`:
+your `vimrc`:
 ```vim
 Plug 'bfrg/vim-qf-tooltip'
 ```
@@ -84,7 +84,7 @@ popup window.
 
 ## License
 
-Distributed under the same terms as Vim itself. See `:help license`.
+Distributed under the same terms as Vim itself. See <kbd>:help license</kbd>.
 
 [plug]: https://github.com/junegunn/vim-plug
 [qf-preview]: https://github.com/bfrg/vim-qf-preview
