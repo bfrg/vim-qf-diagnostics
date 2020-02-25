@@ -1,6 +1,6 @@
 " ==============================================================================
 " Display quickfix errors in a popup window (like a tooltip)
-" File:         autoload/qf/tooltip.vim
+" File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
 " Last Change:  Feb 25, 2020
@@ -28,7 +28,7 @@ function! s:error(msg) abort
     echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction
 
-function! qf#tooltip#show(dict) abort
+function! qftooltip#show(dict) abort
     if !has_key(a:dict, 'title') || !has_key(a:dict, 'items')
         return s:error('qftooltip: dict requires "title" and "items" keys.')
     endif

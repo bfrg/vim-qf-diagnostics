@@ -40,7 +40,7 @@ Mappings ~
 
 Functions ~
 
-qf#tooltip#show({what})                                    *qf#tooltip#show()*
+qftooltip#show({what})                                      *qftooltip#show()*
             The above mappings use the current quickfix or location lists. If
             you want to show errors from another list (for example another
             quickfix list in the stack), use this function directly.
