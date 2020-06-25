@@ -44,14 +44,14 @@ function! qftooltip#show(loclist) abort
     let text = []
     for item in entries
         if empty(item.type)
-            call extend(text, split(printf('%d:%d %s', item.lnum, item.col, trim(item.text)), '\n'))
+            call extend(text, printf('%d:%d %s', item.lnum, item.col, trim(item.text))->split('\n'))
         else
-            if item.nr == -1
-                let type = printf('%s', get(s:type, tolower(item.type), ''))
-            else
-                let type = printf('%s %d', get(s:type, tolower(item.type), ''), item.nr)
-            endif
-            call extend(text, split(printf('%d:%d %s %s', item.lnum, item.col, type, trim(item.text)), '\n'))
+            call extend(text, printf('%d:%d %s: %s',
+                    \ item.lnum,
+                    \ item.col,
+                    \ get(s:type, tolower(item.type), item.type) .. (item.nr == -1 ? '' : ' ' .. item.nr),
+                    \ trim(item.text))->split('\n')
+                    \ )
         endif
     endfor
 
