@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Feb 25, 2020
+" Last Change:  Jun 25, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -28,16 +28,14 @@ function! s:error(msg) abort
     echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction
 
-function! qftooltip#show(dict) abort
-    if !has_key(a:dict, 'title') || !has_key(a:dict, 'items')
-        return s:error('qftooltip: dict requires "title" and "items" keys.')
-    endif
+function! qftooltip#show(loclist) abort
+    let dict = a:loclist ? getloclist(0, {'items': 0, 'title': 0}) : getqflist({'items': 0, 'title': 0})
 
-    if empty(a:dict.items)
+    if empty(dict.items)
         return
     endif
 
-    let entries = filter(a:dict.items, "v:val.bufnr == bufnr('%') && v:val.lnum == line('.')")
+    let entries = filter(dict.items, "v:val.bufnr == bufnr('%') && v:val.lnum == line('.')")
 
     if empty(entries)
         return
@@ -62,7 +60,7 @@ function! qftooltip#show(dict) abort
             \ 'borderchars': [' '],
             \ 'borderhighlight': ['QfTooltipTitle'],
             \ 'highlight': 'QfTooltip',
-            \ 'title': a:dict.title,
+            \ 'title': dict.title,
             \ 'scrollbar': v:true,
             \ 'scrollbarhighlight': 'QfTooltipScrollbar',
             \ 'thumbhighlight': 'QfTooltipThumb'

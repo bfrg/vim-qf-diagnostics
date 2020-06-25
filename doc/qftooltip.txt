@@ -37,31 +37,7 @@ Mappings ~
             Example: >
                 " mnemonic: popup location-list error
                 nmap <leader>pl <plug>(qf-tooltip-loclist)
-
-Functions ~
-
-qftooltip#show({what})                                      *qftooltip#show()*
-            The above mappings use the current quickfix or location lists. If
-            you want to show errors from another list (for example another
-            quickfix list in the stack), use this function directly.
-
-            {what} must be a |Dictionary| containing the following keys:
-
-            "title"         |String| specifying the title for the popup
-                            window.
-
-            "items"         |List| of dictionaries, each containing the
-                            following keys:
-                            bufnr (buffer number)
-                            lnum  (line number)
-                            col   (column number)
-                            type  (type of error: "e", "w", "i", or "")
-                            nr    (error number, or -1)
-                            text  (error message)
-
-                            See |getqflist()| for a more detailed explanation
-                            of the items.
-
+<
 ==============================================================================
 CONFIGURATION                                              *qf-tooltip-config*
 
@@ -91,6 +67,7 @@ QfTooltipError                                             *hl-QfTooltipError*
                     will be marked with an "error" and an optional error
                     number. Example: >
                         6:8 error 1073 Couldn't parse this backtick expansion
+                            ^^^^^^^^^^
 <
                     Default: |hl-ErrorMsg|
 
