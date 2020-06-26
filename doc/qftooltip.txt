@@ -6,7 +6,7 @@ License:    Same terms as Vim itself (see |license|)
 
 
 ==============================================================================
-INTRODUCTION                                   *qf-tooltip* *qf-tooltip-intro*
+INTRODUCTION                                                      *qf-tooltip*
 
 Display the error message for the current line in a |popup| window (like a
 tooltip).
@@ -31,6 +31,8 @@ Mappings ~
                 " mnemonic: popup quickfix error
                 nmap <leader>pq <plug>(qf-tooltip-qflist)
 <
+            Move the cursor in any direction to close the popup window.
+
 <plug>(qf-tooltip-loclist)                        *<plug>(qf-tooltip-loclist)*
             Same as above but uses the current |location-list|.
 
@@ -41,8 +43,37 @@ Mappings ~
 ==============================================================================
 CONFIGURATION                                              *qf-tooltip-config*
 
-The appearance of the popup window can be configured through the following
-highlight groups:
+g:qftooltip                                                      *g:qftooltip*
+
+The appearance of the popup window can be configured through the |Dictionary|
+variable g:qftooltip. The following keys are supported:
+
+    padding         List with numbers defining the padding inside the popup
+                    window: [top, right, bottom, left]
+                    Default: [0,1,0,1]
+
+    border          List with numbers (0 or 1) specifying whether to draw a
+                    border around the popup window.
+                    Default: [1,1,1,1]
+
+    borderchars     List with eight characters used for drawing the border
+                    around the popup window.
+                    Default: double lines all around
+
+    maxheight       Maximum height of the popup window.
+                    Default: 20
+
+Example ~
+>
+    let g:qftooltip = {
+            \ 'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+            \ 'maxheight': 10
+            \ }
+<
+==============================================================================
+HIGHLIGHTING                                             *qftooltip-highlight*
+
+The following highlighting groups are used by the plugin:
 
 QfTooltip                                                       *hl-QfTooltip*
                     Popup window background and error text. This is the
@@ -50,38 +81,13 @@ QfTooltip                                                       *hl-QfTooltip*
                     windows.
                     Default: |hl-Pmenu|
 
-QfTooltipTitle                                             *hl-QfTooltipTitle*
-                    Title (top line) of popup window.
-                    Default: |hl-Title|
+QfTooltipBorder                                           *hl-QfTooltipBorder*
+                    Highlight group name for popup window border.
+                    Default: |hl-Pmenu|
 
                     Note: The title of the popup window is set to the
                     |quickfix-title| of the current quickfix (or location)
                     list.
-
-QfTooltipLineNr                                           *hl-QfTooltipLineNr*
-                    Line and column number.
-                    Default: |hl-Directory|
-
-QfTooltipError                                             *hl-QfTooltipError*
-                    Highlight group name for error messages. Error messages
-                    will be marked with an "error" and an optional error
-                    number. Example: >
-                        6:8 error 1073 Couldn't parse this backtick expansion
-                            ^^^^^^^^^^
-<
-                    Default: |hl-ErrorMsg|
-
-                    For more details on error types, see |getqflist()|, the
-                    item "%t" below |errorformat|, and items "%E", "%W" and
-                    "%I" below |errorformat-multi-line|.
-
-QfTooltipWarning                                         *hl-QfTooltipWarning*
-                    Same as |QfTooltipError| but for warning messages.
-                    Default: |hl-WarningMsg|
-
-QfTooltipInfo                                               *hl-QfTooltipInfo*
-                    Same as |QfTooltipError| but for informational messages.
-                    Default: |hl-MoreMsg|
 
 QfTooltipScrollbar                                     *hl-QfTooltipScrollbar*
                     Highlight group name for the |popup-scrollbar|. The
@@ -92,5 +98,27 @@ QfTooltipThumb                                             *hl-QfTooltipThumb*
                     Highlight group name for the |popup-scrollbar| thumb. The
                     background color is what matters.
                     Default: |hl-PmenuThumb|
+
+QfTooltipLineNr                                           *hl-QfTooltipLineNr*
+                    Error line and column number in the popup window.
+                    Default: |hl-Directory|
+
+QfTooltipError                                             *hl-QfTooltipError*
+                    Highlight group name for error messages in the popup
+                    window. Error messages are marked with "error" and an
+                    optional error number.
+                    Default: |hl-ErrorMsg|
+
+QfTooltipWarning                                         *hl-QfTooltipWarning*
+                    Same as |QfTooltipError| but for warning messages.
+                    Default: |hl-WarningMsg|
+
+QfTooltipInfo                                               *hl-QfTooltipInfo*
+                    Same as |QfTooltipError| but for informational messages.
+                    Default: |hl-MoreMsg|
+
+QfTooltipNote                                               *hl-QfTooltipNote*
+                    Same as |QfTooltipError| but for note messages.
+                    Default: |hl-Todo|
 
  vim:tw=78:et:ft=help:norl:

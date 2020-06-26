@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Jun 25, 2020
+" Last Change:  Jun 26, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -11,7 +11,7 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 hi def link QfTooltip           Pmenu
-hi def link QfTooltipTitle      Title
+hi def link QfTooltipBorder     Pmenu
 hi def link QfTooltipLineNr     Directory
 hi def link QfTooltipScrollbar  PmenuSbar
 hi def link QfTooltipThumb      PmenuThumb
@@ -20,8 +20,7 @@ let s:type = {
         \ 'e': 'error',
         \ 'w': 'warning',
         \ 'i': 'info',
-        \ 'n': 'note',
-        \ 'h': 'hint'
+        \ 'n': 'note'
         \ }
 
 function! s:error(msg) abort
@@ -56,11 +55,15 @@ function! qftooltip#show(loclist) abort
     endfor
 
     let winid = popup_atcursor(text, {
-            \ 'border': [1,1,0,1],
-            \ 'borderchars': [' '],
-            \ 'borderhighlight': ['QfTooltipTitle'],
+            \ 'moved': 'any',
+            \ 'close': 'click',
+            \ 'drag': v:true,
+            \ 'maxheight': get(g:, 'qftooltip', {})->get('maxheight', 20),
+            \ 'padding': get(g:, 'qftooltip', {})->get('padding', [0,1,0,1]),
+            \ 'border': get(g:, 'qftooltip', {})->get('border', [0,0,0,0]),
+            \ 'borderchars': get(g:, 'qftooltip', {})->get('borderchars', []),
+            \ 'borderhighlight': ['QfTooltipBorder'],
             \ 'highlight': 'QfTooltip',
-            \ 'title': dict.title,
             \ 'scrollbar': v:true,
             \ 'scrollbarhighlight': 'QfTooltipScrollbar',
             \ 'thumbhighlight': 'QfTooltipThumb'
