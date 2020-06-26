@@ -57,11 +57,19 @@ variable `g:qfhistory`. The following keys are supported:
 | `borderchars` | List with characters used for drawing the window border.            | `['═', '║', '═', '║', '╔', '╗', '╝', '╚']` |
 | `maxheight`   | Maximum height of popup window.                                     | `20`                                       |
 
-Example:
+Examples:
 ```vim
+" Fancy border with round corners
 let g:qftooltip = {
         \ 'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
         \ 'maxheight': 10
+        \ }
+
+" Don't draw a border around the popup window
+let g:qftooltip = {
+        \ 'padding': [1,1,1,1],
+        \ 'border': [0,0,0,0],
+        \ 'maxheight': 30
         \ }
 ```
 
