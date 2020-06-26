@@ -10,7 +10,7 @@ window.
 
 <dl>
   <p align="center">
-  <img src="https://user-images.githubusercontent.com/6266600/75208558-58775c00-577c-11ea-9ffc-9d8e587b39b0.png" width="480"/>
+  <img src="https://user-images.githubusercontent.com/6266600/85812694-9bb0fe00-b761-11ea-8881-7852fd5cb142.png" width="480"/>
   </p>
 </dl>
 
