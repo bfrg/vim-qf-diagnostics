@@ -35,6 +35,13 @@ nmap <leader>pq <plug>(qf-tooltip-qflist)
 nmap <leader>pl <plug>(qf-tooltip-loclist)
 ```
 
+### Popup window mappings
+
+If not all quickfix errors (for the current line) fit into the popup window, a
+scrollbar will appear on the right side. The popup window can then be scrolled
+with the mouse wheel, or alternatively, with <kbd>CTRL-J</kbd> and
+<kbd>CTRL-K</kbd>.
+
 
 ## Configuration
 

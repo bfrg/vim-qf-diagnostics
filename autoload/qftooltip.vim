@@ -27,6 +27,21 @@ function! s:error(msg) abort
     echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction
 
+function! s:popup_filter(winid, key) abort
+    if line('$', a:winid) == popup_getpos(a:winid).core_height
+        return v:false
+    endif
+    call popup_setoptions(a:winid, {'minheight': popup_getpos(a:winid).core_height})
+    if a:key ==# "\<c-j>"
+        call win_execute(a:winid, "normal! \<c-e>")
+        return v:true
+    elseif a:key ==# "\<c-k>"
+        call win_execute(a:winid, "normal! \<c-y>")
+        return v:true
+    endif
+    return v:false
+endfunction
+
 function! qftooltip#show(loclist) abort
     let dict = a:loclist ? getloclist(0, {'items': 0, 'title': 0}) : getqflist({'items': 0, 'title': 0})
 
@@ -66,7 +81,9 @@ function! qftooltip#show(loclist) abort
             \ 'highlight': 'QfTooltip',
             \ 'scrollbar': v:true,
             \ 'scrollbarhighlight': 'QfTooltipScrollbar',
-            \ 'thumbhighlight': 'QfTooltipThumb'
+            \ 'thumbhighlight': 'QfTooltipThumb',
+            \ 'filtermode': 'n',
+            \ 'filter': funcref('s:popup_filter')
             \ })
 
     call setbufvar(winbufnr(winid), '&filetype', 'qftooltip')

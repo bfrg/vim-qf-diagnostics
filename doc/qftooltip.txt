@@ -40,6 +40,12 @@ Mappings ~
                 " mnemonic: popup location-list error
                 nmap <leader>pl <plug>(qf-tooltip-loclist)
 <
+Popup window mappings ~
+
+If not all |quickfix| errors (for the current line) fit into the popup window,
+a scrollbar will appear on the right side. The popup window can then be
+scrolled with the mouse wheel, or alternatively, with CTRL-J and CTRL-K.
+
 ==============================================================================
 CONFIGURATION                                              *qf-tooltip-config*
 
