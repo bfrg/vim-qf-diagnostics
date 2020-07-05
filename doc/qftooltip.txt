@@ -31,7 +31,8 @@ Mappings ~
                 " mnemonic: popup quickfix error
                 nmap <leader>pq <plug>(qf-tooltip-qflist)
 <
-            Move the cursor in any direction to close the popup window.
+            Move the cursor in any direction or press CTRL-C to close the
+            popup window.
 
 <plug>(qf-tooltip-loclist)                        *<plug>(qf-tooltip-loclist)*
             Same as above but uses the current |location-list|.
@@ -45,6 +46,7 @@ Popup window mappings ~
 If not all |quickfix| errors (for the current line) fit into the popup window,
 a scrollbar will appear on the right side. The popup window can then be
 scrolled with the mouse wheel, or alternatively, with CTRL-J and CTRL-K.
+Pressing CTRL-C closes the popup window.
 
 ==============================================================================
 CONFIGURATION                                              *qf-tooltip-config*
@@ -83,7 +85,7 @@ Examples ~
             \ }
 <
 ==============================================================================
-HIGHLIGHTING                                             *qftooltip-highlight*
+HIGHLIGHTING                                            *qf-tooltip-highlight*
 
 The following highlighting groups are used by the plugin:
 
