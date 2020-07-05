@@ -5,15 +5,9 @@ tooltip).
 
 The plugin checks if the current `quickfix` list (or `location-list`) contains
 any errors for the current line and displays them in a popup window at the
-current cursor position. Moving the cursor in any direction closes the popup
-window.
+current cursor position.
 
-<dl>
-  <p align="center">
-  <img src="https://user-images.githubusercontent.com/6266600/85812694-9bb0fe00-b761-11ea-8881-7852fd5cb142.png" width="480"/>
-  </p>
-</dl>
-
+![screenshots](https://user-images.githubusercontent.com/6266600/86536450-01328680-bee8-11ea-849f-4e24809515b9.png)
 
 ## Usage
 
@@ -41,6 +35,9 @@ If not all quickfix errors (for the current line) fit into the popup window, a
 scrollbar will appear on the right side. The popup window can then be scrolled
 with the mouse wheel, or alternatively, with <kbd>CTRL-J</kbd> and
 <kbd>CTRL-K</kbd>.
+
+Press <kbd>CTRL-C</kbd> or move the cursor in any direction to close the popup
+window.
 
 
 ## Configuration
