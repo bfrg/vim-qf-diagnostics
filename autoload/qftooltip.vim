@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Jun 26, 2020
+" Last Change:  Aug 11, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -16,18 +16,13 @@ hi def link QfTooltipLineNr     Directory
 hi def link QfTooltipScrollbar  PmenuSbar
 hi def link QfTooltipThumb      PmenuThumb
 
-let s:type = {
-        \ 'e': 'error',
-        \ 'w': 'warning',
-        \ 'i': 'info',
-        \ 'n': 'note'
-        \ }
+let s:type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
 
-function! s:error(msg) abort
+function s:error(msg)
     echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction
 
-function! s:popup_filter(winid, key) abort
+function s:popup_filter(winid, key) abort
     if line('$', a:winid) == popup_getpos(a:winid).core_height
         return v:false
     endif
@@ -42,7 +37,7 @@ function! s:popup_filter(winid, key) abort
     return v:false
 endfunction
 
-function! qftooltip#show(loclist) abort
+function qftooltip#show(loclist) abort
     let dict = a:loclist ? getloclist(0, {'items': 0, 'title': 0}) : getqflist({'items': 0, 'title': 0})
 
     if empty(dict.items)
