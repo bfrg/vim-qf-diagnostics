@@ -66,15 +66,12 @@ function qftooltip#show(loclist) abort
 
     let winid = popup_atcursor(text, {
             \ 'moved': 'any',
-            \ 'close': 'click',
-            \ 'drag': v:true,
             \ 'maxheight': get(g:, 'qftooltip', {})->get('maxheight', 20),
             \ 'padding': get(g:, 'qftooltip', {})->get('padding', [0,1,0,1]),
             \ 'border': get(g:, 'qftooltip', {})->get('border', [0,0,0,0]),
             \ 'borderchars': get(g:, 'qftooltip', {})->get('borderchars', []),
             \ 'borderhighlight': ['QfTooltipBorder'],
             \ 'highlight': 'QfTooltip',
-            \ 'scrollbar': v:true,
             \ 'scrollbarhighlight': 'QfTooltipScrollbar',
             \ 'thumbhighlight': 'QfTooltipThumb',
             \ 'filtermode': 'n',
