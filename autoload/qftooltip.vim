@@ -81,7 +81,7 @@ function qftooltip#show(loclist) abort
             \ 'filter': funcref('s:popup_filter')
             \ })
 
-    call setbufvar(winbufnr(winid), '&filetype', 'qftooltip')
+    call setbufvar(winbufnr(winid), '&syntax', 'qftooltip')
     return winid
 endfunction
 
