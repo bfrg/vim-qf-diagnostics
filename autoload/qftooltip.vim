@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Aug 11, 2020
+" Last Change:  Aug 13, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -38,13 +38,13 @@ function s:popup_filter(winid, key) abort
 endfunction
 
 function qftooltip#show(loclist) abort
-    let dict = a:loclist ? getloclist(0, {'items': 0, 'title': 0}) : getqflist({'items': 0, 'title': 0})
+    const dict = a:loclist ? getloclist(0, {'items': 0, 'title': 0}) : getqflist({'items': 0, 'title': 0})
 
     if empty(dict.items)
         return
     endif
 
-    let entries = filter(dict.items, "v:val.bufnr == bufnr('%') && v:val.lnum == line('.')")
+    const entries = filter(dict.items, "v:val.bufnr == bufnr('%') && v:val.lnum == line('.')")
 
     if empty(entries)
         return
@@ -64,7 +64,7 @@ function qftooltip#show(loclist) abort
         endif
     endfor
 
-    let winid = popup_atcursor(text, {
+    const winid = popup_atcursor(text, {
             \ 'moved': 'any',
             \ 'maxheight': get(g:, 'qftooltip', {})->get('maxheight', 20),
             \ 'padding': get(g:, 'qftooltip', {})->get('padding', [0,1,0,1]),
