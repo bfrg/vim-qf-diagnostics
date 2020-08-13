@@ -79,15 +79,11 @@ function qftooltip#show(loclist) abort
     const pos = screenpos(win_getid(), line('.'), col('.'))
     const col = &columns - pos.curscol <= width ? &columns - width - 1 : pos.curscol
 
-    const maxheight = get(g:, 'qftooltip', {})
-            \ ->get('maxheight', max([&lines - pos.row, pos.row]))
-
     const winid = popup_atcursor(text, {
             \ 'moved': 'any',
             \ 'col': col,
             \ 'minwidth': width,
             \ 'maxwidth': width,
-            \ 'maxheight': maxheight,
             \ 'padding': padding,
             \ 'border': border,
             \ 'borderchars': get(g:, 'qftooltip', {})->get('borderchars', []),

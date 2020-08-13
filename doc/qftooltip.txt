@@ -68,20 +68,15 @@ variable g:qftooltip. The following keys are supported:
                     around the popup window.
                     Default: double lines all around
 
-    maxheight       Maximum height of the popup window.
-                    Default: 20
-
 Examples ~
 >
     let g:qftooltip = {
             \ 'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
-            \ 'maxheight': 10
             \ }
 
     let g:qftooltip = {
             \ 'padding': [1,1,1,1],
-            \ 'border': [0,0,0,0],
-            \ 'maxheight': 30
+            \ 'border': [0,0,0,0]
             \ }
 <
 ==============================================================================
