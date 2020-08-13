@@ -64,11 +64,32 @@ function qftooltip#show(loclist) abort
         endif
     endfor
 
+    const textwidth = len(text)
+            \ ->range()
+            \ ->map({_, i -> strdisplaywidth(text[i])})
+            \ ->max()
+
+    " Maximum width for popup window
+    const padding = get(g:, 'qftooltip', {})->get('padding', [0, 1, 0, 1])
+    const border = get(g:, 'qftooltip', {})->get('border', [0, 0, 0, 0])
+    const pad = get(padding, 1, 1) + get(padding, 3, 1) + get(border, 1, 1) + get(border, 3, 1) + 1
+    const width = textwidth + pad > &columns ? &columns - pad : textwidth
+
+    " Column position for popup window
+    const pos = screenpos(win_getid(), line('.'), col('.'))
+    const col = &columns - pos.curscol <= width ? &columns - width - 1 : pos.curscol
+
+    const maxheight = get(g:, 'qftooltip', {})
+            \ ->get('maxheight', max([&lines - pos.row, pos.row]))
+
     const winid = popup_atcursor(text, {
             \ 'moved': 'any',
-            \ 'maxheight': get(g:, 'qftooltip', {})->get('maxheight', 20),
-            \ 'padding': get(g:, 'qftooltip', {})->get('padding', [0,1,0,1]),
-            \ 'border': get(g:, 'qftooltip', {})->get('border', [0,0,0,0]),
+            \ 'col': col,
+            \ 'minwidth': width,
+            \ 'maxwidth': width,
+            \ 'maxheight': maxheight,
+            \ 'padding': padding,
+            \ 'border': border,
             \ 'borderchars': get(g:, 'qftooltip', {})->get('borderchars', []),
             \ 'borderhighlight': ['QfTooltipBorder'],
             \ 'highlight': 'QfTooltip',
