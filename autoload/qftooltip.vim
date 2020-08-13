@@ -100,6 +100,8 @@ function qftooltip#show(loclist) abort
             \ })
 
     call setbufvar(winbufnr(winid), '&syntax', 'qftooltip')
+    call setwinvar(winid, '&breakindent', 1)
+
     return winid
 endfunction
 
