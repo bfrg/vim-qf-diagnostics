@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Aug 13, 2020
+" Last Change:  Aug 15, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -28,13 +28,17 @@ function s:popup_filter(winid, key) abort
     endif
     call popup_setoptions(a:winid, {'minheight': popup_getpos(a:winid).core_height})
     if a:key ==# "\<c-j>"
-        call win_execute(a:winid, "normal! \<c-e>")
-        return v:true
+        let line = popup_getoptions(a:winid).firstline
+        let newline = line < line('$', a:winid) ? (line + 1) : line('$', a:winid)
+        call popup_setoptions(a:winid, {'firstline': newline})
     elseif a:key ==# "\<c-k>"
-        call win_execute(a:winid, "normal! \<c-y>")
-        return v:true
+        let line = popup_getoptions(a:winid).firstline
+        let newline = (line - 1) > 0 ? (line - 1) : 1
+        call popup_setoptions(a:winid, {'firstline': newline})
+    else
+        return v:false
     endif
-    return v:false
+    return v:true
 endfunction
 
 function qftooltip#show(loclist) abort
@@ -77,7 +81,7 @@ function qftooltip#show(loclist) abort
 
     " Column position for popup window
     const pos = screenpos(win_getid(), line('.'), col('.'))
-    const col = &columns - pos.curscol <= width ? &columns - width - 1 : pos.curscol
+    const col = &columns - pos.curscol < width ? &columns - width - 1 : pos.curscol
 
     const winid = popup_atcursor(text, {
             \ 'moved': 'any',
@@ -91,6 +95,8 @@ function qftooltip#show(loclist) abort
             \ 'highlight': 'QfTooltip',
             \ 'scrollbarhighlight': 'QfTooltipScrollbar',
             \ 'thumbhighlight': 'QfTooltipThumb',
+            \ 'firstline': 1,
+            \ 'mapping': v:false,
             \ 'filtermode': 'n',
             \ 'filter': funcref('s:popup_filter')
             \ })
