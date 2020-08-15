@@ -41,13 +41,13 @@ function s:popup_filter(winid, key) abort
 endfunction
 
 function qftooltip#show(loclist) abort
-    const dict = a:loclist ? getloclist(0, {'items': 0, 'title': 0}) : getqflist({'items': 0, 'title': 0})
+    const xlist = a:loclist ? getloclist(0) : getqflist()
 
-    if empty(dict.items)
+    if empty(xlist)
         return
     endif
 
-    const entries = filter(dict.items, "v:val.bufnr == bufnr('%') && v:val.lnum == line('.')")
+    const entries = filter(xlist, "v:val.bufnr == bufnr('%') && v:val.lnum == line('.')")
 
     if empty(entries)
         return
