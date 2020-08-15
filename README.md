@@ -22,11 +22,8 @@ current cursor position.
 
 Example:
 ```vim
-" mnemonic: popup quickfix error
-nmap <leader>pq <plug>(qf-tooltip-qflist)
-
-" mnemonic: popup location-list error
-nmap <leader>pl <plug>(qf-tooltip-loclist)
+nmap gh <plug>(qf-tooltip-qflist)
+nmap gH <plug>(qf-tooltip-loclist)
 ```
 
 ### Popup window mappings

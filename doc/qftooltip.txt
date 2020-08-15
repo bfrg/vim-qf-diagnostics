@@ -28,18 +28,16 @@ Mappings ~
             the same popup.
 
             Example: >
-                " mnemonic: popup quickfix error
-                nmap <leader>pq <plug>(qf-tooltip-qflist)
+                nmap gh <plug>(qf-tooltip-qflist)
 <
             Move the cursor in any direction or press CTRL-C to close the
             popup window.
 
 <plug>(qf-tooltip-loclist)                        *<plug>(qf-tooltip-loclist)*
-            Same as above but uses the current |location-list|.
+            Same as above but checks the current |location-list| for errors.
 
             Example: >
-                " mnemonic: popup location-list error
-                nmap <leader>pl <plug>(qf-tooltip-loclist)
+                nmap gH <plug>(qf-tooltip-loclist)
 <
 Popup window mappings ~
 
