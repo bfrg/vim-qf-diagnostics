@@ -3,7 +3,7 @@
 " File:         syntax/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Jun 26, 2020
+" Last Change:  Aug 15, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -17,7 +17,7 @@ syntax match QfTooltipWarning   "\<warning\>\( \d\+\)\?" contained
 syntax match QfTooltipInfo      "\<info\>\( \d\+\)\?" contained
 syntax match QfTooltipNote      "\<note\>\( \d\+\)\?" contained
 
-hi def link QfTooltipLineNr     LineNr
+hi def link QfTooltipLineNr     Directory
 hi def link QfTooltipError      ErrorMsg
 hi def link QfTooltipWarning    WarningMsg
 hi def link QfTooltipInfo       MoreMsg

@@ -12,7 +12,6 @@ set cpoptions&vim
 
 hi def link QfTooltip           Pmenu
 hi def link QfTooltipBorder     Pmenu
-hi def link QfTooltipLineNr     Directory
 hi def link QfTooltipScrollbar  PmenuSbar
 hi def link QfTooltipThumb      PmenuThumb
 
