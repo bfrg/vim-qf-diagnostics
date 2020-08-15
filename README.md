@@ -47,19 +47,19 @@ variable `g:qfhistory`. The following keys are supported:
 | Key           | Description                                                         | Default                                    |
 | ------------- | ------------------------------------------------------------------- | ------------------------------------------ |
 | `padding`     | List with numbers defining the padding inside the popup window.     | `[0,1,0,1]`                                |
-| `border`      | List with numbers (`0` or `1`) specifying whether to draw a border. | `[1,1,1,1]`                                |
+| `border`      | List with numbers (`0` or `1`) specifying whether to draw a border. | `[0,0,0,0]`                                |
 | `borderchars` | List with characters used for drawing the window border.            | `['═', '║', '═', '║', '╔', '╗', '╝', '╚']` |
 
 Examples:
 ```vim
-" Fancy border with round corners
-let g:qftooltip = {'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰']}
-
-" Don't draw a border around the popup window
+" Use a fancy border with round corners
 let g:qftooltip = {
-        \ 'padding': [1,1,1,1],
-        \ 'border': [0,0,0,0]
+        \ 'border': [],
+        \ 'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
         \ }
+
+" Don't draw a border around the popup window, set padding to 1 on each side
+let g:qftooltip = {'padding': [], 'border': [0,0,0,0]}
 ```
 
 ### Highlighting

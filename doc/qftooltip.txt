@@ -60,7 +60,7 @@ variable g:qftooltip. The following keys are supported:
 
     border          List with numbers (0 or 1) specifying whether to draw a
                     border around the popup window.
-                    Default: [1,1,1,1]
+                    Default: [0,0,0,0]
 
     borderchars     List with eight characters used for drawing the border
                     around the popup window.
@@ -68,14 +68,14 @@ variable g:qftooltip. The following keys are supported:
 
 Examples ~
 >
+    " Enable border and use fancy border characters with round corners
     let g:qftooltip = {
+            \ 'border': [],
             \ 'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
             \ }
 
-    let g:qftooltip = {
-            \ 'padding': [1,1,1,1],
-            \ 'border': [0,0,0,0]
-            \ }
+    " Set padding of 1 on each side, disable border
+    let g:qftooltip = {'padding': [], 'border': [0,0,0,0]}
 <
 ==============================================================================
 HIGHLIGHTING                                            *qf-tooltip-highlight*
