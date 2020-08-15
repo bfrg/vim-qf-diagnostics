@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Aug 15, 2020
+" Last Change:  Aug 16, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -15,7 +15,7 @@ hi def link QfTooltipBorder     Pmenu
 hi def link QfTooltipScrollbar  PmenuSbar
 hi def link QfTooltipThumb      PmenuThumb
 
-let s:type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
+const s:type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
 
 function s:error(msg)
     echohl ErrorMsg | echomsg a:msg | echohl None
@@ -27,12 +27,12 @@ function s:popup_filter(winid, key) abort
     endif
     call popup_setoptions(a:winid, {'minheight': popup_getpos(a:winid).core_height})
     if a:key ==# "\<c-j>"
-        let line = popup_getoptions(a:winid).firstline
-        let newline = line < line('$', a:winid) ? (line + 1) : line('$', a:winid)
+        const line = popup_getoptions(a:winid).firstline
+        const newline = line < line('$', a:winid) ? (line + 1) : line('$', a:winid)
         call popup_setoptions(a:winid, {'firstline': newline})
     elseif a:key ==# "\<c-k>"
-        let line = popup_getoptions(a:winid).firstline
-        let newline = (line - 1) > 0 ? (line - 1) : 1
+        const line = popup_getoptions(a:winid).firstline
+        const newline = (line - 1) > 0 ? (line - 1) : 1
         call popup_setoptions(a:winid, {'firstline': newline})
     else
         return v:false
