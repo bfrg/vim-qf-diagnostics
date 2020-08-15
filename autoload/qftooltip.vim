@@ -15,6 +15,7 @@ hi def link QfTooltipBorder     Pmenu
 hi def link QfTooltipScrollbar  PmenuSbar
 hi def link QfTooltipThumb      PmenuThumb
 
+let s:winid = 0
 const s:type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
 
 function s:error(msg)
@@ -82,7 +83,8 @@ function qftooltip#show(loclist) abort
     const pos = screenpos(win_getid(), line('.'), col('.'))
     const col = &columns - pos.curscol < width ? &columns - width - 1 : pos.curscol
 
-    const winid = popup_atcursor(text, {
+    call popup_close(s:winid)
+    let s:winid = popup_atcursor(text, {
             \ 'moved': 'any',
             \ 'col': col,
             \ 'minwidth': width,
@@ -97,13 +99,14 @@ function qftooltip#show(loclist) abort
             \ 'firstline': 1,
             \ 'mapping': v:false,
             \ 'filtermode': 'n',
-            \ 'filter': funcref('s:popup_filter')
+            \ 'filter': funcref('s:popup_filter'),
+            \ 'callback': {-> execute('let s:winid = 0')}
             \ })
 
-    call setbufvar(winbufnr(winid), '&syntax', 'qftooltip')
-    call setwinvar(winid, '&breakindent', 1)
+    call setbufvar(winbufnr(s:winid), '&syntax', 'qftooltip')
+    call setwinvar(s:winid, '&breakindent', 1)
 
-    return winid
+    return s:winid
 endfunction
 
 let &cpoptions = s:save_cpo
