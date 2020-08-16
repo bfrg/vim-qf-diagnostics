@@ -42,13 +42,13 @@ function s:popup_filter(winid, key) abort
 endfunction
 
 function qftooltip#show(loclist) abort
-    const xlist = a:loclist ? getloclist(0) : getqflist()
+    let entries = a:loclist ? getloclist(0) : getqflist()
 
-    if empty(xlist)
+    if empty(entries)
         return
     endif
 
-    const entries = filter(xlist, "v:val.bufnr == bufnr('%') && v:val.lnum == line('.')")
+    call filter(entries, "v:val.bufnr == bufnr('%') && v:val.lnum == line('.')")
 
     if empty(entries)
         return
