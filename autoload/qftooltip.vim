@@ -43,28 +43,28 @@ function s:popup_filter(winid, key) abort
 endfunction
 
 function qftooltip#show(loclist) abort
-    let entries = a:loclist ? getloclist(0) : getqflist()
+    let xlist = a:loclist ? getloclist(0) : getqflist()
 
-    if empty(entries)
+    if empty(xlist)
         return
     endif
 
-    call filter(entries, "v:val.bufnr == bufnr('%') && v:val.lnum == line('.')")
+    let idxs = s:filter_items(xlist, 0)
 
-    if empty(entries)
+    if empty(idxs)
         return
     endif
 
     let text = []
-    for item in entries
-        if empty(item.type)
-            call extend(text, printf('%d:%d %s', item.lnum, item.col, trim(item.text))->split('\n'))
+    for i in idxs
+        if empty(xlist[i].type)
+            call extend(text, printf('%d:%d %s', xlist[i].lnum, xlist[i].col, trim(xlist[i].text))->split('\n'))
         else
             call extend(text, printf('%d:%d %s: %s',
-                    \ item.lnum,
-                    \ item.col,
-                    \ get(s:type, tolower(item.type), item.type) .. (item.nr == -1 ? '' : ' ' .. item.nr),
-                    \ trim(item.text))->split('\n')
+                    \ xlist[i].lnum,
+                    \ xlist[i].col,
+                    \ get(s:type, tolower(xlist[i].type), xlist[i].type) .. (xlist[i].nr == -1 ? '' : ' ' .. xlist[i].nr),
+                    \ trim(xlist[i].text))->split('\n')
                     \ )
         endif
     endfor
@@ -108,6 +108,75 @@ function qftooltip#show(loclist) abort
     call setwinvar(s:winid, '&breakindent', 1)
 
     return s:winid
+endfunction
+
+" 'xlist':
+"     quickfix or location list
+"
+" 'items':
+"     Option that specifies which quickfix items to display in the popup window
+"     0 - display all items in current line
+"     1 - display only item(s) in current line+column (exact match)
+"     2 - display item(s) closest to current column
+"
+" Note: When the cursor is at the very end of a line but the quickfix item is
+" one character past end-of-line that item will still be displayed. This can
+" happen for some Clang warnings, for example:
+"
+" 18:29 warning: statement should be inside braces [hicpp-braces-around-statements]
+"         for (int i = 0; i < N; ++i)
+"                                    ^
+"                                     {
+"
+function s:filter_items(xlist, items) abort
+    if empty(a:xlist)
+        return []
+    endif
+
+    if !a:items
+        " Find all quickfix items in current line
+        return len(a:xlist)
+                \ ->range()
+                \ ->filter({_,i ->
+                \   a:xlist[i].bufnr == bufnr('%') && a:xlist[i].lnum == line('.')
+                \ })
+    elseif a:items == 1
+        " Find quickfix item(s) only in current line+column (exact match)
+        return len(a:xlist)
+                \ ->range()
+                \ ->filter({_,i ->
+                \   a:xlist[i].bufnr == bufnr('%') &&
+                \   a:xlist[i].lnum == line('.') && (
+                \     a:xlist[i].col == col('.') ||
+                \     a:xlist[i].col == col('.') + 1 &&
+                \     a:xlist[i].col == line('.')->getline()->len() + 1
+                \   )
+                \ })
+    elseif a:items == 2
+        " First find all quickfix items in current line
+        let idxs = len(a:xlist)
+                \ ->range()
+                \ ->filter({_,i ->
+                \   a:xlist[i].bufnr == bufnr('%') && a:xlist[i].lnum == line('.')
+                \ })
+
+        if empty(idxs)
+            return []
+        endif
+
+        " Find item(s) closest to current column
+        let min = line('.')->getline()->len() + 1
+
+        for i in idxs
+            let delta = abs(col('.') - a:xlist[i].col)
+            if delta <= min
+                let min = delta
+                let col = a:xlist[i].col
+            endif
+        endfor
+
+        return filter(idxs, {_,i -> a:xlist[i].col == col})
+    endif
 endfunction
 
 let &cpoptions = s:save_cpo
