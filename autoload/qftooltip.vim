@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Aug 16, 2020
+" Last Change:  Aug 17, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -16,6 +16,7 @@ hi def link QfTooltipScrollbar  PmenuSbar
 hi def link QfTooltipThumb      PmenuThumb
 
 let s:winid = 0
+
 const s:type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
 
 function s:error(msg)
@@ -27,11 +28,11 @@ function s:popup_filter(winid, key) abort
         return v:false
     endif
     call popup_setoptions(a:winid, {'minheight': popup_getpos(a:winid).core_height})
-    if a:key ==# "\<c-j>"
+    if a:key ==# get(g:, 'qftooltip', {})->get('scrollup', "\<c-j>")
         const line = popup_getoptions(a:winid).firstline
         const newline = line < line('$', a:winid) ? (line + 1) : line('$', a:winid)
         call popup_setoptions(a:winid, {'firstline': newline})
-    elseif a:key ==# "\<c-k>"
+    elseif a:key ==# get(g:, 'qftooltip', {})->get('scrollup', "\<c-k>")
         const line = popup_getoptions(a:winid).firstline
         const newline = (line - 1) > 0 ? (line - 1) : 1
         call popup_setoptions(a:winid, {'firstline': newline})
@@ -97,7 +98,7 @@ function qftooltip#show(loclist) abort
             \ 'scrollbarhighlight': 'QfTooltipScrollbar',
             \ 'thumbhighlight': 'QfTooltipThumb',
             \ 'firstline': 1,
-            \ 'mapping': v:false,
+            \ 'mapping': get(g:, 'qftooltip', {})->get('mapping', v:true),
             \ 'filtermode': 'n',
             \ 'filter': funcref('s:popup_filter'),
             \ 'callback': {-> execute('let s:winid = 0')}
