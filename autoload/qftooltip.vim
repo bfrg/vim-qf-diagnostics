@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Aug 17, 2020
+" Last Change:  Aug 18, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -106,6 +106,7 @@ function qftooltip#show(loclist) abort
 
     call setbufvar(winbufnr(s:winid), '&syntax', 'qftooltip')
     call setwinvar(s:winid, '&breakindent', 1)
+    call setwinvar(s:winid, '&tabstop', &g:tabstop)
 
     return s:winid
 endfunction
