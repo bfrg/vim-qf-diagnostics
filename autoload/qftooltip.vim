@@ -163,9 +163,8 @@ function s:filter_items(xlist, items) abort
         " First find all quickfix items in current line
         let idxs = len(a:xlist)
                 \ ->range()
-                \ ->filter({_,i ->
-                \   a:xlist[i].bufnr == bufnr('%') && a:xlist[i].lnum == line('.')
-                \ })
+                \ ->filter("a:xlist[v:val].bufnr == bufnr('%')")
+                \ ->filter("a:xlist[v:val].lnum == line('.')")
 
         if empty(idxs)
             return []
@@ -182,7 +181,7 @@ function s:filter_items(xlist, items) abort
             endif
         endfor
 
-        return filter(idxs, {_,i -> a:xlist[i].col == col})
+        return filter(idxs, "a:xlist[v:val].col == col")
     endif
 endfunction
 
