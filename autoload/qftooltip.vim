@@ -156,14 +156,9 @@ function s:filter_items(xlist, items) abort
         " Find quickfix item(s) only in current line+column (exact match)
         return len(a:xlist)
                 \ ->range()
-                \ ->filter({_,i ->
-                \   a:xlist[i].bufnr == bufnr('%') &&
-                \   a:xlist[i].lnum == line('.') && (
-                \     a:xlist[i].col == col('.') ||
-                \     a:xlist[i].col == col('.') + 1 &&
-                \     a:xlist[i].col == col('$')
-                \   )
-                \ })
+                \ ->filter("a:xlist[v:val].bufnr == bufnr('%')")
+                \ ->filter("a:xlist[v:val].lnum == line('.')")
+                \ ->filter("a:xlist[v:val].col == col('.') || a:xlist[v:val].col == col('.') + 1 && a:xlist[v:val].col == col('$')")
     elseif a:items == 2
         " First find all quickfix items in current line
         let idxs = len(a:xlist)
