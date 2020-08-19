@@ -71,7 +71,8 @@ function qftooltip#show(loclist) abort
         return
     endif
 
-    let idxs = s:filter_items(xlist, s:get('items'))
+    const items = s:get('items')
+    const idxs = s:filter_items(xlist, items)
 
     if empty(idxs)
         return
@@ -103,7 +104,7 @@ function qftooltip#show(loclist) abort
     const width = textwidth + pad > &columns ? &columns - pad : textwidth
 
     " Column position for popup window
-    const pos = screenpos(win_getid(), line('.'), col('.'))
+    const pos = screenpos(win_getid(), line('.'), items == 2 ? xlist[idxs[0]].col : col('.'))
     const col = &columns - pos.curscol <= width ? &columns - width - 1 : pos.curscol
 
     let opts = {
@@ -129,7 +130,7 @@ function qftooltip#show(loclist) abort
 
     if s:get('textprop')
         call prop_remove({'type': 'qf-tooltip-popup', 'all': v:true})
-        call prop_add(line('.'), col('.'), {'type': 'qf-tooltip-popup'})
+        call prop_add(line('.'), items == 2 ? xlist[idxs[0]].col : col('.'), {'type': 'qf-tooltip-popup'})
         call extend(opts, {
                 \ 'textprop': 'qf-tooltip-popup',
                 \ 'pos': 'botleft',
