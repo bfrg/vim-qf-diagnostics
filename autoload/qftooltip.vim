@@ -19,6 +19,10 @@ let s:winid = 0
 
 const s:type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
 
+if empty(prop_type_get('qf-tooltip-popup'))
+    call prop_type_add('qf-tooltip-popup', {})
+endif
+
 const s:defaults = {
         \ 'scrollup': "\<c-k>",
         \ 'scrolldown': "\<c-j>",
@@ -26,7 +30,8 @@ const s:defaults = {
         \ 'border': [0, 0, 0, 0],
         \ 'borderchars': [],
         \ 'mapping': v:true,
-        \ 'items': 2
+        \ 'items': 2,
+        \ 'textprop': v:false
         \ }
 
 const s:get = {x -> get(g:, 'qftooltip', {})->get(x, s:defaults[x])}
@@ -52,6 +57,11 @@ function s:popup_filter(winid, key) abort
         return v:false
     endif
     return v:true
+endfunction
+
+function s:popup_callback(winid, result)
+    let s:winid = 0
+    call prop_remove({'type': 'qf-tooltip-popup', 'all': v:true})
 endfunction
 
 function qftooltip#show(loclist) abort
@@ -96,8 +106,7 @@ function qftooltip#show(loclist) abort
     const pos = screenpos(win_getid(), line('.'), col('.'))
     const col = &columns - pos.curscol < width ? &columns - width - 1 : pos.curscol
 
-    call popup_close(s:winid)
-    let s:winid = popup_atcursor(text, {
+    let opts = {
             \ 'moved': 'any',
             \ 'col': col,
             \ 'minwidth': width,
@@ -113,9 +122,23 @@ function qftooltip#show(loclist) abort
             \ 'mapping': s:get('mapping'),
             \ 'filtermode': 'n',
             \ 'filter': funcref('s:popup_filter'),
-            \ 'callback': {-> execute('let s:winid = 0')}
-            \ })
+            \ 'callback': funcref('s:popup_callback')
+            \ }
 
+    call popup_close(s:winid)
+
+    if s:get('textprop')
+        call prop_remove({'type': 'qf-tooltip-popup', 'all': v:true})
+        call prop_add(line('.'), col('.'), {'type': 'qf-tooltip-popup'})
+        call extend(opts, {
+                \ 'textprop': 'qf-tooltip-popup',
+                \ 'pos': 'botleft',
+                \ 'line': 0,
+                \ 'col': col - pos.curscol,
+                \ })
+    endif
+
+    let s:winid = popup_atcursor(text, opts)
     call setbufvar(winbufnr(s:winid), '&syntax', 'qftooltip')
     call setwinvar(s:winid, '&breakindent', 1)
     call setwinvar(s:winid, '&tabstop', &g:tabstop)
