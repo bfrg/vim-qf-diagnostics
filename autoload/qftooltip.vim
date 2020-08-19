@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Aug 18, 2020
+" Last Change:  Aug 19, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -19,6 +19,18 @@ let s:winid = 0
 
 const s:type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
 
+const s:defaults = {
+        \ 'scrollup': "\<c-k>",
+        \ 'scrolldown': "\<c-j>",
+        \ 'padding': [0, 1, 0, 1],
+        \ 'border': [0, 0, 0, 0],
+        \ 'borderchars': [],
+        \ 'mapping': v:true,
+        \ 'items': 2
+        \ }
+
+const s:get = {x -> get(g:, 'qftooltip', {})->get(x, s:defaults[x])}
+
 function s:error(msg)
     echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction
@@ -28,11 +40,11 @@ function s:popup_filter(winid, key) abort
         return v:false
     endif
     call popup_setoptions(a:winid, {'minheight': popup_getpos(a:winid).core_height})
-    if a:key ==# get(g:, 'qftooltip', {})->get('scrollup', "\<c-j>")
+    if a:key ==# s:get('scrolldown')
         const line = popup_getoptions(a:winid).firstline
         const newline = line < line('$', a:winid) ? (line + 1) : line('$', a:winid)
         call popup_setoptions(a:winid, {'firstline': newline})
-    elseif a:key ==# get(g:, 'qftooltip', {})->get('scrollup', "\<c-k>")
+    elseif a:key ==# s:get('scrollup')
         const line = popup_getoptions(a:winid).firstline
         const newline = (line - 1) > 0 ? (line - 1) : 1
         call popup_setoptions(a:winid, {'firstline': newline})
@@ -49,7 +61,7 @@ function qftooltip#show(loclist) abort
         return
     endif
 
-    let idxs = s:filter_items(xlist, 0)
+    let idxs = s:filter_items(xlist, s:get('items'))
 
     if empty(idxs)
         return
@@ -75,8 +87,8 @@ function qftooltip#show(loclist) abort
             \ ->max()
 
     " Maximum width for popup window
-    const padding = get(g:, 'qftooltip', {})->get('padding', [0, 1, 0, 1])
-    const border = get(g:, 'qftooltip', {})->get('border', [0, 0, 0, 0])
+    const padding = s:get('padding')
+    const border = s:get('border')
     const pad = get(padding, 1, 1) + get(padding, 3, 1) + get(border, 1, 1) + get(border, 3, 1) + 1
     const width = textwidth + pad > &columns ? &columns - pad : textwidth
 
@@ -92,13 +104,13 @@ function qftooltip#show(loclist) abort
             \ 'maxwidth': width,
             \ 'padding': padding,
             \ 'border': border,
-            \ 'borderchars': get(g:, 'qftooltip', {})->get('borderchars', []),
+            \ 'borderchars': s:get('borderchars'),
             \ 'borderhighlight': ['QfTooltipBorder'],
             \ 'highlight': 'QfTooltip',
             \ 'scrollbarhighlight': 'QfTooltipScrollbar',
             \ 'thumbhighlight': 'QfTooltipThumb',
             \ 'firstline': 1,
-            \ 'mapping': get(g:, 'qftooltip', {})->get('mapping', v:true),
+            \ 'mapping': s:get('mapping'),
             \ 'filtermode': 'n',
             \ 'filter': funcref('s:popup_filter'),
             \ 'callback': {-> execute('let s:winid = 0')}
@@ -150,7 +162,7 @@ function s:filter_items(xlist, items) abort
                 \   a:xlist[i].lnum == line('.') && (
                 \     a:xlist[i].col == col('.') ||
                 \     a:xlist[i].col == col('.') + 1 &&
-                \     a:xlist[i].col == line('.')->getline()->len() + 1
+                \     a:xlist[i].col == col('$')
                 \   )
                 \ })
     elseif a:items == 2
@@ -166,7 +178,7 @@ function s:filter_items(xlist, items) abort
         endif
 
         " Find item(s) closest to current column
-        let min = line('.')->getline()->len() + 1
+        let min = col('$')
 
         for i in idxs
             let delta = abs(col('.') - a:xlist[i].col)
