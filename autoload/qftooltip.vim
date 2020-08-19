@@ -104,7 +104,7 @@ function qftooltip#show(loclist) abort
 
     " Column position for popup window
     const pos = screenpos(win_getid(), line('.'), col('.'))
-    const col = &columns - pos.curscol < width ? &columns - width - 1 : pos.curscol
+    const col = &columns - pos.curscol <= width ? &columns - width - 1 : pos.curscol
 
     let opts = {
             \ 'moved': 'any',
