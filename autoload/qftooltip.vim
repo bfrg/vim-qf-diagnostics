@@ -150,9 +150,7 @@ function s:filter_items(xlist, items) abort
         " Find all quickfix items in current line
         return len(a:xlist)
                 \ ->range()
-                \ ->filter({_,i ->
-                \   a:xlist[i].bufnr == bufnr('%') && a:xlist[i].lnum == line('.')
-                \ })
+                \ ->filter("a:xlist[v:val].bufnr == bufnr('%') && a:xlist[v:val].lnum == line('.')")
     elseif a:items == 1
         " Find quickfix item(s) only in current line+column (exact match)
         return len(a:xlist)
