@@ -48,6 +48,7 @@ variable `g:qfhistory`. The following keys are supported:
 | ------------- | ------------------------------------------------------------------- | ------------------------------------------ |
 | `scrollup`    | Key for scrolling popup window up one text line.                    | `"\<C-k>"`                                 |
 | `scrolldown`  | Key for scrolling popup window down one text line.                  | `"\<C-j>"`                                 |
+| `maxheight`   | Maximum height of popup window. Set to `0` for maximum available.   | `0`                                        |
 | `padding`     | List with numbers defining the padding inside the popup window.     | `[0,1,0,1]`                                |
 | `border`      | List with numbers (`0` or `1`) specifying whether to draw a border. | `[0,0,0,0]`                                |
 | `borderchars` | List with characters used for drawing the window border.            | `['═', '║', '═', '║', '╔', '╗', '╝', '╚']` |

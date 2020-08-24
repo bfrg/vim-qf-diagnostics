@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Aug 19, 2020
+" Last Change:  Aug 24, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -28,6 +28,7 @@ const s:defaults = {
         \ 'scrolldown': "\<c-j>",
         \ 'padding': [0, 1, 0, 1],
         \ 'border': [0, 0, 0, 0],
+        \ 'maxheight': 0,
         \ 'borderchars': [],
         \ 'mapping': v:true,
         \ 'items': 2,
@@ -112,6 +113,7 @@ function qftooltip#show(loclist) abort
             \ 'col': col,
             \ 'minwidth': width,
             \ 'maxwidth': width,
+            \ 'maxheight': s:get('maxheight'),
             \ 'padding': padding,
             \ 'border': border,
             \ 'borderchars': s:get('borderchars'),
