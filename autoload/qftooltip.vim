@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Aug 24, 2020
+" Last Change:  Aug 27, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -29,6 +29,7 @@ const s:defaults = {
         \ 'padding': [0, 1, 0, 1],
         \ 'border': [0, 0, 0, 0],
         \ 'maxheight': 0,
+        \ 'maxwidth': 0,
         \ 'borderchars': [],
         \ 'mapping': v:true,
         \ 'items': 2,
@@ -93,12 +94,12 @@ function qftooltip#show(loclist) abort
         endif
     endfor
 
-    const textwidth = len(text)
-            \ ->range()
-            \ ->map({_, i -> strdisplaywidth(text[i])})
-            \ ->max()
-
     " Maximum width for popup window
+    const max = s:get('maxwidth')
+    const textwidth = max > 0
+            \ ? max
+            \ : len(text)->range()->map('strdisplaywidth(text[v:val])')->max()
+
     const padding = s:get('padding')
     const border = s:get('border')
     const pad = get(padding, 1, 1) + get(padding, 3, 1) + get(border, 1, 1) + get(border, 3, 1) + 1
