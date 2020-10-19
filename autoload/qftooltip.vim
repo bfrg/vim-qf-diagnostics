@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Aug 27, 2020
+" Last Change:  Oct 20, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -19,7 +19,7 @@ let s:winid = 0
 
 const s:type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
 
-if empty(prop_type_get('qf-tooltip-popup'))
+if prop_type_get('qf-tooltip-popup')->empty()
     call prop_type_add('qf-tooltip-popup', {})
 endif
 
@@ -35,6 +35,9 @@ const s:defaults = {
         \ 'items': 2,
         \ 'textprop': v:false
         \ }
+
+" Cache current quickfix list: { 'id': 2, 'changedtick': 1, 'items': [...] }
+let s:xlist = {}
 
 const s:get = {x -> get(g:, 'qftooltip', {})->get(x, s:defaults[x])}
 
@@ -66,8 +69,67 @@ function s:popup_callback(winid, result)
     call prop_remove({'type': 'qf-tooltip-popup', 'all': v:true})
 endfunction
 
+function s:getxlist(loclist) abort
+    const Xgetlist = a:loclist ? function('getloclist', [0]) : function('getqflist')
+    const qf = Xgetlist({'changedtick': 0, 'id': 0})
+
+    if get(s:xlist, 'id', -1) == qf.id && get(s:xlist, 'changedtick') == qf.changedtick
+        return s:xlist.items
+    endif
+
+    let s:xlist = Xgetlist({'changedtick': 0, 'id': 0, 'items': 0})
+    return s:xlist.items
+endfunction
+
+" 'xlist':
+"     quickfix or location list
+"
+" 'items':
+"     Option that specifies which quickfix items to display in the popup window
+"     0 - display all items in current line
+"     1 - display only item(s) in current line+column (exact match)
+"     2 - display item(s) closest to current column
+function s:filter_items(xlist, items) abort
+    if empty(a:xlist)
+        return []
+    endif
+
+    if !a:items
+        return len(a:xlist)
+                \ ->range()
+                \ ->filter("a:xlist[v:val].bufnr == bufnr('%')")
+                \ ->filter("a:xlist[v:val].lnum == line('.')")
+    elseif a:items == 1
+        return len(a:xlist)
+                \ ->range()
+                \ ->filter("a:xlist[v:val].bufnr == bufnr('%')")
+                \ ->filter("a:xlist[v:val].lnum == line('.')")
+                \ ->filter("a:xlist[v:val].col == col('.') || a:xlist[v:val].col == col('.') + 1 && a:xlist[v:val].col == col('$')")
+    elseif a:items == 2
+        let idxs = len(a:xlist)
+                \ ->range()
+                \ ->filter("a:xlist[v:val].bufnr == bufnr('%')")
+                \ ->filter("a:xlist[v:val].lnum == line('.')")
+
+        if empty(idxs)
+            return []
+        endif
+
+        let min = col('$')
+        for i in idxs
+            let delta = abs(col('.') - a:xlist[i].col)
+            if delta <= min
+                let min = delta
+                let col = a:xlist[i].col
+            endif
+        endfor
+
+        return filter(idxs, 'a:xlist[v:val].col == col')
+    endif
+endfunction
+
 function qftooltip#show(loclist) abort
-    let xlist = a:loclist ? getloclist(0) : getqflist()
+    const xlist = s:getxlist(a:loclist)
 
     if empty(xlist)
         return
@@ -148,68 +210,6 @@ function qftooltip#show(loclist) abort
     call setwinvar(s:winid, '&tabstop', &g:tabstop)
 
     return s:winid
-endfunction
-
-" 'xlist':
-"     quickfix or location list
-"
-" 'items':
-"     Option that specifies which quickfix items to display in the popup window
-"     0 - display all items in current line
-"     1 - display only item(s) in current line+column (exact match)
-"     2 - display item(s) closest to current column
-"
-" Note: When the cursor is at the very end of a line but the quickfix item is
-" one character past end-of-line that item will still be displayed. This can
-" happen for some Clang warnings, for example:
-"
-" 18:29 warning: statement should be inside braces [hicpp-braces-around-statements]
-"         for (int i = 0; i < N; ++i)
-"                                    ^
-"                                     {
-"
-function s:filter_items(xlist, items) abort
-    if empty(a:xlist)
-        return []
-    endif
-
-    if !a:items
-        " Find all quickfix items in current line
-        return len(a:xlist)
-                \ ->range()
-                \ ->filter("a:xlist[v:val].bufnr == bufnr('%')")
-                \ ->filter("a:xlist[v:val].lnum == line('.')")
-    elseif a:items == 1
-        " Find quickfix item(s) only in current line+column (exact match)
-        return len(a:xlist)
-                \ ->range()
-                \ ->filter("a:xlist[v:val].bufnr == bufnr('%')")
-                \ ->filter("a:xlist[v:val].lnum == line('.')")
-                \ ->filter("a:xlist[v:val].col == col('.') || a:xlist[v:val].col == col('.') + 1 && a:xlist[v:val].col == col('$')")
-    elseif a:items == 2
-        " First find all quickfix items in current line
-        let idxs = len(a:xlist)
-                \ ->range()
-                \ ->filter("a:xlist[v:val].bufnr == bufnr('%')")
-                \ ->filter("a:xlist[v:val].lnum == line('.')")
-
-        if empty(idxs)
-            return []
-        endif
-
-        " Find item(s) closest to current column
-        let min = col('$')
-
-        for i in idxs
-            let delta = abs(col('.') - a:xlist[i].col)
-            if delta <= min
-                let min = delta
-                let col = a:xlist[i].col
-            endif
-        endfor
-
-        return filter(idxs, "a:xlist[v:val].col == col")
-    endif
 endfunction
 
 let &cpoptions = s:save_cpo
