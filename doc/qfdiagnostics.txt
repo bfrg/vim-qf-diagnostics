@@ -1,12 +1,12 @@
-*qftooltip.txt*  Display quickfix errors in a popup window (like a tooltip).
+*qfdiagnostics.txt*  Display quickfix errors in popup window and sign column
 
 Author:     bfrg <http://github.com/bfrg>
-Website:    https://github.com/bfrg/vim-qf-tooltip
+Website:    https://github.com/bfrg/vim-qf-diagnostics
 License:    Same terms as Vim itself (see |license|)
 
 
 ==============================================================================
-INTRODUCTION                                                      *qf-tooltip*
+INTRODUCTION                                                  *qf-diagnostics*
 
 Display the error message for the current line in a |popup| window (like a
 tooltip).
@@ -16,11 +16,11 @@ any errors for the current line and displays them in a popup window at the
 current cursor position.
 
 ==============================================================================
-USAGE                                                       *qf-tooltip-usage*
+USAGE                                                   *qf-diagnostics-usage*
 
 Mappings ~
 
-<plug>(qf-tooltip-qflist)                          *<plug>(qf-tooltip-qflist)*
+<plug>(qf-diagnostics-popup-quickfix)  *<plug>(qf-diagnostics-popup-quickfix)*
             Open a |popup| window with the error message for the current line
             at the current cursor position. The plugin checks if the current
             |quickfix| list contains any errors for the current line. If the
@@ -28,16 +28,16 @@ Mappings ~
             the same popup.
 
             Example: >
-                nmap gh <plug>(qf-tooltip-qflist)
+                nmap gh <plug>(qf-diagnostics-popup-quickfix)
 <
             Move the cursor in any direction or press CTRL-C to close the
             popup window.
 
-<plug>(qf-tooltip-loclist)                        *<plug>(qf-tooltip-loclist)*
+<plug>(qf-diagnostics-popup-loclist)    *<plug>(qf-diagnostics-popup-loclist)*
             Same as above but checks the current |location-list| for errors.
 
             Example: >
-                nmap gH <plug>(qf-tooltip-loclist)
+                nmap gH <plug>(qf-diagnostics-popup-loclist)
 <
 Popup window mappings ~
 
@@ -47,12 +47,12 @@ scrolled with the mouse wheel, or alternatively, with CTRL-J and CTRL-K.
 Pressing CTRL-C closes the popup window.
 
 ==============================================================================
-CONFIGURATION                                              *qf-tooltip-config*
+CONFIGURATION                                          *qf-diagnostics-config*
 
-g:qftooltip                                                      *g:qftooltip*
+g:qfdiagnostics                                              *g:qfdiagnostics*
 
 The appearance of the popup window can be configured through the |Dictionary|
-variable g:qftooltip. The following keys are supported:
+variable g:qfdiagnostics. The following keys are supported:
 
     scrollup        Key for scrolling popup window up one text line.
                     Default: CTRL-K
@@ -83,26 +83,26 @@ variable g:qftooltip. The following keys are supported:
 Examples ~
 >
     " Enable border and use fancy border characters with round corners
-    let g:qftooltip = {
+    let g:qfdiagnostics = {
             \ 'border': [],
             \ 'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
             \ }
 
     " Set padding of 1 on each side, disable border
-    let g:qftooltip = {'padding': [], 'border': [0,0,0,0]}
+    let g:qfdiagnostics = {'padding': [], 'border': [0,0,0,0]}
 <
 ==============================================================================
-HIGHLIGHTING                                            *qf-tooltip-highlight*
+HIGHLIGHTING                                        *qf-diagnostics-highlight*
 
 The following highlighting groups are used by the plugin:
 
-QfTooltip                                                       *hl-QfTooltip*
+QfDiagnostics                                               *hl-QfDiagnostics*
                     Popup window background and error text. This is the
                     equivalent of the |hl-Normal| highlight group in regular
                     windows.
                     Default: |hl-Pmenu|
 
-QfTooltipBorder                                           *hl-QfTooltipBorder*
+QfDiagnosticsBorder                                   *hl-QfDiagnosticsBorder*
                     Highlight group name for popup window border.
                     Default: |hl-Pmenu|
 
@@ -110,36 +110,36 @@ QfTooltipBorder                                           *hl-QfTooltipBorder*
                     |quickfix-title| of the current quickfix (or location)
                     list.
 
-QfTooltipScrollbar                                     *hl-QfTooltipScrollbar*
+QfDiagnosticsScrollbar                             *hl-QfDiagnosticsScrollbar*
                     Highlight group name for the |popup-scrollbar|. The
                     background color is what matters.
                     Default: |hl-PmenuSbar|
 
-QfTooltipThumb                                             *hl-QfTooltipThumb*
+QfDiagnosticsThumb                                     *hl-QfDiagnosticsThumb*
                     Highlight group name for the |popup-scrollbar| thumb. The
                     background color is what matters.
                     Default: |hl-PmenuThumb|
 
-QfTooltipLineNr                                           *hl-QfTooltipLineNr*
+QfDiagnosticsLineNr                                   *hl-QfDiagnosticsLineNr*
                     Error line and column number in the popup window.
                     Default: |hl-Directory|
 
-QfTooltipError                                             *hl-QfTooltipError*
+QfDiagnosticsError                                     *hl-QfDiagnosticsError*
                     Highlight group name for error messages in the popup
                     window. Error messages are marked with "error" and an
                     optional error number.
                     Default: |hl-ErrorMsg|
 
-QfTooltipWarning                                         *hl-QfTooltipWarning*
-                    Same as |QfTooltipError| but for warning messages.
+QfDiagnosticsWarning                                 *hl-QfDiagnosticsWarning*
+                    Same as |QfDiagnosticsError| but for warning messages.
                     Default: |hl-WarningMsg|
 
-QfTooltipInfo                                               *hl-QfTooltipInfo*
-                    Same as |QfTooltipError| but for informational messages.
+QfDiagnosticsInfo                                       *hl-QfDiagnosticsInfo*
+                    Same as |QfDiagnosticsError| but for informational messages.
                     Default: |hl-MoreMsg|
 
-QfTooltipNote                                               *hl-QfTooltipNote*
-                    Same as |QfTooltipError| but for note messages.
+QfDiagnosticsNote                                       *hl-QfDiagnosticsNote*
+                    Same as |QfDiagnosticsError| but for note messages.
                     Default: |hl-Todo|
 
  vim:tw=78:et:ft=help:norl:

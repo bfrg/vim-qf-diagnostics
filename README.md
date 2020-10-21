@@ -1,7 +1,8 @@
-# vim-qf-tooltip
+# vim-qf-diagnostics
 
-Display the error message for the current line in a popup window (like a
-tooltip).
+- Populate the sign column with quickfix or location list errors
+- Display the error message for the current line in a popup window (like a
+  tooltip).
 
 The plugin checks if the current `quickfix` list (or `location-list`) contains
 any errors for the current line and displays them in a popup window at the
@@ -13,17 +14,17 @@ current cursor position.
 
 ### `<Plug>` mappings
 
-* <kbd>\<plug>(qf-tooltip-qflist)</kbd> will popup a small tooltip at the
-  current cursor position with the error message found in the _current_
+* <kbd>\<plug>(qf-diagnostics-popup-quickfix)</kbd> will popup a small tooltip
+  at the current cursor position with the error message found in the _current_
   `quickfix` list. If the line contains several errors, all entries are
   collected and displayed in the same popup window.
-* <kbd>\<plug>(qf-tooltip-loclist)</kbd> same as above but uses the current
-  `location-list`.
+* <kbd>\<plug>(qf-diagnostics-popup-loclist)</kbd> same as above but displays
+  error messages from the current `location-list`.
 
 Example:
 ```vim
-nmap gh <plug>(qf-tooltip-qflist)
-nmap gH <plug>(qf-tooltip-loclist)
+nmap gh <plug>(qf-diagnostics-popup-quickfix)
+nmap gH <plug>(qf-diagnostics-popup-loclist)
 ```
 
 ### Popup window mappings
@@ -39,31 +40,31 @@ window.
 
 ## Configuration
 
-### `g:qftooltip`
+### `g:qfdiagnostics`
 
 The appearance of the popup window can be configured through the dictionary
-variable `g:qfhistory`. The following keys are supported:
+variable `g:qfdiagnostics`. The following entries are supported:
 
-| Key           | Description                                                         | Default                                    |
+| Entry         | Description                                                         | Default                                    |
 | ------------- | ------------------------------------------------------------------- | ------------------------------------------ |
 | `scrollup`    | Key for scrolling popup window up one text line.                    | `"\<C-k>"`                                 |
 | `scrolldown`  | Key for scrolling popup window down one text line.                  | `"\<C-j>"`                                 |
 | `maxheight`   | Maximum height of popup window. Set to `0` for maximum available.   | `0`                                        |
 | `maxwidth`    | Maximum width of popup window. Set to `0` for maximum available.    | `0`                                        |
-| `padding`     | List with numbers defining the padding inside the popup window.     | `[0,1,0,1]`                                |
-| `border`      | List with numbers (`0` or `1`) specifying whether to draw a border. | `[0,0,0,0]`                                |
+| `padding`     | List with numbers defining the padding inside the popup window.     | `[0, 1, 0, 1]`                             |
+| `border`      | List with numbers (`0` or `1`) specifying whether to draw a border. | `[0, 0, 0, 0]`                             |
 | `borderchars` | List with characters used for drawing the window border.            | `['═', '║', '═', '║', '╔', '╗', '╝', '╚']` |
 
 Examples:
 ```vim
 " Use a fancy border with round corners
-let g:qftooltip = {
+let g:qfdiagnostics = {
         \ 'border': [],
         \ 'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
         \ }
 
 " Don't draw a border around the popup window, set padding to 1 on each side
-let g:qftooltip = {'padding': [], 'border': [0,0,0,0]}
+let g:qfdiagnostics = {'padding': [], 'border': [0,0,0,0]}
 ```
 
 ### Highlighting
@@ -71,17 +72,17 @@ let g:qftooltip = {'padding': [], 'border': [0,0,0,0]}
 The highlighting of the popup window can be changed through the following
 highlight groups:
 
-| Highlight group     | Description                              | Default     |
-| ------------------- | ---------------------------------------- | ----------- |
-| `QfTooltip`         | Popup window background and normal text. | `Pmenu`     |
-| `QfTooltipBorder`   | Border of popup window.                  | `Pmenu`     |
-| `QfTooltipScrollbar`| Scrollbar of popup window.               | `PmenuSbar` |
-| `QfTooltipThumb`    | Thumb of scrollbar.                      | `PmenuThumb`|
-| `QfTooltipLineNr`   | Line and column number in popup window.  | `Directory` |
-| `QfTooltipError`    | Error text and number.                   | `ErrorMsg`  |
-| `QfTooltipWarning`  | Warning text and number.                 | `WarningMsg`|
-| `QfTooltipInfo`     | Info text and number.                    | `MoreMsg`   |
-| `QfTooltipNote`     | Note text and number.                    | `Todo`      |
+| Highlight group          | Description                              | Default      |
+| ------------------------ | ---------------------------------------- | ------------ |
+| `QfDiagnostics`          | Popup window background and normal text. | `Pmenu`      |
+| `QfDiagnosticsBorder`    | Border of popup window.                  | `Pmenu`      |
+| `QfDiagnosticsScrollbar` | Scrollbar of popup window.               | `PmenuSbar`  |
+| `QfDiagnosticsThumb`     | Thumb of scrollbar.                      | `PmenuThumb` |
+| `QfDiagnosticsLineNr`    | Line and column number in popup window.  | `Directory`  |
+| `QfDiagnosticsError`     | Error text and number.                   | `ErrorMsg`   |
+| `QfDiagnosticsWarning`   | Warning text and number.                 | `WarningMsg` |
+| `QfDiagnosticsInfo`      | Info text and number.                    | `MoreMsg`    |
+| `QfDiagnosticsNote`      | Note text and number.                    | `Todo`       |
 
 
 ## Installation
@@ -90,8 +91,8 @@ highlight groups:
 
 ```bash
 $ cd ~/.vim/pack/git-plugins/start
-$ git clone https://github.com/bfrg/vim-qf-tooltip
-$ vim -u NONE -c "helptags vim-qf-tooltip/doc" -c q
+$ git clone https://github.com/bfrg/vim-qf-diagnostics
+$ vim -u NONE -c "helptags vim-qf-diagnostics/doc" -c q
 ```
 **Note:** The directory name `git-plugins` is arbitrary, you can pick any other
 name. For more details see <kbd>:help packages</kbd>.
@@ -101,7 +102,7 @@ name. For more details see <kbd>:help packages</kbd>.
 Assuming [vim-plug][plug] is your favorite plugin manager, add the following to
 your `vimrc`:
 ```vim
-Plug 'bfrg/vim-qf-tooltip'
+Plug 'bfrg/vim-qf-diagnostics'
 ```
 
 

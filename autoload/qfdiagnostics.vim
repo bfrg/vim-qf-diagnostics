@@ -1,19 +1,19 @@
 " ==============================================================================
-" Display quickfix errors in a popup window (like a tooltip)
-" File:         autoload/qftooltip.vim
+" Display quickfix errors in popup window and sign column
+" File:         autoload/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
-" Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Oct 21, 2020
+" Website:      https://github.com/bfrg/vim-qf-diagnostics
+" Last Change:  Oct 22, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-hi def link QfTooltip           Pmenu
-hi def link QfTooltipBorder     Pmenu
-hi def link QfTooltipScrollbar  PmenuSbar
-hi def link QfTooltipThumb      PmenuThumb
+hi def link QfDiagnostics           Pmenu
+hi def link QfDiagnosticsBorder     Pmenu
+hi def link QfDiagnosticsScrollbar  PmenuSbar
+hi def link QfDiagnosticsThumb      PmenuThumb
 
 let s:winid = 0
 
@@ -29,8 +29,8 @@ const s:sign_table = {
 
 const s:group = 'qfsigns'
 
-if prop_type_get('qf-tooltip-popup')->empty()
-    call prop_type_add('qf-tooltip-popup', {})
+if prop_type_get('qf-diagnostics-popup')->empty()
+    call prop_type_add('qf-diagnostics-popup', {})
 endif
 
 const s:defaults = {
@@ -57,16 +57,16 @@ const s:sign_properties = {
 " Cache current quickfix list: { 'id': 2, 'changedtick': 1, 'items': [...] }
 let s:xlist = {}
 
-const s:get = {x -> get(g:, 'qf_diagnostics', {})->get(x, s:defaults[x])}
+const s:get = {x -> get(g:, 'qfdiagnostics', {})->get(x, s:defaults[x])}
 
 const s:popup = {x ->
-        \ get(g:, 'qf_diagnostics', {})
+        \ get(g:, 'qfdiagnostics', {})
         \ ->get('popup', s:defaults)
         \ ->get(x, s:defaults[x])
         \ }
 
 const s:sign = {x ->
-        \ get(g:, 'qf_diagnostics', {})
+        \ get(g:, 'qfdiagnostics', {})
         \ ->get('sign_properties', s:sign_properties)
         \ ->get(x, s:sign_properties[x])
         \ }
@@ -96,7 +96,7 @@ endfunction
 
 function s:popup_callback(winid, result)
     let s:winid = 0
-    call prop_remove({'type': 'qf-tooltip-popup', 'all': v:true})
+    call prop_remove({'type': 'qf-diagnostics-popup', 'all': v:true})
 endfunction
 
 function s:getxlist(loclist) abort
@@ -158,7 +158,7 @@ function s:filter_items(xlist, items) abort
     endif
 endfunction
 
-function qftooltip#place(loclist, priority) abort
+function qfdiagnostics#place(loclist, priority) abort
     const xlist = s:getxlist(a:loclist)
 
     if empty(xlist)
@@ -184,11 +184,11 @@ function qftooltip#place(loclist, priority) abort
             \ ->sign_placelist()
 endfunction
 
-function qftooltip#clear()
+function qfdiagnostics#clear()
     return sign_unplace(s:group)
 endfunction
 
-function qftooltip#show(loclist) abort
+function qfdiagnostics#popup(loclist) abort
     const xlist = s:getxlist(a:loclist)
 
     if empty(xlist)
@@ -240,10 +240,10 @@ function qftooltip#show(loclist) abort
             \ 'padding': padding,
             \ 'border': border,
             \ 'borderchars': s:popup('borderchars'),
-            \ 'borderhighlight': ['QfTooltipBorder'],
-            \ 'highlight': 'QfTooltip',
-            \ 'scrollbarhighlight': 'QfTooltipScrollbar',
-            \ 'thumbhighlight': 'QfTooltipThumb',
+            \ 'borderhighlight': ['QfDiagnosticsBorder'],
+            \ 'highlight': 'QfDiagnostics',
+            \ 'scrollbarhighlight': 'QfDiagnosticsScrollbar',
+            \ 'thumbhighlight': 'QfDiagnosticsThumb',
             \ 'firstline': 1,
             \ 'mapping': s:popup('mapping'),
             \ 'filtermode': 'n',
@@ -254,10 +254,10 @@ function qftooltip#show(loclist) abort
     call popup_close(s:winid)
 
     if s:popup('textprop')
-        call prop_remove({'type': 'qf-tooltip-popup', 'all': v:true})
-        call prop_add(line('.'), items == 2 ? xlist[idxs[0]].col : col('.'), {'type': 'qf-tooltip-popup'})
+        call prop_remove({'type': 'qf-diagnostics-popup', 'all': v:true})
+        call prop_add(line('.'), items == 2 ? xlist[idxs[0]].col : col('.'), {'type': 'qf-diagnostics-popup'})
         call extend(opts, {
-                \ 'textprop': 'qf-tooltip-popup',
+                \ 'textprop': 'qf-diagnostics-popup',
                 \ 'pos': 'botleft',
                 \ 'line': 0,
                 \ 'col': col - pos.curscol,
@@ -265,7 +265,7 @@ function qftooltip#show(loclist) abort
     endif
 
     let s:winid = popup_atcursor(text, opts)
-    call setbufvar(winbufnr(s:winid), '&syntax', 'qftooltip')
+    call setbufvar(winbufnr(s:winid), '&syntax', 'qfdiagnostics')
     call setwinvar(s:winid, '&breakindent', 1)
     call setwinvar(s:winid, '&tabstop', &g:tabstop)
 
