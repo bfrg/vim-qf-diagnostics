@@ -3,7 +3,7 @@
 " File:         autoload/qftooltip.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-tooltip
-" Last Change:  Oct 20, 2020
+" Last Change:  Oct 21, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -18,6 +18,16 @@ hi def link QfTooltipThumb      PmenuThumb
 let s:winid = 0
 
 const s:type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
+
+const s:sign_table = {
+        \ 'E': 'qferror',
+        \ 'W': 'qfwarning',
+        \ 'I': 'qfinfo',
+        \ 'N': 'qfnote',
+        \  '': 'qfnormal'
+        \ }
+
+const s:group = 'qfsigns'
 
 if prop_type_get('qf-tooltip-popup')->empty()
     call prop_type_add('qf-tooltip-popup', {})
@@ -36,10 +46,30 @@ const s:defaults = {
         \ 'textprop': v:false
         \ }
 
+const s:sign_properties = {
+        \ 'error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
+        \ 'warning': {'text': 'W>', 'texthl': 'WarningMsg'},
+        \ 'info':    {'text': 'I>', 'texthl': 'MoreMsg'},
+        \ 'note':    {'text': 'N>', 'texthl': 'Todo'},
+        \ 'normal':  {'text': '?>', 'texthl': 'Search'}
+        \ }
+
 " Cache current quickfix list: { 'id': 2, 'changedtick': 1, 'items': [...] }
 let s:xlist = {}
 
-const s:get = {x -> get(g:, 'qftooltip', {})->get(x, s:defaults[x])}
+const s:get = {x -> get(g:, 'qf_diagnostics', {})->get(x, s:defaults[x])}
+
+const s:popup = {x ->
+        \ get(g:, 'qf_diagnostics', {})
+        \ ->get('popup', s:defaults)
+        \ ->get(x, s:defaults[x])
+        \ }
+
+const s:sign = {x ->
+        \ get(g:, 'qf_diagnostics', {})
+        \ ->get('sign_properties', s:sign_properties)
+        \ ->get(x, s:sign_properties[x])
+        \ }
 
 function s:error(msg)
     echohl ErrorMsg | echomsg a:msg | echohl None
@@ -50,11 +80,11 @@ function s:popup_filter(winid, key) abort
         return v:false
     endif
     call popup_setoptions(a:winid, {'minheight': popup_getpos(a:winid).core_height})
-    if a:key ==# s:get('scrolldown')
+    if a:key ==# s:popup('scrolldown')
         const line = popup_getoptions(a:winid).firstline
         const newline = line < line('$', a:winid) ? (line + 1) : line('$', a:winid)
         call popup_setoptions(a:winid, {'firstline': newline})
-    elseif a:key ==# s:get('scrollup')
+    elseif a:key ==# s:popup('scrollup')
         const line = popup_getoptions(a:winid).firstline
         const newline = (line - 1) > 0 ? (line - 1) : 1
         call popup_setoptions(a:winid, {'firstline': newline})
@@ -128,6 +158,36 @@ function s:filter_items(xlist, items) abort
     endif
 endfunction
 
+function qftooltip#place(loclist, priority) abort
+    const xlist = s:getxlist(a:loclist)
+
+    if empty(xlist)
+        return
+    endif
+
+    call sign_define('qferror', s:sign('error'))
+    call sign_define('qfwarning', s:sign('warning'))
+    call sign_define('qfinfo', s:sign('info'))
+    call sign_define('qfnote', s:sign('note'))
+    call sign_define('qfnormal', s:sign('normal'))
+
+    call copy(xlist)
+            \ ->filter('v:val.bufnr && v:val.valid && v:val.lnum')
+            \ ->map({_,item -> {
+            \   'lnum': item.lnum,
+            \   'buffer': item.bufnr,
+            \   'group': s:group,
+            \   'priority': a:priority,
+            \   'name': get(s:sign_table, toupper(item.type), s:sign_table[''])
+            \   }
+            \ })
+            \ ->sign_placelist()
+endfunction
+
+function qftooltip#clear()
+    return sign_unplace(s:group)
+endfunction
+
 function qftooltip#show(loclist) abort
     const xlist = s:getxlist(a:loclist)
 
@@ -135,7 +195,7 @@ function qftooltip#show(loclist) abort
         return
     endif
 
-    const items = s:get('items')
+    const items = s:popup('items')
     const idxs = s:filter_items(xlist, items)
 
     if empty(idxs)
@@ -157,13 +217,13 @@ function qftooltip#show(loclist) abort
     endfor
 
     " Maximum width for popup window
-    const max = s:get('maxwidth')
+    const max = s:popup('maxwidth')
     const textwidth = max > 0
             \ ? max
             \ : len(text)->range()->map('strdisplaywidth(text[v:val])')->max()
 
-    const padding = s:get('padding')
-    const border = s:get('border')
+    const padding = s:popup('padding')
+    const border = s:popup('border')
     const pad = get(padding, 1, 1) + get(padding, 3, 1) + get(border, 1, 1) + get(border, 3, 1) + 1
     const width = textwidth + pad > &columns ? &columns - pad : textwidth
 
@@ -176,16 +236,16 @@ function qftooltip#show(loclist) abort
             \ 'col': col,
             \ 'minwidth': width,
             \ 'maxwidth': width,
-            \ 'maxheight': s:get('maxheight'),
+            \ 'maxheight': s:popup('maxheight'),
             \ 'padding': padding,
             \ 'border': border,
-            \ 'borderchars': s:get('borderchars'),
+            \ 'borderchars': s:popup('borderchars'),
             \ 'borderhighlight': ['QfTooltipBorder'],
             \ 'highlight': 'QfTooltip',
             \ 'scrollbarhighlight': 'QfTooltipScrollbar',
             \ 'thumbhighlight': 'QfTooltipThumb',
             \ 'firstline': 1,
-            \ 'mapping': s:get('mapping'),
+            \ 'mapping': s:popup('mapping'),
             \ 'filtermode': 'n',
             \ 'filter': funcref('s:popup_filter'),
             \ 'callback': funcref('s:popup_callback')
@@ -193,7 +253,7 @@ function qftooltip#show(loclist) abort
 
     call popup_close(s:winid)
 
-    if s:get('textprop')
+    if s:popup('textprop')
         call prop_remove({'type': 'qf-tooltip-popup', 'all': v:true})
         call prop_add(line('.'), items == 2 ? xlist[idxs[0]].col : col('.'), {'type': 'qf-tooltip-popup'})
         call extend(opts, {
