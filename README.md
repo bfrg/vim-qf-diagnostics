@@ -30,12 +30,30 @@ nmap gH <plug>(qf-diagnostics-popup-loclist)
 ### Popup window mappings
 
 If not all quickfix errors (for the current line) fit into the popup window, a
-scrollbar will appear on the right side. The popup window can then be scrolled
-with the mouse wheel, or alternatively, with <kbd>CTRL-J</kbd> and
-<kbd>CTRL-K</kbd>.
+scrollbar will appear on the right side. The popup window can either be scrolled
+with the mouse wheel, or with <kbd>CTRL-J</kbd> and <kbd>CTRL-K</kbd>.
 
-Press <kbd>CTRL-C</kbd> or move the cursor in any direction to close the popup
-window.
+Pressing <kbd>CTRL-C</kbd> or moving the cursor in any direction will close the
+popup window.
+
+### Commands
+
+| Command              | Description                                                         |
+| -------------------- | ------------------------------------------------------------------- |
+| `:DiagnosticsPlace`  | Place a sign for each item in current quickfix list in sign column. |
+| `:LDiagnosticsPlace` | Same as `:DiagnosticsPlace` but use the current location list.      |
+| `:DiagnosticsClear`  | Remove all signs placed by the plugin.                              |
+| `:LDiagnosticsClear` | Same as `:DiagnosticsClear`.                                        |
+
+If you want to place the signs automatically after running `:make`, add the
+following to your `vimrc`:
+```vim
+augroup qf-make-signs
+    autocmd!
+    autocmd QuickfixCmdPre  make DiagnosticsClear
+    autocmd QuickfixCmdPost make DiagnosticsPlace
+augroup END
+```
 
 
 ## Configuration

@@ -8,13 +8,13 @@ License:    Same terms as Vim itself (see |license|)
 ==============================================================================
 INTRODUCTION                                                  *qf-diagnostics*
 
-- Populate the |sign-column| with quickfix or location list errors
+- Populate the |sign-column| with |quickfix| or |location-list| errors.
 - Display the error message for the current line in a |popup| window (like a
   tooltip).
 
-The plugin checks if the current |quickfix| list (or |location-list|) contains
-any errors for the current line and displays them in a popup window at the
-current cursor position.
+The plugin checks if the current quickfix list (or location-list) contains any
+errors for the current line and displays them in a popup window at the current
+cursor position.
 
 ==============================================================================
 USAGE                                                   *qf-diagnostics-usage*
@@ -46,6 +46,19 @@ If not all |quickfix| errors (for the current line) fit into the popup window,
 a scrollbar will appear on the right side. The popup window can then be
 scrolled with the mouse wheel, or alternatively, with CTRL-J and CTRL-K.
 Pressing CTRL-C closes the popup window.
+
+Commands ~
+
+:DiagnosticsPlace                                          *:DiagnosticsPlace*
+            Place a sign for each item in the current quickfix list in the
+            sign column.
+
+:LDiagnosticsPlace                                        *:LDiagnosticsPlace*
+            Same as |:DiagnosticsPlace| but use the current location list.
+
+:DiagnosticsClear                                          *:DiagnosticsClear*
+:LDiagnosticsClear                                        *:LDiagnosticsClear*
+            Remove all signs placed by the plugin.
 
 ==============================================================================
 CONFIGURATION                                          *qf-diagnostics-config*
@@ -110,15 +123,23 @@ The appearance of the popup window and the signs can be configured through the
                     Set sign attributes for quickfix items of type normal.
                     Default: `{'text': '?>', 'texthl': 'Search'}`
 
-Examples ~
->
-    " Enable border and use fancy border characters with round corners
+==============================================================================
+EXAMPLES                                             *qf-diagnostics-examples*
+
+1. Place and clear previous signs automatically after running |:make|: >
+     augroup qf-make-signs
+         autocmd!
+         autocmd QuickfixCmdPre  make DiagnosticsClear
+         autocmd QuickfixCmdPost make DiagnosticsPlace
+     augroup END
+<
+2. Enable border and use fancy border characters with round corners: >
     let g:qfdiagnostics = {
             \ 'popup_border': [],
             \ 'popup_borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
             \ }
-
-    " Set padding of 1 on each side, disable border
+<
+3. Set padding of 1 on each side, disable border in popup window: >
     let g:qfdiagnostics = {
             \ 'popup_padding': [],
             \ 'popup_border': [0,0,0,0]
