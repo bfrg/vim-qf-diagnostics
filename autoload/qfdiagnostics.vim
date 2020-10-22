@@ -44,6 +44,7 @@ const s:defaults = {
         \ 'popup_mapping': v:true,
         \ 'popup_items': 0,
         \ 'popup_textprop': v:false,
+        \ 'sign_priority': [100, 101],
         \ 'sign_error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
         \ 'sign_warning': {'text': 'W>', 'texthl': 'WarningMsg'},
         \ 'sign_info':    {'text': 'I>', 'texthl': 'MoreMsg'},
@@ -143,7 +144,7 @@ function s:filter_items(xlist, items) abort
     endif
 endfunction
 
-function qfdiagnostics#place(loclist, priority) abort
+function qfdiagnostics#place(loclist) abort
     const xlist = s:getxlist(a:loclist)
 
     if empty(xlist)
@@ -156,13 +157,15 @@ function qfdiagnostics#place(loclist, priority) abort
     call sign_define('qfnote', s:get('sign_note'))
     call sign_define('qfnormal', s:get('sign_normal'))
 
+    const priority = s:get('sign_priority')[!!a:loclist]
+
     call copy(xlist)
             \ ->filter('v:val.bufnr && v:val.valid && v:val.lnum')
             \ ->map({_,item -> {
             \   'lnum': item.lnum,
             \   'buffer': item.bufnr,
             \   'group': s:group,
-            \   'priority': a:priority,
+            \   'priority': priority,
             \   'name': get(s:sign_table, toupper(item.type), s:sign_table[''])
             \   }
             \ })

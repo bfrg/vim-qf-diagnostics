@@ -18,9 +18,9 @@ set cpoptions&vim
 nnoremap <silent> <plug>(qf-diagnostics-popup-quickfix) :<c-u>call qfdiagnostics#popup(0)<cr>
 nnoremap <silent> <plug>(qf-diagnostics-popup-loclist)  :<c-u>call qfdiagnostics#popup(1)<cr>
 
-command -bar  DiagnosticsPlace call qfdiagnostics#place(0, 100)
+command -bar  DiagnosticsPlace call qfdiagnostics#place(0)
 command -bar  DiagnosticsClear call qfdiagnostics#clear()
-command -bar LDiagnosticsPlace call qfdiagnostics#place(1, 101)
+command -bar LDiagnosticsPlace call qfdiagnostics#place(1)
 command -bar LDiagnosticsClear call qfdiagnostics#clear()
 
 let &cpoptions = s:save_cpo
