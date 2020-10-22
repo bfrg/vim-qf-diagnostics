@@ -42,7 +42,7 @@ const s:defaults = {
         \ 'popup_maxwidth': 0,
         \ 'popup_borderchars': [],
         \ 'popup_mapping': v:true,
-        \ 'popup_items': 2,
+        \ 'popup_items': 0,
         \ 'popup_textprop': v:false,
         \ 'sign_error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
         \ 'sign_warning': {'text': 'W>', 'texthl': 'WarningMsg'},
