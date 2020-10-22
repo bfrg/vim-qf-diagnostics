@@ -42,29 +42,39 @@ window.
 
 ### `g:qfdiagnostics`
 
-The appearance of the popup window can be configured through the dictionary
-variable `g:qfdiagnostics`. The following entries are supported:
+The appearance of the popup window and the signs can be configured through the
+dictionary variable `g:qfdiagnostics`. The following entries are supported:
 
-| Entry         | Description                                                         | Default                                    |
-| ------------- | ------------------------------------------------------------------- | ------------------------------------------ |
-| `scrollup`    | Key for scrolling popup window up one text line.                    | `"\<C-k>"`                                 |
-| `scrolldown`  | Key for scrolling popup window down one text line.                  | `"\<C-j>"`                                 |
-| `maxheight`   | Maximum height of popup window. Set to `0` for maximum available.   | `0`                                        |
-| `maxwidth`    | Maximum width of popup window. Set to `0` for maximum available.    | `0`                                        |
-| `padding`     | List with numbers defining the padding inside the popup window.     | `[0, 1, 0, 1]`                             |
-| `border`      | List with numbers (`0` or `1`) specifying whether to draw a border. | `[0, 0, 0, 0]`                             |
-| `borderchars` | List with characters used for drawing the window border.            | `['═', '║', '═', '║', '╔', '╗', '╝', '╚']` |
+| Entry               | Description                                                         | Default                                    |
+| ------------------- | ------------------------------------------------------------------- | ------------------------------------------ |
+| `popup_scrollup`    | Key for scrolling popup window up one text line.                    | `"\<C-k>"`                                 |
+| `popup_scrolldown`  | Key for scrolling popup window down one text line.                  | `"\<C-j>"`                                 |
+| `popup_maxheight`   | Maximum height of popup window. Set to `0` for maximum available.   | `0`                                        |
+| `popup_maxwidth`    | Maximum width of popup window. Set to `0` for maximum available.    | `0`                                        |
+| `popup_padding`     | List with numbers defining the padding inside the popup window.     | `[0, 1, 0, 1]`                             |
+| `popup_border`      | List with numbers (`0` or `1`) specifying whether to draw a border. | `[0, 0, 0, 0]`                             |
+| `popup_borderchars` | List with characters used for drawing the window border.            | `['═', '║', '═', '║', '╔', '╗', '╝', '╚']` |
+| `sign_error`        | Sign attributes for quickfix items of type error.                   | `{'text': 'E>', 'texthl': 'ErrorMsg'}`     |
+| `sign_warning`      | Sign attributes for quickfix items of type warning.                 | `{'text': 'W>', 'texthl': 'WarningMsg'}`   |
+| `sign_info`         | Sign attributes for quickfix items of type info.                    | `{'text': 'I>', 'texthl': 'MoreMsg'}`      |
+| `sign_note`         | Sign attributes for quickfix items of type note.                    | `{'text': 'N>', 'texthl': 'Todo'}`         |
+| `sign_normal`       | Sign attributes for quickfix items of type normal.                  | `{'text': '?>', 'texthl': 'Search'}`       |
+
+For more details on sign attributes, see `:help sign_define()`.
 
 Examples:
 ```vim
-" Use a fancy border with round corners
+" Use a border with round corners
 let g:qfdiagnostics = {
-        \ 'border': [],
-        \ 'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
+        \ 'popup_border': [],
+        \ 'popup_borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
         \ }
 
 " Don't draw a border around the popup window, set padding to 1 on each side
-let g:qfdiagnostics = {'padding': [], 'border': [0,0,0,0]}
+let g:qfdiagnostics = {
+        \ 'popup_padding': [],
+        \ 'popup_border': [0, 0, 0, 0]
+        \ }
 ```
 
 ### Highlighting

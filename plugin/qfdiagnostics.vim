@@ -15,11 +15,8 @@ let g:loaded_qfdiagnostics = 1
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-" Display quickfix errors for current line in a popup window
 nnoremap <silent> <plug>(qf-diagnostics-popup-quickfix) :<c-u>call qfdiagnostics#popup(0)<cr>
-
-" Display location-list errors for current line in a popup window
-nnoremap <silent> <plug>(qf-diagnostics-popup-loclist) :<c-u>call qfdiagnostics#popup(1)<cr>
+nnoremap <silent> <plug>(qf-diagnostics-popup-loclist)  :<c-u>call qfdiagnostics#popup(1)<cr>
 
 command -bar  DiagnosticsPlace call qfdiagnostics#place(0, 100)
 command -bar  DiagnosticsClear call qfdiagnostics#clear()

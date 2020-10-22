@@ -8,8 +8,9 @@ License:    Same terms as Vim itself (see |license|)
 ==============================================================================
 INTRODUCTION                                                  *qf-diagnostics*
 
-Display the error message for the current line in a |popup| window (like a
-tooltip).
+- Populate the |sign-column| with quickfix or location list errors
+- Display the error message for the current line in a |popup| window (like a
+  tooltip).
 
 The plugin checks if the current |quickfix| list (or |location-list|) contains
 any errors for the current line and displays them in a popup window at the
@@ -51,45 +52,77 @@ CONFIGURATION                                          *qf-diagnostics-config*
 
 g:qfdiagnostics                                              *g:qfdiagnostics*
 
-The appearance of the popup window can be configured through the |Dictionary|
-variable g:qfdiagnostics. The following keys are supported:
+The appearance of the popup window and the signs can be configured through the
+|Dictionary| variable g:qfdiagnostics. The following keys are supported:
 
-    scrollup        Key for scrolling popup window up one text line.
+    popup_scrollup                            *g:qfdiagnostics.popup_scrollup*
+                    Key for scrolling popup window up one text line.
                     Default: CTRL-K
 
-    scrolldown      Key for scrolling popup window down one text line.
+    popup_scrolldown                        *g:qfdiagnostics.popup_scrolldown*
+                    Key for scrolling popup window down one text line.
                     Default: CTRL-J
 
-    maxheight       Maximum height for the popup window. Set this entry to
+    popup_maxheight                          *g:qfdiagnostics.popup_maxheight*
+                    Maximum height for the popup window. Set this entry to
                     zero to use as much space as available.
                     Default: 0
 
-    maxwidth        Maximum width for the popup window. Set this entry to zero
+    popup_maxwidth                            *g:qfdiagnostics.popup_maxwidth*
+                    Maximum width for the popup window. Set this entry to zero
                     to use as much space as available.
                     Default: 0
 
-    padding         List with numbers defining the padding inside the popup
+    popup_padding                              *g:qfdiagnostics.popup_padding*
+                    List with numbers defining the padding inside the popup
                     window: [top, right, bottom, left]
-                    Default: [0,1,0,1]
+                    Default: [0, 1, 0, 1]
 
-    border          List with numbers (0 or 1) specifying whether to draw a
+    popup_border                                *g:qfdiagnostics.popup_border*
+                    List with numbers (0 or 1) specifying whether to draw a
                     border around the popup window.
-                    Default: [0,0,0,0]
+                    Default: [0, 0, 0, 0]
 
-    borderchars     List with eight characters used for drawing the border
+    popup_borderchars                      *g:qfdiagnostics.popup_borderchars*
+                    List with eight characters used for drawing the border
                     around the popup window.
-                    Default: double lines all around
+                    Default: ['═', '║', '═', '║', '╔', '╗', '╝', '╚']
+
+    sign_error                                    *g:qfdiagnostics.sign_error*
+                    Set the sign attributes for quickfix items of type error.
+                    See the {dict} argument in |sign_define()| for more
+                    details.
+                    Default: `{'text': 'E>', 'texthl': 'ErrorMsg'}`
+
+    sign_warning                                *g:qfdiagnostics.sign_warning*
+                    Set sign attributes for quickfix items of type warning.
+                    Default: `{'text': 'W>', 'texthl': 'WarningMsg'}`
+
+    sign_info                                      *g:qfdiagnostics.sign_info*
+                    Set sign attributes for quickfix items of type info.
+                    Default: `{'text': 'I>', 'texthl': 'MoreMsg'}`
+
+    sign_note                                      *g:qfdiagnostics.sign_note*
+                    Set sign attributes for quickfix items of type note.
+                    Default: `{'text': 'N>', 'texthl': 'Todo'}`
+
+    sign_normal                                  *g:qfdiagnostics.sign_normal*
+                    Set sign attributes for quickfix items of type normal.
+                    Default: `{'text': '?>', 'texthl': 'Search'}`
 
 Examples ~
 >
     " Enable border and use fancy border characters with round corners
     let g:qfdiagnostics = {
-            \ 'border': [],
-            \ 'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+            \ 'popup_border': [],
+            \ 'popup_borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
             \ }
 
     " Set padding of 1 on each side, disable border
-    let g:qfdiagnostics = {'padding': [], 'border': [0,0,0,0]}
+    let g:qfdiagnostics = {
+            \ 'popup_padding': [],
+            \ 'popup_border': [0,0,0,0]
+            \ }
 <
 ==============================================================================
 HIGHLIGHTING                                        *qf-diagnostics-highlight*

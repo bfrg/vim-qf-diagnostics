@@ -34,42 +34,27 @@ if prop_type_get('qf-diagnostics-popup')->empty()
 endif
 
 const s:defaults = {
-        \ 'scrollup': "\<c-k>",
-        \ 'scrolldown': "\<c-j>",
-        \ 'padding': [0, 1, 0, 1],
-        \ 'border': [0, 0, 0, 0],
-        \ 'maxheight': 0,
-        \ 'maxwidth': 0,
-        \ 'borderchars': [],
-        \ 'mapping': v:true,
-        \ 'items': 2,
-        \ 'textprop': v:false
-        \ }
-
-const s:sign_properties = {
-        \ 'error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
-        \ 'warning': {'text': 'W>', 'texthl': 'WarningMsg'},
-        \ 'info':    {'text': 'I>', 'texthl': 'MoreMsg'},
-        \ 'note':    {'text': 'N>', 'texthl': 'Todo'},
-        \ 'normal':  {'text': '?>', 'texthl': 'Search'}
+        \ 'popup_scrollup': "\<c-k>",
+        \ 'popup_scrolldown': "\<c-j>",
+        \ 'popup_padding': [0, 1, 0, 1],
+        \ 'popup_border': [0, 0, 0, 0],
+        \ 'popup_maxheight': 0,
+        \ 'popup_maxwidth': 0,
+        \ 'popup_borderchars': [],
+        \ 'popup_mapping': v:true,
+        \ 'popup_items': 2,
+        \ 'popup_textprop': v:false,
+        \ 'sign_error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
+        \ 'sign_warning': {'text': 'W>', 'texthl': 'WarningMsg'},
+        \ 'sign_info':    {'text': 'I>', 'texthl': 'MoreMsg'},
+        \ 'sign_note':    {'text': 'N>', 'texthl': 'Todo'},
+        \ 'sign_normal':  {'text': '?>', 'texthl': 'Search'}
         \ }
 
 " Cache current quickfix list: { 'id': 2, 'changedtick': 1, 'items': [...] }
 let s:xlist = {}
 
 const s:get = {x -> get(g:, 'qfdiagnostics', {})->get(x, s:defaults[x])}
-
-const s:popup = {x ->
-        \ get(g:, 'qfdiagnostics', {})
-        \ ->get('popup', s:defaults)
-        \ ->get(x, s:defaults[x])
-        \ }
-
-const s:sign = {x ->
-        \ get(g:, 'qfdiagnostics', {})
-        \ ->get('sign_properties', s:sign_properties)
-        \ ->get(x, s:sign_properties[x])
-        \ }
 
 function s:error(msg)
     echohl ErrorMsg | echomsg a:msg | echohl None
@@ -80,11 +65,11 @@ function s:popup_filter(winid, key) abort
         return v:false
     endif
     call popup_setoptions(a:winid, {'minheight': popup_getpos(a:winid).core_height})
-    if a:key ==# s:popup('scrolldown')
+    if a:key ==# s:get('popup_scrolldown')
         const line = popup_getoptions(a:winid).firstline
         const newline = line < line('$', a:winid) ? (line + 1) : line('$', a:winid)
         call popup_setoptions(a:winid, {'firstline': newline})
-    elseif a:key ==# s:popup('scrollup')
+    elseif a:key ==# s:get('popup_scrollup')
         const line = popup_getoptions(a:winid).firstline
         const newline = (line - 1) > 0 ? (line - 1) : 1
         call popup_setoptions(a:winid, {'firstline': newline})
@@ -165,11 +150,11 @@ function qfdiagnostics#place(loclist, priority) abort
         return
     endif
 
-    call sign_define('qferror', s:sign('error'))
-    call sign_define('qfwarning', s:sign('warning'))
-    call sign_define('qfinfo', s:sign('info'))
-    call sign_define('qfnote', s:sign('note'))
-    call sign_define('qfnormal', s:sign('normal'))
+    call sign_define('qferror', s:get('sign_error'))
+    call sign_define('qfwarning', s:get('sign_warning'))
+    call sign_define('qfinfo', s:get('sign_info'))
+    call sign_define('qfnote', s:get('sign_note'))
+    call sign_define('qfnormal', s:get('sign_normal'))
 
     call copy(xlist)
             \ ->filter('v:val.bufnr && v:val.valid && v:val.lnum')
@@ -195,7 +180,7 @@ function qfdiagnostics#popup(loclist) abort
         return
     endif
 
-    const items = s:popup('items')
+    const items = s:get('popup_items')
     const idxs = s:filter_items(xlist, items)
 
     if empty(idxs)
@@ -217,13 +202,13 @@ function qfdiagnostics#popup(loclist) abort
     endfor
 
     " Maximum width for popup window
-    const max = s:popup('maxwidth')
+    const max = s:get('popup_maxwidth')
     const textwidth = max > 0
             \ ? max
             \ : len(text)->range()->map('strdisplaywidth(text[v:val])')->max()
 
-    const padding = s:popup('padding')
-    const border = s:popup('border')
+    const padding = s:get('popup_padding')
+    const border = s:get('popup_border')
     const pad = get(padding, 1, 1) + get(padding, 3, 1) + get(border, 1, 1) + get(border, 3, 1) + 1
     const width = textwidth + pad > &columns ? &columns - pad : textwidth
 
@@ -236,16 +221,16 @@ function qfdiagnostics#popup(loclist) abort
             \ 'col': col,
             \ 'minwidth': width,
             \ 'maxwidth': width,
-            \ 'maxheight': s:popup('maxheight'),
+            \ 'maxheight': s:get('popup_maxheight'),
             \ 'padding': padding,
             \ 'border': border,
-            \ 'borderchars': s:popup('borderchars'),
+            \ 'borderchars': s:get('popup_borderchars'),
             \ 'borderhighlight': ['QfDiagnosticsBorder'],
             \ 'highlight': 'QfDiagnostics',
             \ 'scrollbarhighlight': 'QfDiagnosticsScrollbar',
             \ 'thumbhighlight': 'QfDiagnosticsThumb',
             \ 'firstline': 1,
-            \ 'mapping': s:popup('mapping'),
+            \ 'mapping': s:get('popup_mapping'),
             \ 'filtermode': 'n',
             \ 'filter': funcref('s:popup_filter'),
             \ 'callback': funcref('s:popup_callback')
@@ -253,7 +238,7 @@ function qfdiagnostics#popup(loclist) abort
 
     call popup_close(s:winid)
 
-    if s:popup('textprop')
+    if s:get('popup_textprop')
         call prop_remove({'type': 'qf-diagnostics-popup', 'all': v:true})
         call prop_add(line('.'), items == 2 ? xlist[idxs[0]].col : col('.'), {'type': 'qf-diagnostics-popup'})
         call extend(opts, {
