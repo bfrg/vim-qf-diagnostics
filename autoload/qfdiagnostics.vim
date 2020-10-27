@@ -3,7 +3,7 @@
 " File:         autoload/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Oct 22, 2020
+" Last Change:  Oct 27, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -17,14 +17,14 @@ hi def link QfDiagnosticsThumb      PmenuThumb
 
 let s:winid = 0
 
-const s:type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
+const s:type = {'E': 'error', 'W': 'warning', 'I': 'info', 'N': 'note'}
 
 const s:sign_table = {
-        \ 'E': 'qferror',
-        \ 'W': 'qfwarning',
-        \ 'I': 'qfinfo',
-        \ 'N': 'qfnote',
-        \  '': 'qfnormal'
+        \ 'E': 'qf-diagnostics-error',
+        \ 'W': 'qf-diagnostics-warning',
+        \ 'I': 'qf-diagnostics-info',
+        \ 'N': 'qf-diagnostics-note',
+        \  '': 'qf-diagnostics-normal'
         \ }
 
 const s:group = 'qfsigns'
@@ -151,11 +151,11 @@ function qfdiagnostics#place(loclist) abort
         return
     endif
 
-    call sign_define('qferror', s:get('sign_error'))
-    call sign_define('qfwarning', s:get('sign_warning'))
-    call sign_define('qfinfo', s:get('sign_info'))
-    call sign_define('qfnote', s:get('sign_note'))
-    call sign_define('qfnormal', s:get('sign_normal'))
+    call sign_define('qf-diagnostics-error', s:get('sign_error'))
+    call sign_define('qf-diagnostics-warning', s:get('sign_warning'))
+    call sign_define('qf-diagnostics-info', s:get('sign_info'))
+    call sign_define('qf-diagnostics-note', s:get('sign_note'))
+    call sign_define('qf-diagnostics-normal', s:get('sign_normal'))
 
     const priority = s:get('sign_priority')[!!a:loclist]
 
@@ -198,7 +198,7 @@ function qfdiagnostics#popup(loclist) abort
             call extend(text, printf('%d:%d %s: %s',
                     \ xlist[i].lnum,
                     \ xlist[i].col,
-                    \ get(s:type, tolower(xlist[i].type), xlist[i].type) .. (xlist[i].nr == -1 ? '' : ' ' .. xlist[i].nr),
+                    \ get(s:type, toupper(xlist[i].type), xlist[i].type) .. (xlist[i].nr == -1 ? '' : ' ' .. xlist[i].nr),
                     \ trim(xlist[i].text))->split('\n')
                     \ )
         endif
