@@ -167,9 +167,12 @@ function qfdiagnostics#place(loclist) abort
     call sign_define('qf-diagnostics-normal', s:get('sign_normal'))
 
     if a:loclist
+        const winid = win_getid()->getwininfo()[0].loclist
+                \ ? getloclist(0, {'filewinid': 0}).filewinid
+                \ : win_getid()
         const priority = s:get('sign_priority')[1]
-        const group = win_getid()->s:sign_lgroup()
-        call extend(s:sign_lgroups, {win_getid(): s:xlist.id})
+        const group = s:sign_lgroup(winid)
+        call extend(s:sign_lgroups, {winid: s:xlist.id})
     else
         const priority = s:get('sign_priority')[0]
         const group = s:sign_cgroup
@@ -201,18 +204,24 @@ function qfdiagnostics#lclear(bang) abort
         call keys(s:sign_lgroups)->map({_,i -> s:sign_lgroup(i)->sign_unplace()})
         let s:sign_lgroups = {}
     else
-        if has_key(s:sign_lgroups, win_getid())
-            call win_getid()->s:sign_lgroup()->sign_unplace()
-            call remove(s:sign_lgroups, win_getid())
+        const winid = win_getid()->getwininfo()[0].loclist
+                \ ? getloclist(0, {'filewinid': 0}).filewinid
+                \ : win_getid()
+        if has_key(s:sign_lgroups, winid)
+            call s:sign_lgroup(winid)->sign_unplace()
+            call remove(s:sign_lgroups, winid)
         endif
     endif
 endfunction
 
 function qfdiagnostics#toggle(loclist) abort
     if a:loclist
-        if has_key(s:sign_lgroups, win_getid())
-            call win_getid()->s:sign_lgroup()->sign_unplace()
-            call remove(s:sign_lgroups, win_getid())
+        const winid = win_getid()->getwininfo()[0].loclist
+                \ ? getloclist(0, {'filewinid': 0}).filewinid
+                \ : win_getid()
+        if has_key(s:sign_lgroups, winid)
+            call s:sign_lgroup(winid)->sign_unplace()
+            call remove(s:sign_lgroups, winid)
         else
             call qfdiagnostics#place(a:loclist)
         endif
