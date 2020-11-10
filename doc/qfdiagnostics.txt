@@ -4,82 +4,88 @@ Author:     bfrg <http://github.com/bfrg>
 Website:    https://github.com/bfrg/vim-qf-diagnostics
 License:    Same terms as Vim itself (see |license|)
 
-
 ==============================================================================
 INTRODUCTION                                                  *qf-diagnostics*
 
+- Display the error message for the current line in a |popup-window| using the
+  current quickfix or location list.
 - Populate the |sign-column| with |quickfix| or |location-list| errors.
-- Display the error message for the current line in a |popup| window (like a
-  tooltip).
-
-The plugin checks if the current quickfix list (or location-list) contains any
-errors for the current line and displays them in a popup window at the current
-cursor position.
 
 ==============================================================================
-USAGE                                                   *qf-diagnostics-usage*
+POPUP WINDOW                                            *qf-diagnostics-popup*
 
-Mappings ~
+*<plug>(qf-diagnostics-popup-quickfix)*
+        Open a |popup-window| with the error message for the current line at
+        the current cursor position. The plugin checks if the current
+        |quickfix| list contains any errors for the current line. If the line
+        contains several errors, all will be collected and displayed in the
+        same popup.
 
-<plug>(qf-diagnostics-popup-quickfix)  *<plug>(qf-diagnostics-popup-quickfix)*
-            Open a |popup| window with the error message for the current line
-            at the current cursor position. The plugin checks if the current
-            |quickfix| list contains any errors for the current line. If the
-            line contains several errors, all will be collected and listed in
-            the same popup.
-
-            Example: >
-                nmap gh <plug>(qf-diagnostics-popup-quickfix)
+        Example: >
+            nmap gh <plug>(qf-diagnostics-popup-quickfix)
 <
-            Move the cursor in any direction or press CTRL-C to close the
-            popup window.
+        Move the cursor in any direction or press CTRL-C to close the popup
+        window.
 
-<plug>(qf-diagnostics-popup-loclist)    *<plug>(qf-diagnostics-popup-loclist)*
-            Same as above but checks the current |location-list| for errors.
+        Note: If not all quickfix errors (for the current line) fit into the
+        popup window, a scrollbar will appear on the right side. The popup
+        window can then be scrolled with CTRL-J and CTRL-K, or alternatively,
+        using the mouse wheel.
 
-            Example: >
-                nmap gH <plug>(qf-diagnostics-popup-loclist)
+*<plug>(qf-diagnostics-popup-loclist)*
+        Same as above but checks the current |location-list| of the current
+        window for errors.
+
+        Example: >
+            nmap gH <plug>(qf-diagnostics-popup-loclist)
 <
-Popup window mappings ~
-
-If not all |quickfix| errors (for the current line) fit into the popup window,
-a scrollbar will appear on the right side. The popup window can then be
-scrolled with the mouse wheel, or alternatively, with CTRL-J and CTRL-K.
-Pressing CTRL-C closes the popup window.
-
-Commands ~
+==============================================================================
+SIGNS                                                   *qf-diagnostics-signs*
 
 :DiagnosticsPlace                                          *:DiagnosticsPlace*
-            Place signs in the |sign-column| for the current quickfix list.
+        Place a sign in the |sign-column| for each item the current quickfix
+        list.
 
-            Note: The command automatically removes any signs that were
-            previously placed by the command.
+        Note: The command will always remove the signs that have previously
+        been placed by the same command.
 
 :DiagnosticsClear                                          *:DiagnosticsClear*
-            Remove the signs placed by |:DiagnosticsPlace|.
+        Remove the signs from the sign column placed by |:DiagnosticsPlace|.
 
 :DiagnosticsToggle                                        *:DiagnosticsToggle*
-            Toggle the signs for the quickfix list.
+        Toggle the signs in the sign column for the quickfix list.
 
+                                      *<plug>(qf-diagnostics-toggle-quickfix)*
+        For convenience the plugin also provides a <Plug> mapping.
+
+        Example: >
+            nmap <F8> <plug>(qf-diagnostics-toggle-quickfix)
+<
 :LDiagnosticsPlace                                        *:LDiagnosticsPlace*
-            Same as |:DiagnosticsPlace| but use the current location list of
-            the current window. This command can be run in multiple windows to
-            place signs using several location-list errors belonging different
-            windows.
+        Same as |:DiagnosticsPlace| but use the current location list of the
+        current window. This command can be run in multiple windows to place
+        signs of several location lists simultaneously.
 
-:LDiagnosticsClear[!]                                     *:LDiagnosticsClear*
-            Remove the signs placed by |:LDiagnosticsPlace|.
+:LDiagnosticsClear                                        *:LDiagnosticsClear*
+        Remove the signs placed by |:LDiagnosticsPlace|.
 
-            Note: The command must be run in the same window where
-            |:LDiagnosticsPlace| has been executed.
+        Note: The command must be run in the same window where
+        |:LDiagnosticsPlace| has also been run.
 
-            Add ! to remove all location-list signs that have been placed by
-            |:LDiagnosticsPlace|. This is like running |:LDianogistsClear|
-            manually in every window where |:LDiagnosticsPlace| has been run.
+        Add ! to remove all location-list signs that have been placed by
+        |:LDiagnosticsPlace|. This is like running |:LDianogistsClear|
+        manually in every window where |:LDiagnosticsPlace| has been run.
 
 :LDiagnosticsToggle                                      *:LDiagnosticsToggle*
-            Toggle the signs for the location list of the current window.
+        Toggle the signs in the sign column for the location list of the
+        current window.
 
+                                       *<plug>(qf-diagnostics-toggle-loclist)*
+        For convenience the plugin also provides a <Plug> mapping.
+
+        Example: >
+            nmap <S-F8> <plug>(qf-diagnostics-toggle-loclist)
+<
 ==============================================================================
 CONFIGURATION                                          *qf-diagnostics-config*
 
@@ -146,8 +152,7 @@ The appearance of the popup window and the signs can be configured through the
 ==============================================================================
 EXAMPLES                                             *qf-diagnostics-examples*
 
-1. Place and clear previous signs automatically after running |:make| or
-   |:lmake|: >
+1. Place the signs automatically after running |:make| or |:lmake|: >
      augroup qf-make-signs
          autocmd!
          autocmd QuickfixCmdPost  make  DiagnosticsPlace
