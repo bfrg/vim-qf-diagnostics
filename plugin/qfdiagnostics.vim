@@ -15,8 +15,10 @@ let g:loaded_qfdiagnostics = 1
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-nnoremap <silent> <plug>(qf-diagnostics-popup-quickfix) :<c-u>call qfdiagnostics#popup(0)<cr>
-nnoremap <silent> <plug>(qf-diagnostics-popup-loclist)  :<c-u>call qfdiagnostics#popup(1)<cr>
+nnoremap <silent> <plug>(qf-diagnostics-popup-quickfix)  :<c-u>call qfdiagnostics#popup(0)<cr>
+nnoremap <silent> <plug>(qf-diagnostics-popup-loclist)   :<c-u>call qfdiagnostics#popup(1)<cr>
+nnoremap <silent> <plug>(qf-diagnostics-toggle-quickfix) :<c-u>call qfdiagnostics#toggle(0)<cr>
+nnoremap <silent> <plug>(qf-diagnostics-toggle-loclist)  :<c-u>call qfdiagnostics#toggle(1)<cr>
 
 command -bar  DiagnosticsPlace call qfdiagnostics#place(0)
 command -bar LDiagnosticsPlace call qfdiagnostics#place(1)
