@@ -27,7 +27,7 @@ nmap gh <plug>(qf-diagnostics-popup-quickfix)
 nmap gH <plug>(qf-diagnostics-popup-loclist)
 ```
 
-### Popup window mappings
+#### Popup window mappings
 
 If not all quickfix errors (for the current line) fit into the popup window, a
 scrollbar will appear on the right side. The popup window can either be scrolled
@@ -38,20 +38,29 @@ popup window.
 
 ### Commands
 
-| Command              | Description                                                         |
-| -------------------- | ------------------------------------------------------------------- |
-| `:DiagnosticsPlace`  | Place a sign for each item in current quickfix list in sign column. |
-| `:LDiagnosticsPlace` | Same as `:DiagnosticsPlace` but use the current location list.      |
-| `:DiagnosticsClear`  | Remove all signs placed by the plugin.                              |
-| `:LDiagnosticsClear` | Same as `:DiagnosticsClear`.                                        |
+| Command              | Description                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| `:DiagnosticsPlace`  | Place signs in the sign column for the current quickfix list.                        |
+| `:DiagnosticsClear`  | Remove the signs placed by `:DiagnosticsPlace`.                                      |
+| `:LDiagnosticsPlace` | Same as `:DiagnosticsPlace` but use the current location list of the current window. |
+| `:LDiagnosticsClear` | Remove the signs placed by `:LDiagnosticsPlace`.                                     |
 
-If you want to place the signs automatically after running `:make`, add the
-following to your `vimrc`:
+**Notes:**
+* `:DiagnosticsPlace` and `:LDiagnosticsPlace` automatically remove any signs
+  previously placed by the same command.
+* `:LDiagnosticsClear` must be called in the same window where
+  `:LDiagnosticsPlace` has been called. To remove all location-list signs (all
+  windows) run `:LDiagnosticsClear!`.
+
+#### Example
+
+If you want to place the signs automatically after running `:make` or `:lmake`,
+add the following to your `vimrc`:
 ```vim
 augroup qf-make-signs
     autocmd!
-    autocmd QuickfixCmdPre  make DiagnosticsClear
-    autocmd QuickfixCmdPost make DiagnosticsPlace
+    autocmd QuickfixCmdPost  make  DiagnosticsPlace
+    autocmd QuickfixCmdPost lmake LDiagnosticsPlace
 augroup END
 ```
 
@@ -80,7 +89,8 @@ dictionary variable `g:qfdiagnostics`. The following entries are supported:
 
 For more details on sign attributes, see `:help sign_define()`.
 
-Examples:
+#### Examples
+
 ```vim
 " Use a border with round corners
 let g:qfdiagnostics = {

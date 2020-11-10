@@ -3,7 +3,7 @@
 " File:         autoload/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Oct 27, 2020
+" Last Change:  Nov 9, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -27,7 +27,11 @@ const s:sign_table = {
         \  '': 'qf-diagnostics-normal'
         \ }
 
-const s:group = 'qfsigns'
+const s:sign_cgroup = 'qf-diagnostics-quickfix'
+const s:sign_lgroup = {winid -> printf('qf-diagnostics-loclist-%d', winid)}
+
+" Dictionary of win-ID - quickfix-ID pairs
+let s:sign_lgroups = {}
 
 if prop_type_get('qf-diagnostics-popup')->empty()
     call prop_type_add('qf-diagnostics-popup', {})
@@ -157,14 +161,23 @@ function qfdiagnostics#place(loclist) abort
     call sign_define('qf-diagnostics-note', s:get('sign_note'))
     call sign_define('qf-diagnostics-normal', s:get('sign_normal'))
 
-    const priority = s:get('sign_priority')[!!a:loclist]
+    if a:loclist
+        const priority = s:get('sign_priority')[1]
+        const group = win_getid()->s:sign_lgroup()
+        call extend(s:sign_lgroups, {win_getid(): s:xlist.id})
+    else
+        const priority = s:get('sign_priority')[0]
+        const group = s:sign_cgroup
+    endif
+
+    call sign_unplace(group)
 
     call copy(xlist)
             \ ->filter('v:val.bufnr && v:val.valid && v:val.lnum')
             \ ->map({_,item -> {
             \   'lnum': item.lnum,
             \   'buffer': item.bufnr,
-            \   'group': s:group,
+            \   'group': group,
             \   'priority': priority,
             \   'name': get(s:sign_table, toupper(item.type), s:sign_table[''])
             \   }
@@ -172,8 +185,20 @@ function qfdiagnostics#place(loclist) abort
             \ ->sign_placelist()
 endfunction
 
-function qfdiagnostics#clear()
-    return sign_unplace(s:group)
+function qfdiagnostics#cclear() abort
+    return sign_unplace(s:sign_cgroup)
+endfunction
+
+function qfdiagnostics#lclear(bang) abort
+    if a:bang
+        call keys(s:sign_lgroups)->map({_,i -> s:sign_lgroup(i)->sign_unplace()})
+        let s:sign_lgroups = {}
+    else
+        if has_key(s:sign_lgroups, win_getid())
+            call win_getid()->s:sign_lgroup()->sign_unplace()
+            call remove(s:sign_lgroups, win_getid())
+        endif
+    endif
 endfunction
 
 function qfdiagnostics#popup(loclist) abort

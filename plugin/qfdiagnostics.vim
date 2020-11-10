@@ -3,7 +3,7 @@
 " File:         plugin/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Oct 22, 2020
+" Last Change:  Nov 9, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -19,9 +19,10 @@ nnoremap <silent> <plug>(qf-diagnostics-popup-quickfix) :<c-u>call qfdiagnostics
 nnoremap <silent> <plug>(qf-diagnostics-popup-loclist)  :<c-u>call qfdiagnostics#popup(1)<cr>
 
 command -bar  DiagnosticsPlace call qfdiagnostics#place(0)
-command -bar  DiagnosticsClear call qfdiagnostics#clear()
 command -bar LDiagnosticsPlace call qfdiagnostics#place(1)
-command -bar LDiagnosticsClear call qfdiagnostics#clear()
+
+command -bar        DiagnosticsClear call qfdiagnostics#cclear()
+command -bar -bang LDiagnosticsClear call qfdiagnostics#lclear(<bang>0)
 
 let &cpoptions = s:save_cpo
 unlet s:save_cpo

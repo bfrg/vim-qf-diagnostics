@@ -50,15 +50,29 @@ Pressing CTRL-C closes the popup window.
 Commands ~
 
 :DiagnosticsPlace                                          *:DiagnosticsPlace*
-            Place a sign for each item in the current quickfix list in the
-            sign column.
+            Place signs in the |sign-column| for the current quickfix list.
 
-:LDiagnosticsPlace                                        *:LDiagnosticsPlace*
-            Same as |:DiagnosticsPlace| but use the current location list.
+            Note: The command automatically removes any signs that were
+            previously placed by the command.
 
 :DiagnosticsClear                                          *:DiagnosticsClear*
-:LDiagnosticsClear                                        *:LDiagnosticsClear*
-            Remove all signs placed by the plugin.
+            Remove the signs placed by |:DiagnosticsPlace|.
+
+:LDiagnosticsPlace                                        *:LDiagnosticsPlace*
+            Same as |:DiagnosticsPlace| but use the current location list of
+            the current window. This command can be run in multiple windows to
+            place signs using several location-list errors belonging different
+            windows.
+
+:LDiagnosticsClear[!]                                     *:LDiagnosticsClear*
+            Remove the signs placed by |:LDiagnosticsPlace|.
+
+            Note: The command must be run in the same window where
+            |:LDiagnosticsPlace| has been executed.
+
+            Add ! to remove all location-list signs that have been placed by
+            |:LDiagnosticsPlace|. This is like running |:LDianogistsClear|
+            manually in every window where |:LDiagnosticsPlace| has been run.
 
 ==============================================================================
 CONFIGURATION                                          *qf-diagnostics-config*
@@ -126,11 +140,12 @@ The appearance of the popup window and the signs can be configured through the
 ==============================================================================
 EXAMPLES                                             *qf-diagnostics-examples*
 
-1. Place and clear previous signs automatically after running |:make|: >
+1. Place and clear previous signs automatically after running |:make| or
+   |:lmake|: >
      augroup qf-make-signs
          autocmd!
-         autocmd QuickfixCmdPre  make DiagnosticsClear
-         autocmd QuickfixCmdPost make DiagnosticsPlace
+         autocmd QuickfixCmdPost  make  DiagnosticsPlace
+         autocmd QuickfixCmdPost lmake LDiagnosticsPlace
      augroup END
 <
 2. Enable border and use fancy border characters with round corners: >
