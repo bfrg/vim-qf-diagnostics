@@ -3,7 +3,7 @@
 " File:         plugin/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Nov 9, 2020
+" Last Change:  Nov 10, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -23,6 +23,9 @@ command -bar LDiagnosticsPlace call qfdiagnostics#place(1)
 
 command -bar        DiagnosticsClear call qfdiagnostics#cclear()
 command -bar -bang LDiagnosticsClear call qfdiagnostics#lclear(<bang>0)
+
+command -bar  DiagnosticsToggle call qfdiagnostics#toggle(0)
+command -bar LDiagnosticsToggle call qfdiagnostics#toggle(1)
 
 let &cpoptions = s:save_cpo
 unlet s:save_cpo

@@ -3,7 +3,7 @@
 " File:         autoload/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Nov 9, 2020
+" Last Change:  Nov 10, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -32,6 +32,11 @@ const s:sign_lgroup = {winid -> printf('qf-diagnostics-loclist-%d', winid)}
 
 " Dictionary of win-ID - quickfix-ID pairs
 let s:sign_lgroups = {}
+
+" Since sign_getplaced() can't return all signs placed in a specified group, we
+" use a flag to check if signs have been placed in the qf-diagnostics-quickfix
+" group by the plugin.
+let s:cgroup_placed = 0
 
 if prop_type_get('qf-diagnostics-popup')->empty()
     call prop_type_add('qf-diagnostics-popup', {})
@@ -168,6 +173,7 @@ function qfdiagnostics#place(loclist) abort
     else
         const priority = s:get('sign_priority')[0]
         const group = s:sign_cgroup
+        let s:cgroup_placed = 1
     endif
 
     call sign_unplace(group)
@@ -186,7 +192,8 @@ function qfdiagnostics#place(loclist) abort
 endfunction
 
 function qfdiagnostics#cclear() abort
-    return sign_unplace(s:sign_cgroup)
+    call sign_unplace(s:sign_cgroup)
+    let s:cgroup_placed = 0
 endfunction
 
 function qfdiagnostics#lclear(bang) abort
@@ -197,6 +204,23 @@ function qfdiagnostics#lclear(bang) abort
         if has_key(s:sign_lgroups, win_getid())
             call win_getid()->s:sign_lgroup()->sign_unplace()
             call remove(s:sign_lgroups, win_getid())
+        endif
+    endif
+endfunction
+
+function qfdiagnostics#toggle(loclist) abort
+    if a:loclist
+        if has_key(s:sign_lgroups, win_getid())
+            call win_getid()->s:sign_lgroup()->sign_unplace()
+            call remove(s:sign_lgroups, win_getid())
+        else
+            call qfdiagnostics#place(a:loclist)
+        endif
+    else
+        if s:cgroup_placed
+            call qfdiagnostics#cclear()
+        else
+            call qfdiagnostics#place(a:loclist)
         endif
     endif
 endfunction

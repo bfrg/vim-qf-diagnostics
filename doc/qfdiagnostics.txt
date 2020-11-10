@@ -58,6 +58,9 @@ Commands ~
 :DiagnosticsClear                                          *:DiagnosticsClear*
             Remove the signs placed by |:DiagnosticsPlace|.
 
+:DiagnosticsToggle                                        *:DiagnosticsToggle*
+            Toggle the signs for the quickfix list.
+
 :LDiagnosticsPlace                                        *:LDiagnosticsPlace*
             Same as |:DiagnosticsPlace| but use the current location list of
             the current window. This command can be run in multiple windows to
@@ -73,6 +76,9 @@ Commands ~
             Add ! to remove all location-list signs that have been placed by
             |:LDiagnosticsPlace|. This is like running |:LDianogistsClear|
             manually in every window where |:LDiagnosticsPlace| has been run.
+
+:LDiagnosticsToggle                                      *:LDiagnosticsToggle*
+            Toggle the signs for the location list of the current window.
 
 ==============================================================================
 CONFIGURATION                                          *qf-diagnostics-config*

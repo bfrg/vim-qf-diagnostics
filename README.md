@@ -38,12 +38,14 @@ popup window.
 
 ### Commands
 
-| Command              | Description                                                                          |
-| -------------------- | ------------------------------------------------------------------------------------ |
-| `:DiagnosticsPlace`  | Place signs in the sign column for the current quickfix list.                        |
-| `:DiagnosticsClear`  | Remove the signs placed by `:DiagnosticsPlace`.                                      |
-| `:LDiagnosticsPlace` | Same as `:DiagnosticsPlace` but use the current location list of the current window. |
-| `:LDiagnosticsClear` | Remove the signs placed by `:LDiagnosticsPlace`.                                     |
+| Command               | Description                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------ |
+| `:DiagnosticsPlace`   | Place signs in the sign column for the current quickfix list.                        |
+| `:DiagnosticsClear`   | Remove the signs placed by `:DiagnosticsPlace`.                                      |
+| `:DiagnosticsToggle`  | Toggle the signs for the quickfix list.                                              |
+| `:LDiagnosticsPlace`  | Same as `:DiagnosticsPlace` but use the current location list of the current window. |
+| `:LDiagnosticsClear`  | Remove the signs placed by `:LDiagnosticsPlace`.                                     |
+| `:LDiagnosticsToggle` | Toggle the signs for the location list of the current window.                        |
 
 **Notes:**
 * `:DiagnosticsPlace` and `:LDiagnosticsPlace` automatically remove any signs
