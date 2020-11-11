@@ -3,7 +3,7 @@
 " File:         autoload/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Nov 10, 2020
+" Last Change:  Nov 11, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -52,7 +52,7 @@ const s:defaults = {
         \ 'popup_borderchars': [],
         \ 'popup_mapping': v:true,
         \ 'popup_items': 0,
-        \ 'popup_textprop': v:false,
+        \ 'popup_attach': v:false,
         \ 'sign_priority': [100, 101],
         \ 'sign_error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
         \ 'sign_warning': {'text': 'W>', 'texthl': 'WarningMsg'},
@@ -299,7 +299,7 @@ function qfdiagnostics#popup(loclist) abort
 
     call popup_close(s:winid)
 
-    if s:get('popup_textprop')
+    if s:get('popup_attach')
         call prop_remove({'type': 'qf-diagnostics-popup', 'all': v:true})
         call prop_add(line('.'), items == 2 ? xlist[idxs[0]].col : col('.'), {'type': 'qf-diagnostics-popup'})
         call extend(opts, {
