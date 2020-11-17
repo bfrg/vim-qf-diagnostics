@@ -3,7 +3,7 @@
 " File:         autoload/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Nov 11, 2020
+" Last Change:  Nov 17, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -17,9 +17,9 @@ hi def link QfDiagnosticsThumb      PmenuThumb
 
 let s:winid = 0
 
-const s:type = {'E': 'error', 'W': 'warning', 'I': 'info', 'N': 'note'}
+const s:error_types = {'E': 'error', 'W': 'warning', 'I': 'info', 'N': 'note'}
 
-const s:sign_table = {
+const s:sign_names = {
         \ 'E': 'qf-diagnostics-error',
         \ 'W': 'qf-diagnostics-warning',
         \ 'I': 'qf-diagnostics-info',
@@ -27,16 +27,25 @@ const s:sign_table = {
         \  '': 'qf-diagnostics-normal'
         \ }
 
-const s:sign_cgroup = 'qf-diagnostics-quickfix'
-const s:sign_lgroup = {winid -> printf('qf-diagnostics-loclist-%d', winid)}
+" Place quickfix and location-list errors under different sign groups so that
+" they can be toggled separately in the sign column. Quickfix errors are placed
+" under the qf-diagnostics-0 group, and location-list errors under
+" qf-diagnostics-winid, where 'winid' is the window-ID of the window the
+" location-list belongs to.
+const s:sign_group = {id -> printf('qf-diagnostics-%d', id)}
 
-" Dictionary of win-ID - quickfix-ID pairs
-let s:sign_lgroups = {}
+const s:id = {loclist -> loclist
+        \ ? win_getid()->getwininfo()[0].loclist
+        \   ? getloclist(0, {'filewinid': 0}).filewinid
+        \   : win_getid()
+        \ : 0
+        \ }
 
-" Since sign_getplaced() can't return all signs placed in a specified group, we
-" use a flag to check if signs have been placed in the qf-diagnostics-quickfix
-" group by the plugin.
-let s:cgroup_placed = 0
+" Dictionary with (ID, 1) pairs for every placed quickfix/location-list,
+" quickfix list has ID=0, for location lists we use win-IDs
+let s:sign_placed_ids = {}
+
+const s:signs_placed = {id -> has_key(s:sign_placed_ids, id)}
 
 if prop_type_get('qf-diagnostics-popup')->empty()
     call prop_type_add('qf-diagnostics-popup', {})
@@ -153,6 +162,11 @@ function s:filter_items(xlist, items) abort
     endif
 endfunction
 
+function s:remove_signs(groupid) abort
+    call s:sign_group(a:groupid)->sign_unplace()
+    call remove(s:sign_placed_ids, a:groupid)
+endfunction
+
 function qfdiagnostics#place(loclist) abort
     const xlist = s:getxlist(a:loclist)
 
@@ -160,26 +174,18 @@ function qfdiagnostics#place(loclist) abort
         return
     endif
 
-    call sign_define('qf-diagnostics-error', s:get('sign_error'))
+    call sign_define('qf-diagnostics-error',   s:get('sign_error'))
     call sign_define('qf-diagnostics-warning', s:get('sign_warning'))
-    call sign_define('qf-diagnostics-info', s:get('sign_info'))
-    call sign_define('qf-diagnostics-note', s:get('sign_note'))
-    call sign_define('qf-diagnostics-normal', s:get('sign_normal'))
+    call sign_define('qf-diagnostics-info',    s:get('sign_info'))
+    call sign_define('qf-diagnostics-note',    s:get('sign_note'))
+    call sign_define('qf-diagnostics-normal',  s:get('sign_normal'))
 
-    if a:loclist
-        const winid = win_getid()->getwininfo()[0].loclist
-                \ ? getloclist(0, {'filewinid': 0}).filewinid
-                \ : win_getid()
-        const priority = s:get('sign_priority')[1]
-        const group = s:sign_lgroup(winid)
-        call extend(s:sign_lgroups, {winid: s:xlist.id})
-    else
-        const priority = s:get('sign_priority')[0]
-        const group = s:sign_cgroup
-        let s:cgroup_placed = 1
-    endif
-
+    const id = s:id(a:loclist)
+    const group = s:sign_group(id)
     call sign_unplace(group)
+
+    const priority = s:get('sign_priority')[a:loclist ? 1 : 0]
+    call extend(s:sign_placed_ids, {id: 1})
 
     call copy(xlist)
             \ ->filter('v:val.bufnr && v:val.valid && v:val.lnum')
@@ -188,49 +194,37 @@ function qfdiagnostics#place(loclist) abort
             \   'buffer': item.bufnr,
             \   'group': group,
             \   'priority': priority,
-            \   'name': get(s:sign_table, toupper(item.type), s:sign_table[''])
+            \   'name': get(s:sign_names, toupper(item.type), s:sign_names[''])
             \   }
             \ })
             \ ->sign_placelist()
 endfunction
 
 function qfdiagnostics#cclear() abort
-    call sign_unplace(s:sign_cgroup)
-    let s:cgroup_placed = 0
+    if s:signs_placed(0)
+        call s:remove_signs(0)
+    endif
 endfunction
 
 function qfdiagnostics#lclear(bang) abort
     if a:bang
-        call keys(s:sign_lgroups)->map({_,i -> s:sign_lgroup(i)->sign_unplace()})
-        let s:sign_lgroups = {}
+        call keys(s:sign_placed_ids)
+                \ ->filter('v:val != 0')
+                \ ->map({_,i -> s:remove_signs(i)})
     else
-        const winid = win_getid()->getwininfo()[0].loclist
-                \ ? getloclist(0, {'filewinid': 0}).filewinid
-                \ : win_getid()
-        if has_key(s:sign_lgroups, winid)
-            call s:sign_lgroup(winid)->sign_unplace()
-            call remove(s:sign_lgroups, winid)
+        const id = s:id(v:true)
+        if s:signs_placed(id)
+            call s:remove_signs(id)
         endif
     endif
 endfunction
 
 function qfdiagnostics#toggle(loclist) abort
-    if a:loclist
-        const winid = win_getid()->getwininfo()[0].loclist
-                \ ? getloclist(0, {'filewinid': 0}).filewinid
-                \ : win_getid()
-        if has_key(s:sign_lgroups, winid)
-            call s:sign_lgroup(winid)->sign_unplace()
-            call remove(s:sign_lgroups, winid)
-        else
-            call qfdiagnostics#place(a:loclist)
-        endif
+    const id = s:id(a:loclist)
+    if s:signs_placed(id)
+        call s:remove_signs(id)
     else
-        if s:cgroup_placed
-            call qfdiagnostics#cclear()
-        else
-            call qfdiagnostics#place(a:loclist)
-        endif
+        call qfdiagnostics#place(a:loclist)
     endif
 endfunction
 
@@ -256,7 +250,7 @@ function qfdiagnostics#popup(loclist) abort
             call extend(text, printf('%d:%d %s: %s',
                     \ xlist[i].lnum,
                     \ xlist[i].col,
-                    \ get(s:type, toupper(xlist[i].type), xlist[i].type) .. (xlist[i].nr == -1 ? '' : ' ' .. xlist[i].nr),
+                    \ get(s:error_types, toupper(xlist[i].type), xlist[i].type) .. (xlist[i].nr == -1 ? '' : ' ' .. xlist[i].nr),
                     \ trim(xlist[i].text))->split('\n')
                     \ )
         endif
