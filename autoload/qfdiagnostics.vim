@@ -19,6 +19,14 @@ let s:winid = 0
 
 const s:error_types = {'E': 'error', 'W': 'warning', 'I': 'info', 'N': 'note'}
 
+const s:sign_priorities = {offset -> {
+        \ 'E': offset + 4,
+        \ 'W': offset + 3,
+        \ 'I': offset + 2,
+        \ 'N': offset + 1,
+        \  '': offset
+        \ }}
+
 const s:sign_names = {
         \ 'E': 'qf-diagnostics-error',
         \ 'W': 'qf-diagnostics-warning',
@@ -62,7 +70,7 @@ const s:defaults = {
         \ 'popup_mapping': v:true,
         \ 'popup_items': 0,
         \ 'popup_attach': v:false,
-        \ 'sign_priority': [100, 101],
+        \ 'sign_priorities': [100, 100],
         \ 'sign_error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
         \ 'sign_warning': {'text': 'W>', 'texthl': 'WarningMsg'},
         \ 'sign_info':    {'text': 'I>', 'texthl': 'MoreMsg'},
@@ -184,7 +192,7 @@ function qfdiagnostics#place(loclist) abort
     const group = s:sign_group(id)
     call sign_unplace(group)
 
-    const priority = s:get('sign_priority')[a:loclist ? 1 : 0]
+    const priorities = s:get('sign_priorities')[a:loclist ? 1 : 0]->s:sign_priorities()
     call extend(s:sign_placed_ids, {id: 1})
 
     call copy(xlist)
@@ -193,7 +201,7 @@ function qfdiagnostics#place(loclist) abort
             \   'lnum': item.lnum,
             \   'buffer': item.bufnr,
             \   'group': group,
-            \   'priority': priority,
+            \   'priority': get(priorities, toupper(item.type), priorities['']),
             \   'name': get(s:sign_names, toupper(item.type), s:sign_names[''])
             \   }
             \ })
