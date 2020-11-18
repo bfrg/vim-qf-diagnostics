@@ -3,7 +3,7 @@
 " File:         autoload/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Nov 17, 2020
+" Last Change:  Nov 18, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -82,10 +82,6 @@ const s:defaults = {
 let s:xlist = {}
 
 const s:get = {x -> get(g:, 'qfdiagnostics', {})->get(x, s:defaults[x])}
-
-function s:error(msg)
-    echohl ErrorMsg | echomsg a:msg | echohl None
-endfunction
 
 function s:popup_filter(winid, key) abort
     if line('$', a:winid) == popup_getpos(a:winid).core_height
