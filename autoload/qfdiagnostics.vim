@@ -26,7 +26,6 @@ let s:winid = 0
 let s:xlist = {}
 
 const s:error_types = {'E': 'error', 'W': 'warning', 'I': 'info', 'N': 'note'}
-
 const s:sign_priorities = {x -> {'E': x + 4, 'W': x + 3, 'I': x + 2, 'N': x + 1, '': x}}
 
 " Look-up table used for both sign names and text-property types
@@ -35,7 +34,7 @@ const s:sign_names = {
         \ 'W': 'qf-diagnostics-warning',
         \ 'I': 'qf-diagnostics-info',
         \ 'N': 'qf-diagnostics-note',
-        \  '': 'qf-diagnostics-normal'
+        \  '': 'qf-diagnostics-misc'
         \ }
 
 " Place quickfix and location-list errors under different sign groups so that
@@ -53,7 +52,7 @@ const s:id = {loclist -> loclist
         \ }
 
 " Dictionary with (ID, 1) pairs for every placed quickfix/location-list,
-" quickfix list has ID=0, for location lists we use win-IDs
+" quickfix list has ID=0, for location lists we use window-IDs
 let s:sign_placed_ids = {}
 
 " Similar to sign groups we use different text-property IDs so that quickfix and
@@ -92,14 +91,14 @@ const s:defaults = {
         \ 'highlight_warning': {'highlight': 'SpellCap',   'priority': 13, 'combine': 1},
         \ 'highlight_info':    {'highlight': 'SpellLocal', 'priority': 12, 'combine': 1},
         \ 'highlight_note':    {'highlight': 'SpellRare',  'priority': 11, 'combine': 1},
-        \ 'highlight_normal':  {'highlight': 'Underlined', 'priority': 10, 'combine': 1},
+        \ 'highlight_misc':    {'highlight': 'Underlined', 'priority': 10, 'combine': 1},
         \ 'signs': v:true,
         \ 'sign_priorities': 10,
         \ 'sign_error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
         \ 'sign_warning': {'text': 'W>', 'texthl': 'WarningMsg'},
         \ 'sign_info':    {'text': 'I>', 'texthl': 'MoreMsg'},
         \ 'sign_note':    {'text': 'N>', 'texthl': 'Todo'},
-        \ 'sign_normal':  {'text': '?>', 'texthl': 'Normal'}
+        \ 'sign_misc':    {'text': '?>', 'texthl': 'Normal'}
         \ }
 
 const s:get = {x -> get(g:, 'qfdiagnostics', {})->get(x, s:defaults[x])}
@@ -109,7 +108,7 @@ silent! call prop_type_add('qf-diagnostics-error',   s:get('highlight_error'))
 silent! call prop_type_add('qf-diagnostics-warning', s:get('highlight_warning'))
 silent! call prop_type_add('qf-diagnostics-info',    s:get('highlight_info'))
 silent! call prop_type_add('qf-diagnostics-note',    s:get('highlight_note'))
-silent! call prop_type_add('qf-diagnostics-normal',  s:get('highlight_normal'))
+silent! call prop_type_add('qf-diagnostics-misc',    s:get('highlight_misc'))
 
 function s:popup_filter(winid, key) abort
     if line('$', a:winid) == popup_getpos(a:winid).core_height
@@ -147,8 +146,7 @@ function s:getxlist(loclist) abort
     return s:xlist.items
 endfunction
 
-" 'xlist':
-"     quickfix or location list
+" 'xlist': quickfix or location list
 "
 " 'items':
 "     Option that specifies which quickfix items to display in the popup window
@@ -244,7 +242,7 @@ function s:remove_textprops(id) abort
             call prop_remove({'id': a:id, 'type': 'qf-diagnostics-warning', 'bufnr': bufnr, 'both': 1, 'all': 1})
             call prop_remove({'id': a:id, 'type': 'qf-diagnostics-info',    'bufnr': bufnr, 'both': 1, 'all': 1})
             call prop_remove({'id': a:id, 'type': 'qf-diagnostics-note',    'bufnr': bufnr, 'both': 1, 'all': 1})
-            call prop_remove({'id': a:id, 'type': 'qf-diagnostics-normal',  'bufnr': bufnr, 'both': 1, 'all': 1})
+            call prop_remove({'id': a:id, 'type': 'qf-diagnostics-misc',    'bufnr': bufnr, 'both': 1, 'all': 1})
         endif
     endfor
 
@@ -297,7 +295,7 @@ function qfdiagnostics#place(loclist) abort
         call prop_type_change('qf-diagnostics-warning', s:get('highlight_warning'))
         call prop_type_change('qf-diagnostics-info',    s:get('highlight_info'))
         call prop_type_change('qf-diagnostics-note',    s:get('highlight_note'))
-        call prop_type_change('qf-diagnostics-normal',  s:get('highlight_normal'))
+        call prop_type_change('qf-diagnostics-misc',    s:get('highlight_misc'))
         call s:remove_textprops(id)
         call s:add_textprops(xlist, id)
     endif
@@ -307,7 +305,7 @@ function qfdiagnostics#place(loclist) abort
         call sign_define('qf-diagnostics-warning', s:get('sign_warning'))
         call sign_define('qf-diagnostics-info',    s:get('sign_info'))
         call sign_define('qf-diagnostics-note',    s:get('sign_note'))
-        call sign_define('qf-diagnostics-normal',  s:get('sign_normal'))
+        call sign_define('qf-diagnostics-misc',    s:get('sign_misc'))
         call s:remove_signs(id)
         call s:add_signs(xlist, id)
     endif
