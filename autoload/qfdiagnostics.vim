@@ -203,14 +203,6 @@ function s:on_buf_read_post(bufnr) abort
     endfor
 endfunction
 
-function s:init_autocmds(id) abort
-    for bufnr in get(s:prop_items, a:id)->keys()
-        if str2nr(bufnr)->bufexists()
-            execute printf('autocmd! qf-diagnostics-textprops BufReadPost <buffer=%d> call s:on_buf_read_post(%d)', bufnr, bufnr)
-        endif
-    endfor
-endfunction
-
 function s:add_textprops(xlist, id) abort
     let s:prop_items[a:id] = {}
     let bufs = s:prop_items[a:id]
@@ -230,9 +222,9 @@ function s:add_textprops(xlist, id) abort
                         \ 'type': type
                         \ })
             endif
+            execute printf('autocmd! qf-diagnostics-textprops BufReadPost <buffer=%d> call s:on_buf_read_post(%d)', i.bufnr, i.bufnr)
         endif
     endfor
-    call s:init_autocmds(a:id)
 endfunction
 
 function s:remove_textprops(id) abort
