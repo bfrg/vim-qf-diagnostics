@@ -80,8 +80,7 @@ SIGN AND TEXT HIGHLIGHTING                          *qf-diagnostics-highlight*
 
 ==============================================================================
 CONFIGURATION                                          *qf-diagnostics-config*
-
-*g:qfdiagnostics*
+                                                             *g:qfdiagnostics*
 
 The appearance of the popup window as well as the signs and text highlights
 can be configured through the |Dictionary| g:qfdiagnostics. The following keys
@@ -116,7 +115,7 @@ are supported:
             Default: ['═', '║', '═', '║', '╔', '╗', '╝', '╚']
 
     signs                                               *g:qfdiagnostics.sigs*
-            Whether to display diagnostics in the |sign-column|.
+            Whether to highlight diagnostics in the |sign-column|.
             Default: |v:true|
 
     sign_priorities                          *g:qfdiagnostics.sign_priorities*
@@ -155,12 +154,13 @@ are supported:
             |:grep| items).
             Default: `{'text': '?>', 'texthl': 'Normal'}`
 
-    highlights                                    *g:qfdiagnostics.highlights*
-            Whether to highlight the diagnostics in the text.
+    texthl                                            *g:qfdiagnostics.texthl*
+            Whether to highlight diagnostics in the text using
+            |text-properties|.
             Default: |v:false|
 
     highlight_error                          *g:qfdiagnostics.highlight_error*
-            Set the appearance of |text-properties| for quickfix items of type
+            Set the appearance of text-properties for quickfix items of type
             "error". See the {props} argument in |prop_type_add()| for more
             details.
             Default: `{'highlight': 'SpellBad', 'priority': 14, 'combine': 1}`

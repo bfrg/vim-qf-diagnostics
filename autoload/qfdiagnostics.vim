@@ -86,7 +86,7 @@ const s:defaults = {
         \ 'popup_mapping': v:true,
         \ 'popup_items': 0,
         \ 'popup_attach': v:false,
-        \ 'highlights': v:false,
+        \ 'texthl': v:false,
         \ 'highlight_error':   {'highlight': 'SpellBad',   'priority': 14, 'combine': 1},
         \ 'highlight_warning': {'highlight': 'SpellCap',   'priority': 13, 'combine': 1},
         \ 'highlight_info':    {'highlight': 'SpellLocal', 'priority': 12, 'combine': 1},
@@ -278,7 +278,7 @@ function s:add_signs(xlist, id) abort
 endfunction
 
 function qfdiagnostics#place(loclist) abort
-    if !s:get('signs') && !s:get('highlights')
+    if !s:get('signs') && !s:get('texthl')
         return
     endif
 
@@ -290,7 +290,7 @@ function qfdiagnostics#place(loclist) abort
 
     const id = s:id(a:loclist)
 
-    if s:get('highlights')
+    if s:get('texthl')
         call prop_type_change('qf-diagnostics-error',   s:get('highlight_error'))
         call prop_type_change('qf-diagnostics-warning', s:get('highlight_warning'))
         call prop_type_change('qf-diagnostics-info',    s:get('highlight_info'))
