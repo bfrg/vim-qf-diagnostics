@@ -117,11 +117,6 @@ are supported:
             space as available.
             Default: 0
 
-    popup_padding                              *g:qfdiagnostics.popup_padding*
-            List with numbers defining the padding inside the popup window:
-            [top, right, bottom, left]
-            Default: [0, 1, 0, 1]
-
     popup_border                                *g:qfdiagnostics.popup_border*
             List with numbers (0 or 1) specifying whether to draw a border
             around the popup window.
@@ -215,12 +210,6 @@ EXAMPLES                                             *qf-diagnostics-examples*
             \ 'popup_borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
             \ }
 <
-3. Set padding of 1 on each side, disable border in popup window: >
-    let g:qfdiagnostics = {
-            \ 'popup_padding': [],
-            \ 'popup_border': [0,0,0,0]
-            \ }
-<
 ==============================================================================
 POPUP HIGHLIGHTING                            *qf-diagnostics-popup-highlight*
 
@@ -237,8 +226,7 @@ QfDiagnosticsBorder                                   *hl-QfDiagnosticsBorder*
                     Default: |hl-Pmenu|
 
                     Note: The title of the popup window is set to the
-                    |quickfix-title| of the current quickfix (or location)
-                    list.
+                    |quickfix-title| of the current quickfix or location list.
 
 QfDiagnosticsScrollbar                             *hl-QfDiagnosticsScrollbar*
                     Highlight group name for the |popup-scrollbar|. The

@@ -75,7 +75,6 @@ augroup END
 const s:defaults = {
         \ 'popup_scrollup': "\<c-k>",
         \ 'popup_scrolldown': "\<c-j>",
-        \ 'popup_padding': [0, 1, 0, 1],
         \ 'popup_border': [0, 0, 0, 0],
         \ 'popup_maxheight': 0,
         \ 'popup_maxwidth': 0,
@@ -383,9 +382,8 @@ function qfdiagnostics#popup(loclist) abort
             \ ? max
             \ : len(text)->range()->map('strdisplaywidth(text[v:val])')->max()
 
-    const padding = s:get('popup_padding')
     const border = s:get('popup_border')
-    const pad = get(padding, 1, 1) + get(padding, 3, 1) + get(border, 1, 1) + get(border, 3, 1) + 1
+    const pad = + get(border, 1, 1) + get(border, 3, 1) + 3
     const width = textwidth + pad > &columns ? &columns - pad : textwidth
 
     " Column position for popup window
@@ -398,7 +396,7 @@ function qfdiagnostics#popup(loclist) abort
             \ 'minwidth': width,
             \ 'maxwidth': width,
             \ 'maxheight': s:get('popup_maxheight'),
-            \ 'padding': padding,
+            \ 'padding': [0, 1, 0, 1],
             \ 'border': border,
             \ 'borderchars': s:get('popup_borderchars'),
             \ 'borderhighlight': ['QfDiagnosticsBorder'],
