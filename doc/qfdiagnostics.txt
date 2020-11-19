@@ -59,12 +59,6 @@ SIGN AND TEXT HIGHLIGHTING                          *qf-diagnostics-highlight*
 :DiagnosticsToggle                                        *:DiagnosticsToggle*
         Toggle the diagnostics from the quickfix list.
 
-                                      *<plug>(qf-diagnostics-toggle-quickfix)*
-        For convenience the plugin also provides a |<Plug>| mapping.
-
-        Example: >
-            nmap <F7> <plug>(qf-diagnostics-toggle-quickfix)
-<
 :LDiagnosticsPlace                                        *:LDiagnosticsPlace*
         Same as |:DiagnosticsPlace| but use the current location list of the
         current window. This command can be run in multiple windows to
@@ -84,12 +78,6 @@ SIGN AND TEXT HIGHLIGHTING                          *qf-diagnostics-highlight*
 :LDiagnosticsToggle                                      *:LDiagnosticsToggle*
         Toggle the diagnostics from the location list of the current window.
 
-                                       *<plug>(qf-diagnostics-toggle-loclist)*
-        For convenience the plugin also provides a |<Plug>| mapping.
-
-        Example: >
-            nmap <F8> <plug>(qf-diagnostics-toggle-loclist)
-<
 ==============================================================================
 CONFIGURATION                                          *qf-diagnostics-config*
 
@@ -211,6 +199,11 @@ EXAMPLES                                             *qf-diagnostics-examples*
             \ 'popup_border': [],
             \ 'popup_borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
             \ }
+<
+3. Toggle the diagnostics of the quickfix and location lists with <F7> and
+   <F8>, respectively: >
+    nnoremap <F7> <Cmd>DiagnosticsToggle<Cr>
+    nnoremap <F8> <Cmd>LDiagnosticsToggle<Cr>
 <
 ==============================================================================
 POPUP HIGHLIGHTING                            *qf-diagnostics-popup-highlight*

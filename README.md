@@ -58,20 +58,13 @@ only signs are placed.
 * To remove the highlightings of all diagnostics from all location lists at
   once, run `:LDiagnosticsClear!`.
 
-For convenience the following mappings are provided for toggling the
-diagnostics:
-- **`<plug>(qf-diagnostics-toggle-quickfix)`** Toggle the diagnostics from the
-  quickfix list.
-- **`<plug>(qf-diagnostics-toggle-loclist)`** Toggle the diagnostics from the
-  location list of the current window.
-
 #### Examples
 
 1. Toggle the diagnostics of the quickfix and location lists with <kbd>F7</kbd>
    and <kbd>F8</kbd>, respectively:
    ```vim
-   nmap <F7> <plug>(qf-diagnostics-toggle-quickfix)
-   nmap <F8> <plug>(qf-diagnostics-toggle-loclist)
+   nnoremap <F7> <Cmd>DiagnosticsToggle<Cr>
+   nnoremap <F8> <Cmd>LDiagnosticsToggle<Cr>
    ```
 2. If you want to place the diagnostics automatically after running `:make` or
    `:lmake`, add the following to your `vimrc`:
