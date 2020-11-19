@@ -104,16 +104,8 @@ name. For more details see `:help packages`. Alternatively use your favorite
 plugin manager.
 
 
-## Related plugins
-
-[vim-qf-preview][qf-preview]: A plugin for the quickfix and location list
-windows to quickly preview the file referenced by the quickfix item under the
-cursor in a popup window.
-
-
 ## License
 
 Distributed under the same terms as Vim itself. See `:help license`.
 
 [plug]: https://github.com/junegunn/vim-plug
-[qf-preview]: https://github.com/bfrg/vim-qf-preview
