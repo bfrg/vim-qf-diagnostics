@@ -1,4 +1,4 @@
-*qfdiagnostics.txt*  Display quickfix errors in popup window and sign column
+*qfdiagnostics.txt* Highlight quickfix errors and show error messages in popup window.
 
 Author:     bfrg <http://github.com/bfrg>
 Website:    https://github.com/bfrg/vim-qf-diagnostics
@@ -7,9 +7,10 @@ License:    Same terms as Vim itself (see |license|)
 ==============================================================================
 INTRODUCTION                                                  *qf-diagnostics*
 
-- Display the error message for the current line in a |popup-window| using the
-  current quickfix or location list.
-- Populate the |sign-column| with |quickfix| or |location-list| errors.
+- Highlight the diagnostics (of a project-build, linter, grep) stored in a
+  |quickfix| list in the buffer and |sign-column|.
+- Display the error message for the current line in a |popup-window| next to
+  the cursor.
 
 ==============================================================================
 POPUP WINDOW                                            *qf-diagnostics-popup*
@@ -27,10 +28,10 @@ POPUP WINDOW                                            *qf-diagnostics-popup*
         Move the cursor in any direction or press CTRL-C to close the popup
         window.
 
-        Note: If not all quickfix errors (for the current line) fit into the
-        popup window, a scrollbar will appear on the right side. The popup
-        window can then be scrolled with CTRL-J and CTRL-K, or alternatively,
-        using the mouse wheel.
+        If not all quickfix errors (for the current line) fit into the popup
+        window, a scrollbar will appear on the right side. The popup window
+        can then be scrolled with CTRL-J and CTRL-K, or alternatively, using
+        the mouse wheel.
 
 *<plug>(qf-diagnostics-popup-loclist)*
         Same as above but checks the current |location-list| of the current
@@ -40,124 +41,173 @@ POPUP WINDOW                                            *qf-diagnostics-popup*
             nmap gH <plug>(qf-diagnostics-popup-loclist)
 <
 ==============================================================================
-SIGNS                                                   *qf-diagnostics-signs*
+DIAGNOSTICS HIGHLIGHTS                             *qf-diagnostics-highlights*
 
 :DiagnosticsPlace                                          *:DiagnosticsPlace*
-        Place a sign in the |sign-column| for each item the current quickfix
-        list.
+        Highlight the diagnostics from the current quickfix list. The command
+        will first remove the  highlights that have been previously placed by
+        the same command.
 
-        Note: The command will always remove the signs that have previously
-        been placed by the same command.
+        By default the plugin will place only |signs| in the |sign-column|.
+        Optionally, the error locations can also be highlighted in the text
+        directly. Sign and text highlights can be individually enabled or
+        disabled in |g:qfdiagnostics| (see below).
 
 :DiagnosticsClear                                          *:DiagnosticsClear*
-        Remove the signs from the sign column placed by |:DiagnosticsPlace|.
+        Remove the highlights placed by |:DiagnosticsPlace|.
 
 :DiagnosticsToggle                                        *:DiagnosticsToggle*
-        Toggle the signs in the sign column for the quickfix list.
+        Toggle the diagnostics from the quickfix list.
 
                                       *<plug>(qf-diagnostics-toggle-quickfix)*
-        For convenience the plugin also provides a <Plug> mapping.
+        For convenience the plugin also provides a |<Plug>| mapping.
 
         Example: >
-            nmap <F8> <plug>(qf-diagnostics-toggle-quickfix)
+            nmap <F7> <plug>(qf-diagnostics-toggle-quickfix)
 <
 :LDiagnosticsPlace                                        *:LDiagnosticsPlace*
         Same as |:DiagnosticsPlace| but use the current location list of the
-        current window. This command can be run in multiple windows to place
-        signs of several location lists simultaneously.
+        current window. This command can be run in multiple windows to
+        simultaneously highlight the diagnostics from several location lists.
 
-:LDiagnosticsClear                                        *:LDiagnosticsClear*
+:LDiagnosticsClear[!]                                     *:LDiagnosticsClear*
         Remove the signs placed by |:LDiagnosticsPlace|.
 
         Note: The command must be run in the same window where
-        |:LDiagnosticsPlace| has also been run.
+        |:LDiagnosticsPlace| has been executed to remove the previously placed
+        highlights.
 
-        Add ! to remove all location-list signs that have been placed by
-        |:LDiagnosticsPlace|. This is like running |:LDianogistsClear|
-        manually in every window where |:LDiagnosticsPlace| has been run.
+        Add ! to remove the highlightings of all diagnostics from all location
+        list at once. This is like running |:LDiagnosticsClear| in every
+        window where |:LDiagnosticsPlace| has been run.
 
 :LDiagnosticsToggle                                      *:LDiagnosticsToggle*
-        Toggle the signs in the sign column for the location list of the
-        current window.
+        Toggle the diagnostics from the location list of the current window.
 
                                        *<plug>(qf-diagnostics-toggle-loclist)*
-        For convenience the plugin also provides a <Plug> mapping.
+        For convenience the plugin also provides a |<Plug>| mapping.
 
         Example: >
-            nmap <S-F8> <plug>(qf-diagnostics-toggle-loclist)
+            nmap <F8> <plug>(qf-diagnostics-toggle-loclist)
 <
 ==============================================================================
 CONFIGURATION                                          *qf-diagnostics-config*
 
-g:qfdiagnostics                                              *g:qfdiagnostics*
+*g:qfdiagnostics*
 
-The appearance of the popup window and the signs can be configured through the
-|Dictionary| variable g:qfdiagnostics. The following keys are supported:
+The appearance of the popup window as well as the signs and text highlights
+can be configured through the |Dictionary| g:qfdiagnostics. The following keys
+are supported:
 
     popup_scrollup                            *g:qfdiagnostics.popup_scrollup*
-                    Key for scrolling popup window up one text line.
-                    Default: CTRL-K
+            Key for scrolling popup window up one text line.
+            Default: CTRL-K
 
     popup_scrolldown                        *g:qfdiagnostics.popup_scrolldown*
-                    Key for scrolling popup window down one text line.
-                    Default: CTRL-J
+            Key for scrolling popup window down one text line.
+            Default: CTRL-J
 
     popup_maxheight                          *g:qfdiagnostics.popup_maxheight*
-                    Maximum height for the popup window. Set this entry to
-                    zero to use as much space as available.
-                    Default: 0
+            Maximum height for the popup window. Set to zero to use as much
+            space as available.
+            Default: 0
 
     popup_maxwidth                            *g:qfdiagnostics.popup_maxwidth*
-                    Maximum width for the popup window. Set this entry to zero
-                    to use as much space as available.
-                    Default: 0
+            Maximum width for the popup window. Set to zero to use as much
+            space as available.
+            Default: 0
 
     popup_padding                              *g:qfdiagnostics.popup_padding*
-                    List with numbers defining the padding inside the popup
-                    window: [top, right, bottom, left]
-                    Default: [0, 1, 0, 1]
+            List with numbers defining the padding inside the popup window:
+            [top, right, bottom, left]
+            Default: [0, 1, 0, 1]
 
     popup_border                                *g:qfdiagnostics.popup_border*
-                    List with numbers (0 or 1) specifying whether to draw a
-                    border around the popup window.
-                    Default: [0, 0, 0, 0]
+            List with numbers (0 or 1) specifying whether to draw a border
+            around the popup window.
+            Default: [0, 0, 0, 0]
 
     popup_borderchars                      *g:qfdiagnostics.popup_borderchars*
-                    List with eight characters used for drawing the border
-                    around the popup window.
-                    Default: ['═', '║', '═', '║', '╔', '╗', '╝', '╚']
+            List with eight characters for drawing the border around the popup
+            window.
+            Default: ['═', '║', '═', '║', '╔', '╗', '╝', '╚']
+
+    signs                                               *g:qfdiagnostics.sigs*
+            Whether to display diagnostics in the |sign-column|.
+            Default: |v:true|
+
+    sign_priorities                          *g:qfdiagnostics.sign_priorities*
+            List of two numbers for setting the sign priorities for quickfix
+            and location-list items.
+            Default: [100, 100]
+
+            The plugin distinguishes between five different quickfix items:
+            error (4), warning (3), info (2), note (1), normal (0). The
+            numbers are added to to the priorities specified above. Thus,
+            quickfix and location-list items of type error have priority 104.
+            "normal" types are all items that don't have any type (for example
+            |:grep| items).
 
     sign_error                                    *g:qfdiagnostics.sign_error*
-                    Set the sign attributes for quickfix items of type error.
-                    See the {dict} argument in |sign_define()| for more
-                    details.
-                    Default: `{'text': 'E>', 'texthl': 'ErrorMsg'}`
+            Set the sign attributes for quickfix items of type error.  See the
+            {dict} argument in |sign_define()| for more details.
+            Default: `{'text': 'E>', 'texthl': 'ErrorMsg'}`
 
     sign_warning                                *g:qfdiagnostics.sign_warning*
-                    Set sign attributes for quickfix items of type warning.
-                    Default: `{'text': 'W>', 'texthl': 'WarningMsg'}`
+            Set sign attributes for quickfix items of type warning.
+            Default: `{'text': 'W>', 'texthl': 'WarningMsg'}`
 
     sign_info                                      *g:qfdiagnostics.sign_info*
-                    Set sign attributes for quickfix items of type info.
-                    Default: `{'text': 'I>', 'texthl': 'MoreMsg'}`
+            Set sign attributes for quickfix items of type info.
+            Default: `{'text': 'I>', 'texthl': 'MoreMsg'}`
 
     sign_note                                      *g:qfdiagnostics.sign_note*
-                    Set sign attributes for quickfix items of type note.
-                    Default: `{'text': 'N>', 'texthl': 'Todo'}`
+            Set sign attributes for quickfix items of type note.
+            Default: `{'text': 'N>', 'texthl': 'Todo'}`
 
     sign_normal                                  *g:qfdiagnostics.sign_normal*
-                    Set sign attributes for quickfix items of type normal.
-                    Default: `{'text': '?>', 'texthl': 'Search'}`
+            Set sign attributes for quickfix items of type normal.
+            Default: `{'text': '?>', 'texthl': 'Normal'}`
+
+    highlights                                    *g:qfdiagnostics.highlights*
+            Whether to highlight the diagnostics in the text.
+            Default: |v:false|
+
+    highlight_error                          *g:qfdiagnostics.highlight_error*
+            Set the appearance of text-properties for quickfix items of type
+            error. See the {props} argument in in |prop_type_add()| for more
+            details.
+            Default: `{'highlight': 'SpellBad', 'priority': 14, 'combine': 1}`
+
+    highlight_warning                      *g:qfdiagnostics.highlight_warning*
+            Set the appearance of text-properties for quickfix items of type
+            warning.
+            Default: `{'highlight': 'SpellCap', 'priority': 13, 'combine': 1}`
+
+    highlight_info                            *g:qfdiagnostics.highlight_info*
+            Set the appearance of text-properties for quickfix items of type
+            info.
+            Default: `{'highlight': 'SpellLocal', 'priority': 12, 'combine': 1}`
+
+    highlight_note                            *g:qfdiagnostics.highlight_note*
+            Set the appearance of text-properties for quickfix items of type
+            note.
+            Default: `{'highlight': 'SpellRare', 'priority': 11, 'combine': 1}`
+
+    highlight_normal                        *g:qfdiagnostics.highlight_normal*
+            Set the appearance of text-properties for quickfix items of type
+            normal.
+            Default: `{'highlight': 'Underlined', 'priority': 10, 'combine': 1}`
 
 ==============================================================================
 EXAMPLES                                             *qf-diagnostics-examples*
 
 1. Place the signs automatically after running |:make| or |:lmake|: >
-     augroup qf-make-signs
-         autocmd!
-         autocmd QuickfixCmdPost  make  DiagnosticsPlace
-         autocmd QuickfixCmdPost lmake LDiagnosticsPlace
-     augroup END
+    augroup qf-make-signs
+        autocmd!
+        autocmd QuickfixCmdPost  make  DiagnosticsPlace
+        autocmd QuickfixCmdPost lmake LDiagnosticsPlace
+    augroup END
 <
 2. Enable border and use fancy border characters with round corners: >
     let g:qfdiagnostics = {
@@ -172,9 +222,9 @@ EXAMPLES                                             *qf-diagnostics-examples*
             \ }
 <
 ==============================================================================
-HIGHLIGHTING                                        *qf-diagnostics-highlight*
+POPUP HIGHLIGHTING                            *qf-diagnostics-popup-highlight*
 
-The following highlighting groups are used by the plugin:
+The following highlighting groups are used in the popup window:
 
 QfDiagnostics                                               *hl-QfDiagnostics*
                     Popup window background and error text. This is the

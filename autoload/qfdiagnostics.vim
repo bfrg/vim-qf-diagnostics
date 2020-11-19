@@ -3,7 +3,7 @@
 " File:         autoload/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Nov 18, 2020
+" Last Change:  Nov 19, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -17,16 +17,14 @@ hi def link QfDiagnosticsThumb      PmenuThumb
 
 let s:winid = 0
 
+" Cache current quickfix list: {'id': 2, 'changedtick': 1, 'items': [...]}
+let s:xlist = {}
+
 const s:error_types = {'E': 'error', 'W': 'warning', 'I': 'info', 'N': 'note'}
 
-const s:sign_priorities = {offset -> {
-        \ 'E': offset + 4,
-        \ 'W': offset + 3,
-        \ 'I': offset + 2,
-        \ 'N': offset + 1,
-        \  '': offset
-        \ }}
+const s:sign_priorities = {x -> {'E': x + 4, 'W': x + 3, 'I': x + 2, 'N': x + 1, '': x}}
 
+" Look-up table used for both sign names and text-property types
 const s:sign_names = {
         \ 'E': 'qf-diagnostics-error',
         \ 'W': 'qf-diagnostics-warning',
@@ -53,11 +51,26 @@ const s:id = {loclist -> loclist
 " quickfix list has ID=0, for location lists we use win-IDs
 let s:sign_placed_ids = {}
 
+" Similar to sign groups we use different text-property IDs so that quickfix and
+" location-list errors can be removed individually. For quickfix errors the IDs
+" are set to 0, and for location-list errors the IDs are set to the window-ID of
+" the window the location-list belongs to.
+" Dictionary of (ID, bufnr-items):
+" {
+"   '0': {
+"       bufnr_1: [{'type': 'prop-error', 'lnum': 10, 'col': 19}, {...}, ...],
+"       bufnr_2: [{'type': 'prop-info',  'lnum': 13, 'col': 19}, {...}, ...],
+"       ...
+"   },
+"   '1001': {...}
+" }
+let s:prop_items = {}
+
+const s:props_placed = {id -> has_key(s:prop_items, id)}
 const s:signs_placed = {id -> has_key(s:sign_placed_ids, id)}
 
-if prop_type_get('qf-diagnostics-popup')->empty()
-    call prop_type_add('qf-diagnostics-popup', {})
-endif
+augroup qf-diagnostics-textprops
+augroup END
 
 const s:defaults = {
         \ 'popup_scrollup': "\<c-k>",
@@ -70,18 +83,29 @@ const s:defaults = {
         \ 'popup_mapping': v:true,
         \ 'popup_items': 0,
         \ 'popup_attach': v:false,
+        \ 'highlights': v:false,
+        \ 'highlight_error':   {'highlight': 'SpellBad',   'priority': 14, 'combine': 1},
+        \ 'highlight_warning': {'highlight': 'SpellCap',   'priority': 13, 'combine': 1},
+        \ 'highlight_info':    {'highlight': 'SpellLocal', 'priority': 12, 'combine': 1},
+        \ 'highlight_note':    {'highlight': 'SpellRare',  'priority': 11, 'combine': 1},
+        \ 'highlight_normal':  {'highlight': 'Underlined', 'priority': 10, 'combine': 1},
+        \ 'signs': v:true,
         \ 'sign_priorities': [100, 100],
         \ 'sign_error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
         \ 'sign_warning': {'text': 'W>', 'texthl': 'WarningMsg'},
         \ 'sign_info':    {'text': 'I>', 'texthl': 'MoreMsg'},
         \ 'sign_note':    {'text': 'N>', 'texthl': 'Todo'},
-        \ 'sign_normal':  {'text': '?>', 'texthl': 'Search'}
+        \ 'sign_normal':  {'text': '?>', 'texthl': 'Normal'}
         \ }
 
-" Cache current quickfix list: { 'id': 2, 'changedtick': 1, 'items': [...] }
-let s:xlist = {}
-
 const s:get = {x -> get(g:, 'qfdiagnostics', {})->get(x, s:defaults[x])}
+
+silent! call prop_type_add('qf-diagnostics-popup', {})
+silent! call prop_type_add('qf-diagnostics-error',   s:get('highlight_error'))
+silent! call prop_type_add('qf-diagnostics-warning', s:get('highlight_warning'))
+silent! call prop_type_add('qf-diagnostics-info',    s:get('highlight_info'))
+silent! call prop_type_add('qf-diagnostics-note',    s:get('highlight_note'))
+silent! call prop_type_add('qf-diagnostics-normal',  s:get('highlight_normal'))
 
 function s:popup_filter(winid, key) abort
     if line('$', a:winid) == popup_getpos(a:winid).core_height
@@ -166,48 +190,136 @@ function s:filter_items(xlist, items) abort
     endif
 endfunction
 
+function s:on_buf_read_post(bufnr) abort
+    for id in keys(s:prop_items)
+        for item in get(s:prop_items[id], a:bufnr, [])
+            let max = getbufline(a:bufnr, item.lnum)[0]->len()
+            call prop_add(item.lnum, item.col >= max ? max : item.col, {
+                    \ 'length': 1,
+                    \ 'bufnr': a:bufnr,
+                    \ 'id': id,
+                    \ 'type': item.type
+                    \ })
+        endfor
+    endfor
+endfunction
+
+function s:init_autocmds(id) abort
+    for bufnr in get(s:prop_items, a:id)->keys()
+        if str2nr(bufnr)->bufexists()
+            execute printf('autocmd! qf-diagnostics-textprops BufReadPost <buffer=%d> call s:on_buf_read_post(%d)', bufnr, bufnr)
+        endif
+    endfor
+endfunction
+
+function s:add_textprops(xlist, id) abort
+    let s:prop_items[a:id] = {}
+    let bufs = s:prop_items[a:id]
+
+    for i in a:xlist
+        if i.bufnr > 0 && bufexists(i.bufnr) && i.valid && i.lnum > 0 && i.col > 0
+            call extend(bufs, {i.bufnr: []}, 'keep')
+            let type = get(s:sign_names, toupper(i.type), s:sign_names[''])
+            call add(bufs[i.bufnr], {'type': type, 'lnum': i.lnum, 'col': i.col})
+
+            if bufloaded(i.bufnr)
+                let max = getbufline(i.bufnr, i.lnum)[0]->len()
+                call prop_add(i.lnum, i.col >= max ? max : i.col, {
+                        \ 'length': 1,
+                        \ 'bufnr': i.bufnr,
+                        \ 'id': a:id,
+                        \ 'type': type
+                        \ })
+            endif
+        endif
+    endfor
+    call s:init_autocmds(a:id)
+endfunction
+
+function s:remove_textprops(id) abort
+    if !has_key(s:prop_items, a:id)
+        return
+    endif
+
+    for i in get(s:prop_items, a:id)->keys()
+        let bufnr = str2nr(i)
+        if bufexists(bufnr)
+            call prop_remove({'id': a:id, 'type': 'qf-diagnostics-error',   'bufnr': bufnr, 'both': 1, 'all': 1})
+            call prop_remove({'id': a:id, 'type': 'qf-diagnostics-warning', 'bufnr': bufnr, 'both': 1, 'all': 1})
+            call prop_remove({'id': a:id, 'type': 'qf-diagnostics-info',    'bufnr': bufnr, 'both': 1, 'all': 1})
+            call prop_remove({'id': a:id, 'type': 'qf-diagnostics-note',    'bufnr': bufnr, 'both': 1, 'all': 1})
+            call prop_remove({'id': a:id, 'type': 'qf-diagnostics-normal',  'bufnr': bufnr, 'both': 1, 'all': 1})
+        endif
+    endfor
+
+    call remove(s:prop_items, a:id)
+    if empty(s:prop_items)
+        autocmd! qf-diagnostics-textprops
+    endif
+endfunction
+
 function s:remove_signs(groupid) abort
+    if !has_key(s:sign_placed_ids, a:groupid)
+        return
+    endif
     call s:sign_group(a:groupid)->sign_unplace()
     call remove(s:sign_placed_ids, a:groupid)
 endfunction
 
-function qfdiagnostics#place(loclist) abort
-    const xlist = s:getxlist(a:loclist)
-
-    if empty(xlist)
-        return
-    endif
-
-    call sign_define('qf-diagnostics-error',   s:get('sign_error'))
-    call sign_define('qf-diagnostics-warning', s:get('sign_warning'))
-    call sign_define('qf-diagnostics-info',    s:get('sign_info'))
-    call sign_define('qf-diagnostics-note',    s:get('sign_note'))
-    call sign_define('qf-diagnostics-normal',  s:get('sign_normal'))
-
-    const id = s:id(a:loclist)
-    const group = s:sign_group(id)
-    call sign_unplace(group)
-
-    const priorities = s:get('sign_priorities')[a:loclist ? 1 : 0]->s:sign_priorities()
-    call extend(s:sign_placed_ids, {id: 1})
-
-    call copy(xlist)
+function s:add_signs(xlist, id, priorities) abort
+    const group = s:sign_group(a:id)
+    call extend(s:sign_placed_ids, {a:id: 1})
+    call copy(a:xlist)
             \ ->filter('v:val.bufnr && v:val.valid && v:val.lnum')
             \ ->map({_,item -> {
             \   'lnum': item.lnum,
             \   'buffer': item.bufnr,
             \   'group': group,
-            \   'priority': get(priorities, toupper(item.type), priorities['']),
+            \   'priority': get(a:priorities, toupper(item.type), a:priorities['']),
             \   'name': get(s:sign_names, toupper(item.type), s:sign_names[''])
             \   }
             \ })
             \ ->sign_placelist()
 endfunction
 
-function qfdiagnostics#cclear() abort
-    if s:signs_placed(0)
-        call s:remove_signs(0)
+function qfdiagnostics#place(loclist) abort
+    if !s:get('signs') && !s:get('highlights')
+        return
     endif
+
+    const xlist = s:getxlist(a:loclist)
+
+    if empty(xlist)
+        return
+    endif
+
+    const id = s:id(a:loclist)
+
+    if s:get('highlights')
+        call prop_type_change('qf-diagnostics-error',   s:get('highlight_error'))
+        call prop_type_change('qf-diagnostics-warning', s:get('highlight_warning'))
+        call prop_type_change('qf-diagnostics-info',    s:get('highlight_info'))
+        call prop_type_change('qf-diagnostics-note',    s:get('highlight_note'))
+        call prop_type_change('qf-diagnostics-normal',  s:get('highlight_normal'))
+        call s:remove_textprops(id)
+        call s:add_textprops(xlist, id)
+    endif
+
+    if s:get('signs')
+        call sign_define('qf-diagnostics-error',   s:get('sign_error'))
+        call sign_define('qf-diagnostics-warning', s:get('sign_warning'))
+        call sign_define('qf-diagnostics-info',    s:get('sign_info'))
+        call sign_define('qf-diagnostics-note',    s:get('sign_note'))
+        call sign_define('qf-diagnostics-normal',  s:get('sign_normal'))
+        const priorities = s:get('sign_priorities')[a:loclist ? 1 : 0]->s:sign_priorities()
+        call s:remove_signs(id)
+        call s:add_signs(xlist, id, priorities)
+    endif
+endfunction
+
+function qfdiagnostics#cclear() abort
+    call s:remove_signs(0)
+    call s:remove_textprops(0)
 endfunction
 
 function qfdiagnostics#lclear(bang) abort
@@ -215,21 +327,26 @@ function qfdiagnostics#lclear(bang) abort
         call keys(s:sign_placed_ids)
                 \ ->filter('v:val != 0')
                 \ ->map({_,i -> s:remove_signs(i)})
+        call keys(s:prop_items)
+                \ ->filter('v:val != 0')
+                \ ->map({_,i -> s:remove_textprops(i)})
     else
         const id = s:id(v:true)
-        if s:signs_placed(id)
-            call s:remove_signs(id)
-        endif
+        call s:remove_signs(id)
+        call s:remove_textprops(id)
     endif
 endfunction
 
 function qfdiagnostics#toggle(loclist) abort
     const id = s:id(a:loclist)
-    if s:signs_placed(id)
-        call s:remove_signs(id)
-    else
+
+    if !s:signs_placed(id) && !s:props_placed(id)
         call qfdiagnostics#place(a:loclist)
+        return
     endif
+
+    call s:remove_signs(id)
+    call s:remove_textprops(id)
 endfunction
 
 function qfdiagnostics#popup(loclist) abort
