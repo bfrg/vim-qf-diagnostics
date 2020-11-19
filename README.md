@@ -1,6 +1,6 @@
 # vim-qf-diagnostics
 
-- Highlight the diagnostics (of a project-build, linter, grep) stored in a
+- Highlight the diagnostics (of a project-build, linter, `grep`) stored in a
   quickfix list in the buffer and sign column.
 - Display the error message for the current line in a popup window next to the
   cursor.
@@ -31,36 +31,39 @@ nmap gh <plug>(qf-diagnostics-popup-quickfix)
 nmap gH <plug>(qf-diagnostics-popup-loclist)
 ```
 
-### Diagnostics highlights
+### Sign and text highlighting
 
-The diagnostics from the quickfix and location list can be displayed in the sign
-column as well as highlighted directly in the buffer.
+The diagnostics from the quickfix and location list can be highlighted in the
+sign column and in the buffer directly. Both highlightings are optional and can
+be individually configured in [`g:qfdiagnostics`](#configuration). By default,
+only signs are placed.
 
 | Command                 | Description                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------ |
 | `:DiagnosticsPlace`     | Highlight the diagnostics from the current quickfix list.                            |
 | `:LDiagnosticsPlace`    | Same as `:DiagnosticsPlace` but use the current location list of the current window. |
-| `:DiagnosticsClear`     | Remove the highlights placed by `:DiagnosticsPlace`.                                 |
-| `:LDiagnosticsClear[!]` | Remove the highlights placed by `:LDiagnosticsPlace`.                                |
-| `:DiagnosticsToggle`    | Toggle the highlighting of the diagnostics from the quickfix list.                   |
-| `:LDiagnosticsToggle`   | Toggle the highlighting of the diagnostics from the location list.                   |
+| `:DiagnosticsClear`     | Remove the highlightings placed by `:DiagnosticsPlace`.                              |
+| `:LDiagnosticsClear[!]` | Remove the highlightings placed by `:LDiagnosticsPlace`.                             |
+| `:DiagnosticsToggle`    | Toggle the diagnostics from the quickfix list.                                       |
+| `:LDiagnosticsToggle`   | Toggle the diagnostics from the location list.                                       |
 
 **Notes:**
-* `:DiagnosticsPlace` and `:LDiagnosticsPlace` will first remove the highlights
-  if any have been previously placed by the same command.
-* `:LDiagnosticsPlace` can be run in multiple window to simultaneously highlight
-  diagnostics from several location lists.
-* `:LDiagnosticsClear` must always be run in the same windows where
+* `:DiagnosticsPlace` and `:LDiagnosticsPlace` will first remove any
+  highlightings that have been previously placed by the respective command.
+* `:LDiagnosticsPlace` can be run in multiple windows to simultaneously
+  highlight diagnostics from several location lists.
+* `:LDiagnosticsClear` must always be run in the same window where
   `:LDiagnosticsPlace` has been executed to remove the previously placed
-  highlights.
+  diagnostics.
 * To remove the highlightings of all diagnostics from all location lists at
   once, run `:LDiagnosticsClear!`.
-* For convenience the following mappings are provided for toggling the
-  diagnostics:
-  - **`<plug>(qf-diagnostics-toggle-quickfix)`** Toggle the diagnostics from the
-    quickfix list.
-  - **`<plug>(qf-diagnostics-toggle-loclist)`** Toggle the diagnostics from the
-    location list of the current window.
+
+For convenience the following mappings are provided for toggling the
+diagnostics:
+- **`<plug>(qf-diagnostics-toggle-quickfix)`** Toggle the diagnostics from the
+  quickfix list.
+- **`<plug>(qf-diagnostics-toggle-loclist)`** Toggle the diagnostics from the
+  location list of the current window.
 
 #### Examples
 
@@ -73,7 +76,7 @@ column as well as highlighted directly in the buffer.
 2. If you want to place the diagnostics automatically after running `:make` or
    `:lmake`, add the following to your `vimrc`:
    ```vim
-   augroup qf-make-signs
+   augroup qf-diagnostics-user
        autocmd!
        autocmd QuickfixCmdPost  make  DiagnosticsPlace
        autocmd QuickfixCmdPost lmake LDiagnosticsPlace
@@ -83,7 +86,7 @@ column as well as highlighted directly in the buffer.
 
 ## Configuration
 
-The appearance of the popup window, the signs and text highlights can be
+The appearance of the popup window, the signs and text highlightings can be
 configured through the variable `g:qfdiagnostics`. For all supported entries,
 see `:help qf-diagnostics-config`, and `:help qf-diagnostics-examples` for a few
 examples.
@@ -107,5 +110,3 @@ plugin manager.
 ## License
 
 Distributed under the same terms as Vim itself. See `:help license`.
-
-[plug]: https://github.com/junegunn/vim-plug

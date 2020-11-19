@@ -41,20 +41,20 @@ POPUP WINDOW                                            *qf-diagnostics-popup*
             nmap gH <plug>(qf-diagnostics-popup-loclist)
 <
 ==============================================================================
-DIAGNOSTICS HIGHLIGHTS                             *qf-diagnostics-highlights*
+SIGN AND TEXT HIGHLIGHTING                          *qf-diagnostics-highlight*
 
 :DiagnosticsPlace                                          *:DiagnosticsPlace*
         Highlight the diagnostics from the current quickfix list. The command
-        will first remove the  highlights that have been previously placed by
-        the same command.
+        will first remove the highlightings that have been previously placed
+        by the same command.
 
         By default the plugin will place only |signs| in the |sign-column|.
         Optionally, the error locations can also be highlighted in the text
-        directly. Sign and text highlights can be individually enabled or
+        directly. Sign and text highlighting can be individually enabled or
         disabled in |g:qfdiagnostics| (see below).
 
 :DiagnosticsClear                                          *:DiagnosticsClear*
-        Remove the highlights placed by |:DiagnosticsPlace|.
+        Remove the highlightings placed by |:DiagnosticsPlace|.
 
 :DiagnosticsToggle                                        *:DiagnosticsToggle*
         Toggle the diagnostics from the quickfix list.
@@ -71,14 +71,14 @@ DIAGNOSTICS HIGHLIGHTS                             *qf-diagnostics-highlights*
         simultaneously highlight the diagnostics from several location lists.
 
 :LDiagnosticsClear[!]                                     *:LDiagnosticsClear*
-        Remove the signs placed by |:LDiagnosticsPlace|.
+        Remove the highlightings placed by |:LDiagnosticsPlace|.
 
         Note: The command must be run in the same window where
         |:LDiagnosticsPlace| has been executed to remove the previously placed
         highlights.
 
         Add ! to remove the highlightings of all diagnostics from all location
-        list at once. This is like running |:LDiagnosticsClear| in every
+        lists at once. This is like running |:LDiagnosticsClear| in every
         window where |:LDiagnosticsPlace| has been run.
 
 :LDiagnosticsToggle                                      *:LDiagnosticsToggle*
@@ -200,7 +200,7 @@ are supported:
 EXAMPLES                                             *qf-diagnostics-examples*
 
 1. Place the signs automatically after running |:make| or |:lmake|: >
-    augroup qf-make-signs
+    augroup qf-diagnostics-user
         autocmd!
         autocmd QuickfixCmdPost  make  DiagnosticsPlace
         autocmd QuickfixCmdPost lmake LDiagnosticsPlace
