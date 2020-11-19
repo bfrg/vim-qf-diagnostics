@@ -89,7 +89,7 @@ const s:defaults = {
         \ 'highlight_note':    {'highlight': 'SpellRare',  'priority': 11, 'combine': 1},
         \ 'highlight_normal':  {'highlight': 'Underlined', 'priority': 10, 'combine': 1},
         \ 'signs': v:true,
-        \ 'sign_priorities': [100, 100],
+        \ 'sign_priorities': 10,
         \ 'sign_error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
         \ 'sign_warning': {'text': 'W>', 'texthl': 'WarningMsg'},
         \ 'sign_info':    {'text': 'I>', 'texthl': 'MoreMsg'},
@@ -257,7 +257,8 @@ function s:remove_signs(groupid) abort
     call remove(s:sign_placed_ids, a:groupid)
 endfunction
 
-function s:add_signs(xlist, id, priorities) abort
+function s:add_signs(xlist, id) abort
+    const priorities = s:get('sign_priorities')->s:sign_priorities()
     const group = s:sign_group(a:id)
     call extend(s:sign_placed_ids, {a:id: 1})
     call copy(a:xlist)
@@ -266,7 +267,7 @@ function s:add_signs(xlist, id, priorities) abort
             \   'lnum': item.lnum,
             \   'buffer': item.bufnr,
             \   'group': group,
-            \   'priority': get(a:priorities, toupper(item.type), a:priorities['']),
+            \   'priority': get(priorities, toupper(item.type), priorities['']),
             \   'name': get(s:sign_names, toupper(item.type), s:sign_names[''])
             \   }
             \ })
@@ -302,9 +303,8 @@ function qfdiagnostics#place(loclist) abort
         call sign_define('qf-diagnostics-info',    s:get('sign_info'))
         call sign_define('qf-diagnostics-note',    s:get('sign_note'))
         call sign_define('qf-diagnostics-normal',  s:get('sign_normal'))
-        const priorities = s:get('sign_priorities')[a:loclist ? 1 : 0]->s:sign_priorities()
         call s:remove_signs(id)
-        call s:add_signs(xlist, id, priorities)
+        call s:add_signs(xlist, id)
     endif
 endfunction
 

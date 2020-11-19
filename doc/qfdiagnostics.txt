@@ -132,14 +132,16 @@ are supported:
             Default: |v:true|
 
     sign_priorities                          *g:qfdiagnostics.sign_priorities*
-            List of two numbers for setting the sign priorities for quickfix
-            and location-list items.
-            Default: [100, 100]
+            Set the offset for sign priorities for quickfix and location-list
+            items.
+            Default: 10
 
-            The plugin distinguishes between five different quickfix items:
-            error (4), warning (3), info (2), note (1), normal (0). The
-            numbers are added to to the priorities specified above. Thus,
-            quickfix and location-list items of type error have priority 104.
+            Note: The plugin distinguishes between five different quickfix
+            items:
+                error (4), warning (3), info (2), note (1), normal (0)
+
+            The numbers are added to the priority specified above. Thus,
+            quickfix and location-list items of type error have priority 14.
             "normal" types are all items that don't have any type (for example
             |:grep| items).
 
