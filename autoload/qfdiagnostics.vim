@@ -14,6 +14,11 @@ hi def link QfDiagnostics           Pmenu
 hi def link QfDiagnosticsBorder     Pmenu
 hi def link QfDiagnosticsScrollbar  PmenuSbar
 hi def link QfDiagnosticsThumb      PmenuThumb
+hi def link QfDiagnosticsLineNr     Directory
+hi def link QfDiagnosticsError      ErrorMsg
+hi def link QfDiagnosticsWarning    WarningMsg
+hi def link QfDiagnosticsInfo       MoreMsg
+hi def link QfDiagnosticsNote       Todo
 
 let s:winid = 0
 
@@ -416,9 +421,14 @@ function qfdiagnostics#popup(loclist) abort
     endif
 
     let s:winid = popup_atcursor(text, opts)
-    call setbufvar(winbufnr(s:winid), '&syntax', 'qfdiagnostics')
     call setwinvar(s:winid, '&breakindent', 1)
     call setwinvar(s:winid, '&tabstop', &g:tabstop)
+
+    call matchadd('QfDiagnosticsLineNr',  '^\d\+\%(:\d\+\)\?',                              10, -1, {'window': s:winid})
+    call matchadd('QfDiagnosticsError',   '^\d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {'window': s:winid})
+    call matchadd('QfDiagnosticsWarning', '^\d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {'window': s:winid})
+    call matchadd('QfDiagnosticsInfo',    '^\d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {'window': s:winid})
+    call matchadd('QfDiagnosticsNote',    '^\d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {'window': s:winid})
 
     return s:winid
 endfunction
