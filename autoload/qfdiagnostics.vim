@@ -77,6 +77,7 @@ augroup qf-diagnostics-textprops
 augroup END
 
 const s:defaults = {
+        \ 'popup_create_cb': {-> 0},
         \ 'popup_scrollup': "\<c-k>",
         \ 'popup_scrolldown': "\<c-j>",
         \ 'popup_border': [0, 0, 0, 0],
@@ -427,6 +428,7 @@ function qfdiagnostics#popup(loclist) abort
     call matchadd('QfDiagnosticsWarning', '^\d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {'window': s:winid})
     call matchadd('QfDiagnosticsInfo',    '^\d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {'window': s:winid})
     call matchadd('QfDiagnosticsNote',    '^\d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {'window': s:winid})
+    call s:get('popup_create_cb')(s:winid, s:xlist.id, a:loclist)
 
     return s:winid
 endfunction

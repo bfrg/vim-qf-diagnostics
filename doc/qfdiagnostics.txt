@@ -114,6 +114,13 @@ are supported:
             window.
             Default: ['═', '║', '═', '║', '╔', '╗', '╝', '╚']
 
+    popup_create_cb                          *g:qfdiagnostics.popup_create_cb*
+            Callback function called after the popup window is created. The
+            arguments are |window-ID| of the popup window, the |quickfix-ID|
+            of the current quickfix or location list, and a boolean that
+            indicates whether a quickfix or location list is used.
+            Default: {-> 0}
+
     signs                                               *g:qfdiagnostics.sigs*
             Whether to highlight diagnostics in the |sign-column|.
             Default: |v:true|
@@ -205,6 +212,29 @@ EXAMPLES                                             *qf-diagnostics-examples*
    <F8>, respectively: >
     nnoremap <F7> <Cmd>DiagnosticsToggle<Cr>
     nnoremap <F8> <Cmd>LDiagnosticsToggle<Cr>
+<
+4. Add a callback function that highlights the message type of gcc and clang
+   compiler warnings: >
+    function s:popup_cb(winid, qfid, loclist)
+        const title = a:loclist
+                \ ? getloclist(0, {'title': 0, 'id': a:qfid}).title
+                \ : getqflist({'title': 0, 'id': a:qfid}).title
+
+        if title !~# '^:\=\%(gcc\|g++\|clang\|clang++\|clang-tidy\)'
+            return
+        endif
+
+        call matchadd('WarningMsg', '\[\zs.\{-}\ze]$', 10, -1,
+                \ {'window': a:winid})
+    endfunction
+
+    let g:qfdiagnostics = {
+            \ 'popup_create_cb': funcref('s:popup_cb')
+            \ }
+<
+    The above defined callback will highlight "-Wunused-parameter" in compiler
+    messages like: >
+     warning: unused parameter 'out' [-Wunused-parameter]
 <
 ==============================================================================
 POPUP HIGHLIGHTING                            *qf-diagnostics-popup-highlight*
