@@ -3,22 +3,22 @@
 " File:         autoload/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Nov 19, 2020
+" Last Change:  Nov 23, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-hi def link QfDiagnostics           Pmenu
-hi def link QfDiagnosticsBorder     Pmenu
-hi def link QfDiagnosticsScrollbar  PmenuSbar
-hi def link QfDiagnosticsThumb      PmenuThumb
-hi def link QfDiagnosticsLineNr     Directory
-hi def link QfDiagnosticsError      ErrorMsg
-hi def link QfDiagnosticsWarning    WarningMsg
-hi def link QfDiagnosticsInfo       MoreMsg
-hi def link QfDiagnosticsNote       Todo
+hi def link QfDiagnostics          Pmenu
+hi def link QfDiagnosticsBorder    Pmenu
+hi def link QfDiagnosticsScrollbar PmenuSbar
+hi def link QfDiagnosticsThumb     PmenuThumb
+hi def link QfDiagnosticsLineNr    Directory
+hi def link QfDiagnosticsError     ErrorMsg
+hi def link QfDiagnosticsWarning   WarningMsg
+hi def link QfDiagnosticsInfo      MoreMsg
+hi def link QfDiagnosticsNote      Todo
 
 let s:winid = 0
 
@@ -284,12 +284,13 @@ function qfdiagnostics#place(loclist) abort
     endif
 
     const xlist = s:getxlist(a:loclist)
+    const id = s:id(a:loclist)
+    call s:remove_textprops(id)
+    call s:remove_signs(id)
 
     if empty(xlist)
         return
     endif
-
-    const id = s:id(a:loclist)
 
     if s:get('texthl')
         call prop_type_change('qf-diagnostics-error',   s:get('highlight_error'))
@@ -297,7 +298,6 @@ function qfdiagnostics#place(loclist) abort
         call prop_type_change('qf-diagnostics-info',    s:get('highlight_info'))
         call prop_type_change('qf-diagnostics-note',    s:get('highlight_note'))
         call prop_type_change('qf-diagnostics-misc',    s:get('highlight_misc'))
-        call s:remove_textprops(id)
         call s:add_textprops(xlist, id)
     endif
 
@@ -307,7 +307,6 @@ function qfdiagnostics#place(loclist) abort
         call sign_define('qf-diagnostics-info',    s:get('sign_info'))
         call sign_define('qf-diagnostics-note',    s:get('sign_note'))
         call sign_define('qf-diagnostics-misc',    s:get('sign_misc'))
-        call s:remove_signs(id)
         call s:add_signs(xlist, id)
     endif
 endfunction
