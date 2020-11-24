@@ -3,7 +3,7 @@
 " File:         autoload/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Nov 23, 2020
+" Last Change:  Nov 24, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -193,7 +193,7 @@ function s:filter_items(xlist, items) abort
     endif
 endfunction
 
-function s:on_buf_read_post(bufnr) abort
+function s:add_textprops_on_bufread(bufnr) abort
     for id in keys(s:prop_items)
         for item in get(s:prop_items[id], a:bufnr, [])
             let max = getbufline(a:bufnr, item.lnum)[0]->len()
@@ -226,7 +226,7 @@ function s:add_textprops(xlist, id) abort
                         \ 'type': type
                         \ })
             endif
-            execute printf('autocmd! qf-diagnostics-textprops BufReadPost <buffer=%d> call s:on_buf_read_post(%d)', i.bufnr, i.bufnr)
+            execute printf('autocmd! qf-diagnostics-textprops BufReadPost <buffer=%d> call s:add_textprops_on_bufread(%d)', i.bufnr, i.bufnr)
         endif
     endfor
 endfunction

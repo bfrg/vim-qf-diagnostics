@@ -11,12 +11,12 @@
 
 ### Popup window
 
-* **`<plug>(qf-diagnostics-popup-quickfix)`** Display a popup window at the
+* **`<plug>(qf-diagnostics-popup-quickfix)`** - Display a popup window at the
   current cursor position with the error message found for the current line in
   the `quickfix` list. If the line contains several errors, all entries are
   collected and displayed in the same popup window.
-* **`<plug>(qf-diagnostics-popup-loclist)`** Same as above but display the error
-  messages from the current `location-list` of the current window.
+* **`<plug>(qf-diagnostics-popup-loclist)`** - Same as above but display the
+  error messages from the current `location-list` of the current window.
 
 If not all quickfix errors (for the current line) fit into the popup window, a
 scrollbar will appear on the right side. The popup window can then be scrolled
@@ -31,12 +31,12 @@ nmap gh <plug>(qf-diagnostics-popup-quickfix)
 nmap gH <plug>(qf-diagnostics-popup-loclist)
 ```
 
-### Sign and text highlighting
+### Signs and text highlightings
 
-The diagnostics from the quickfix and location list can be highlighted in the
-sign column and in the buffer directly. Both highlightings are optional and can
-be individually configured in [`g:qfdiagnostics`](#configuration). By default,
-only signs are placed.
+The items in the quickfix and location list can be highlighted in the sign
+column and in the buffer directly. Both highlightings are optional and can be
+individually configured in [`g:qfdiagnostics`](#configuration). By default, only
+signs are placed.
 
 | Command                 | Description                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------ |
@@ -93,10 +93,10 @@ qf-dagnostics-popup-highlight`.
 ```bash
 $ cd ~/.vim/pack/git-plugins/start
 $ git clone https://github.com/bfrg/vim-qf-diagnostics
-$ vim -u NONE -c 'helptags ALL' -c q
+$ vim -u NONE -c 'helptags vim-qf-diagnostics/doc | quit'
 ```
 **Note:** The directory name `git-plugins` is arbitrary, you can pick any other
-name. For more details see `:help packages`. Alternatively use your favorite
+name. For more details see `:help packages`. Alternatively, use your favorite
 plugin manager.
 
 
