@@ -3,7 +3,7 @@
 " File:         autoload/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Nov 24, 2020
+" Last Change:  Nov 25, 2020
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
@@ -193,13 +193,19 @@ function s:filter_items(xlist, items) abort
     endif
 endfunction
 
-function s:add_textprops_on_bufread(bufnr) abort
+function s:add_textprops_on_bufread() abort
+    const bufnr = expand('<afile>')->fnamemodify(':p')->bufnr()
+
+    if bufnr <= 0
+        return
+    endif
+
     for id in keys(s:prop_items)
-        for item in get(s:prop_items[id], a:bufnr, [])
-            let max = getbufline(a:bufnr, item.lnum)[0]->len()
+        for item in get(s:prop_items[id], bufnr, [])
+            let max = getbufline(bufnr, item.lnum)[0]->len()
             call prop_add(item.lnum, item.col >= max ? max : item.col, {
                     \ 'length': 1,
-                    \ 'bufnr': a:bufnr,
+                    \ 'bufnr': bufnr,
                     \ 'id': id,
                     \ 'type': item.type
                     \ })
@@ -226,9 +232,9 @@ function s:add_textprops(xlist, id) abort
                         \ 'type': type
                         \ })
             endif
-            execute printf('autocmd! qf-diagnostics-textprops BufReadPost <buffer=%d> call s:add_textprops_on_bufread(%d)', i.bufnr, i.bufnr)
         endif
     endfor
+    autocmd! qf-diagnostics-textprops BufReadPost * call s:add_textprops_on_bufread()
 endfunction
 
 function s:remove_textprops(id) abort
@@ -378,7 +384,7 @@ function qfdiagnostics#popup(loclist) abort
             \ : len(text)->range()->map('strdisplaywidth(text[v:val])')->max()
 
     const border = s:get('popup_border')
-    const pad = + get(border, 1, 1) + get(border, 3, 1) + 3
+    const pad = get(border, 1, 1) + get(border, 3, 1) + 3
     const width = textwidth + pad > &columns ? &columns - pad : textwidth
 
     " Column position for popup window
