@@ -41,7 +41,7 @@ POPUP WINDOW                                            *qf-diagnostics-popup*
             nmap gH <plug>(qf-diagnostics-popup-loclist)
 <
 ==============================================================================
-SIGN AND TEXT HIGHLIGHTING                          *qf-diagnostics-highlight*
+SIGNS AND TEXT HIGHLIGHTINGS                        *qf-diagnostics-highlight*
 
 :DiagnosticsPlace                                          *:DiagnosticsPlace*
         Highlight the diagnostics from the current quickfix list. The command
@@ -213,14 +213,14 @@ EXAMPLES                                             *qf-diagnostics-examples*
     nnoremap <F7> <Cmd>DiagnosticsToggle<Cr>
     nnoremap <F8> <Cmd>LDiagnosticsToggle<Cr>
 <
-4. Add a callback function that highlights the message type of gcc and clang
-   compiler warnings: >
-    function s:popup_cb(winid, qfid, loclist)
+4. Add a callback function that highlights the warning type of gcc and clang
+   compiler messages: >
+    function s:popup_cb(winid, qfid, loclist) abort
         const title = a:loclist
                 \ ? getloclist(0, {'title': 0, 'id': a:qfid}).title
                 \ : getqflist({'title': 0, 'id': a:qfid}).title
 
-        if title !~# '^:\=\%(gcc\|g++\|clang\|clang++\|clang-tidy\)'
+        if title !~# '^:\=\%(gcc\|g++\|clang\|clang\)'
             return
         endif
 
@@ -232,9 +232,20 @@ EXAMPLES                                             *qf-diagnostics-examples*
             \ 'popup_create_cb': funcref('s:popup_cb')
             \ }
 <
-    The above defined callback will highlight "-Wunused-parameter" in compiler
+    This will highlight "-Wunused-parameter" in the popup window for compiler
     messages like: >
      warning: unused parameter 'out' [-Wunused-parameter]
+<
+5. Toggle the text highlighting on and off: >
+    function s:diagnostics_toggle_props() abort
+        let g:qfdiagnostics = get(g:, 'qfdiagnostics', {})
+        let g:qfdiagnostics.texthl = get(g:qfdiagnostics, 'texthl', v:false)
+                \ ? v:false
+                \ : v:true
+        DiagnosticsPlace
+    endfunction
+
+    command DiagnosticsToggleHl call s:diagnostics_toggle_props()
 <
 ==============================================================================
 POPUP HIGHLIGHTING                            *qf-diagnostics-popup-highlight*
