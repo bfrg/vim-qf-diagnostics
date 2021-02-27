@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Feb 4, 2021
+# Last Change:  Feb 28, 2021
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -116,27 +116,27 @@ def Signs_placed(id: number): number
     return has_key(s:sign_placed_ids, id)
 enddef
 
-def Popup_filter(winid: number, key: string): bool
-    if line('$', winid) == popup_getpos(winid).core_height
+def Popup_filter(wid: number, key: string): bool
+    if line('$', wid) == popup_getpos(wid).core_height
         return false
     endif
-    popup_setoptions(winid, {'minheight': popup_getpos(winid).core_height})
+    popup_setoptions(wid, {'minheight': popup_getpos(wid).core_height})
 
     if key ==# Get('popup_scrolldown')
-        const line: number = popup_getoptions(winid).firstline
-        const newline: number = line < line('$', winid) ? (line + 1) : line('$', winid)
-        popup_setoptions(winid, {'firstline': newline})
+        const line: number = popup_getoptions(wid).firstline
+        const newline: number = line < line('$', wid) ? (line + 1) : line('$', wid)
+        popup_setoptions(wid, {'firstline': newline})
     elseif key ==# Get('popup_scrollup')
-        const line: number = popup_getoptions(winid).firstline
+        const line: number = popup_getoptions(wid).firstline
         const newline: number = (line - 1) > 0 ? (line - 1) : 1
-        popup_setoptions(winid, {'firstline': newline})
+        popup_setoptions(wid, {'firstline': newline})
     else
         return false
     endif
     return true
 enddef
 
-def Popup_callback(winid: number, result: number)
+def Popup_callback(wid: number, result: number)
     s:winid = 0
     prop_remove({'type': 'qf-diagnostics-popup', 'all': true})
 enddef
