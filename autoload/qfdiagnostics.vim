@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Feb 28, 2021
+# Last Change:  Jun 2, 2021
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -204,7 +204,7 @@ def Filter_items(xlist: list<any>, items: number): list<number>
 enddef
 
 def Add_textprops_on_bufread()
-    const bufnr: number = expand('<afile>')->fnamemodify(':p')->bufnr()
+    const bufnr: number = expand('<abuf>')->str2nr()
 
     if bufnr <= 0
         return
