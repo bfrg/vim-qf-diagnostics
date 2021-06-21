@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Jun 2, 2021
+# Last Change:  Jun 21, 2021
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -249,7 +249,7 @@ def Add_textprops(xlist: list<any>, id: number)
             endif
         endif
     endfor
-    autocmd! qf-diagnostics-textprops BufReadPost * call Add_textprops_on_bufread()
+    autocmd! qf-diagnostics-textprops BufReadPost * Add_textprops_on_bufread()
 enddef
 
 def Remove_textprops(id: number)
