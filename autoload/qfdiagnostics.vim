@@ -168,19 +168,19 @@ def Filter_items(xlist: list<any>, items: number): list<number>
     if !items
         return len(xlist)
             ->range()
-            ->filter((_, i) => xlist[i].bufnr == bufnr('%'))
-            ->filter((_, i) => xlist[i].lnum == line('.'))
+            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr('%'))
+            ->filter((_: number, i: number): bool => xlist[i].lnum == line('.'))
     elseif items == 1
         return len(xlist)
             ->range()
-            ->filter((_, i) => xlist[i].bufnr == bufnr('%'))
-            ->filter((_, i) => xlist[i].lnum == line('.'))
-            ->filter((_, i) => xlist[i].col == col('.') || xlist[i].col == col('.') + 1 && xlist[i].col == col('$'))
+            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr('%'))
+            ->filter((_: number, i: number): bool => xlist[i].lnum == line('.'))
+            ->filter((_: number, i: number): bool => xlist[i].col == col('.') || xlist[i].col == col('.') + 1 && xlist[i].col == col('$'))
     elseif items == 2
         var idxs: list<number> = len(xlist)
             ->range()
-            ->filter((_, i) => xlist[i].bufnr == bufnr('%'))
-            ->filter((_, i) => xlist[i].lnum == line('.'))
+            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr('%'))
+            ->filter((_: number, i: number): bool => xlist[i].lnum == line('.'))
 
         if empty(idxs)
             return []
@@ -198,7 +198,7 @@ def Filter_items(xlist: list<any>, items: number): list<number>
             endif
         endfor
 
-        return filter(idxs, (_, i) => xlist[i].col == col)
+        return filter(idxs, (_: number, i: number): bool => xlist[i].col == col)
     endif
     return []
 enddef
@@ -289,8 +289,8 @@ def Add_signs(xlist: list<any>, id: number)
     s:sign_placed_ids[id] = 1
 
     copy(xlist)
-        ->filter((_, i) => i.bufnr > 0 && i.valid > 0 && i.lnum > 0)
-        ->map((_, i) => ({
+        ->filter((_: number, i: dict<any>) => i.bufnr > 0 && i.valid > 0 && i.lnum > 0)
+        ->map((_: number, i: dict<any>) => ({
           'lnum': i.lnum,
           'buffer': i.bufnr,
           'group': group,
@@ -341,13 +341,13 @@ enddef
 def qfdiagnostics#lclear(bang: bool)
     if bang
         keys(s:sign_placed_ids)
-            ->map((_, i) => str2nr(i))
-            ->filter((_, i) => i != 0)
-            ->map((_, i) => Remove_signs(i))
+            ->map((_: number, i: string): number => str2nr(i))
+            ->filter((_: number, i: number): bool => i != 0)
+            ->map((_: number, i: number): void => Remove_signs(i))
         keys(s:prop_items)
-            ->map((_, i) => str2nr(i))
-            ->filter((_, i) => i != 0)
-            ->map((_, i) => Remove_textprops(i))
+            ->map((_: number, i: string): number => str2nr(i))
+            ->filter((_: number, i: number): bool => i != 0)
+            ->map((_: number, i: number): void => Remove_textprops(i))
     else
         const xid: number = Id(true)
         Remove_signs(xid)
@@ -399,7 +399,7 @@ def qfdiagnostics#popup(loclist: bool): number
         ? max
         : len(text)
             ->range()
-            ->map((_, i) => strdisplaywidth(text[i]))
+            ->map((_: number, i: number): number => strdisplaywidth(text[i]))
             ->max()
 
     const border: list<number> = Get('popup_border')
