@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Jun 21, 2021
+# Last Change:  Jul 6, 2021
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -210,12 +210,18 @@ def Add_textprops_on_bufread()
         return
     endif
 
-    var max: number = 0
+    var max: number
+    var col: number
+    var end_col: number
+
     for id in keys(s:prop_items)
         for item in get(s:prop_items[id], bufnr, [])
             max = getbufline(bufnr, item.lnum)[0]->len()
-            prop_add(item.lnum, item.col >= max ? max : item.col, {
-                'length': 1,
+            col = item.col >= max ? max : item.col
+            end_col = item.end_col >= max ? max : item.end_col
+            prop_add(item.lnum, col, {
+                'end_lnum': item.end_lnum > 0 ? item.end_lnum : item.lnum,
+                'end_col': item.end_col > 0 ? item.end_col : item.col + 1,
                 'bufnr': bufnr,
                 'id': str2nr(id),
                 'type': item.type
@@ -229,19 +235,30 @@ def Add_textprops(xlist: list<any>, id: number)
     final bufs: dict<list<any>> = s:prop_items[id]
     var prop_type: string
     var max: number
+    var col: number
+    var end_col: number
 
     for i in xlist
         if i.bufnr > 0 && bufexists(i.bufnr) && i.valid && i.lnum > 0 && i.col > 0
-            if !has_key(s:prop_items[id], i.bufnr)
+            if !has_key(bufs, i.bufnr)
                 bufs[i.bufnr] = []
             endif
             prop_type = get(s:sign_names, toupper(i.type), s:sign_names[''])
-            add(s:prop_items[id][i.bufnr], {'type': prop_type, 'lnum': i.lnum, 'col': i.col})
+            add(bufs[i.bufnr], {
+                'type': prop_type,
+                'lnum': i.lnum,
+                'col': i.col,
+                'end_lnum': get(i, 'end_lnum'),
+                'end_col': get(i, 'end_col')
+            })
 
             if bufloaded(i.bufnr)
                 max = getbufline(i.bufnr, i.lnum)[0]->len()
-                prop_add(i.lnum, i.col >= max ? max : i.col, {
-                    'length': 1,
+                col = i.col >= max ? max : i.col
+                end_col = i.end_col >= max ? max : i.end_col
+                prop_add(i.lnum, col, {
+                    'end_lnum': i.end_lnum > 0 ? i.end_lnum : i.lnum,
+                    'end_col': i.end_col > 0 ? i.end_col : i.col + 1,
                     'bufnr': i.bufnr,
                     'id': id,
                     'type': prop_type
