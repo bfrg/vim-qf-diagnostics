@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Jul 6, 2021
+# Last Change:  Jul 8, 2021
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -35,11 +35,11 @@ const s:defaults: dict<any> = {
     'popup_items': 0,
     'popup_attach': false,
     'texthl': false,
-    'highlight_error':   {'highlight': 'SpellBad',   'priority': 14, 'combine': 1},
-    'highlight_warning': {'highlight': 'SpellCap',   'priority': 13, 'combine': 1},
-    'highlight_info':    {'highlight': 'SpellLocal', 'priority': 12, 'combine': 1},
-    'highlight_note':    {'highlight': 'SpellRare',  'priority': 11, 'combine': 1},
-    'highlight_misc':    {'highlight': 'Underlined', 'priority': 10, 'combine': 1},
+    'highlight_error':   {'highlight': 'SpellBad',   'priority': 14, 'combine': true},
+    'highlight_warning': {'highlight': 'SpellCap',   'priority': 13, 'combine': true},
+    'highlight_info':    {'highlight': 'SpellLocal', 'priority': 12, 'combine': true},
+    'highlight_note':    {'highlight': 'SpellRare',  'priority': 11, 'combine': true},
+    'highlight_misc':    {'highlight': 'Underlined', 'priority': 10, 'combine': true},
     'signs': true,
     'sign_priorities': 10,
     'sign_error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
@@ -278,11 +278,11 @@ def Remove_textprops(id: number)
     for i in get(s:prop_items, id)->keys()
         bufnr = str2nr(i)
         if bufexists(bufnr)
-            prop_remove({'id': id, 'type': 'qf-diagnostics-error',   'bufnr': bufnr, 'both': 1, 'all': 1})
-            prop_remove({'id': id, 'type': 'qf-diagnostics-warning', 'bufnr': bufnr, 'both': 1, 'all': 1})
-            prop_remove({'id': id, 'type': 'qf-diagnostics-info',    'bufnr': bufnr, 'both': 1, 'all': 1})
-            prop_remove({'id': id, 'type': 'qf-diagnostics-note',    'bufnr': bufnr, 'both': 1, 'all': 1})
-            prop_remove({'id': id, 'type': 'qf-diagnostics-misc',    'bufnr': bufnr, 'both': 1, 'all': 1})
+            prop_remove({'id': id, 'type': 'qf-diagnostics-error',   'bufnr': bufnr, 'both': true, 'all': true})
+            prop_remove({'id': id, 'type': 'qf-diagnostics-warning', 'bufnr': bufnr, 'both': true, 'all': true})
+            prop_remove({'id': id, 'type': 'qf-diagnostics-info',    'bufnr': bufnr, 'both': true, 'all': true})
+            prop_remove({'id': id, 'type': 'qf-diagnostics-note',    'bufnr': bufnr, 'both': true, 'all': true})
+            prop_remove({'id': id, 'type': 'qf-diagnostics-misc',    'bufnr': bufnr, 'both': true, 'all': true})
         endif
     endfor
 
