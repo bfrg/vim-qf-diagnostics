@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Jul 8, 2021
+# Last Change:  Jul 9, 2021
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -168,18 +168,18 @@ def Filter_items(xlist: list<any>, items: number): list<number>
     if !items
         return len(xlist)
             ->range()
-            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr('%'))
+            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr())
             ->filter((_: number, i: number): bool => xlist[i].lnum == line('.'))
     elseif items == 1
         return len(xlist)
             ->range()
-            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr('%'))
+            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr())
             ->filter((_: number, i: number): bool => xlist[i].lnum == line('.'))
             ->filter((_: number, i: number): bool => xlist[i].col == col('.') || xlist[i].col == col('.') + 1 && xlist[i].col == col('$'))
     elseif items == 2
         var idxs: list<number> = len(xlist)
             ->range()
-            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr('%'))
+            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr())
             ->filter((_: number, i: number): bool => xlist[i].lnum == line('.'))
 
         if empty(idxs)
