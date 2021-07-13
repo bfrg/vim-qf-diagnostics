@@ -206,10 +206,6 @@ enddef
 def Add_textprops_on_bufread()
     const bufnr: number = expand('<abuf>')->str2nr()
 
-    if bufnr <= 0
-        return
-    endif
-
     var max: number
     var col: number
     var end_col: number
