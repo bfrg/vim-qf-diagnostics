@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Jul 9, 2021
+# Last Change:  Jul 13, 2021
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -306,7 +306,7 @@ def Add_signs(xlist: list<any>, id: number)
     s:sign_placed_ids[id] = 1
 
     copy(xlist)
-        ->filter((_: number, i: dict<any>) => i.bufnr > 0 && i.valid > 0 && i.lnum > 0)
+        ->filter((_: number, i: dict<any>) => bufexists(i.bufnr) && i.valid > 0 && i.lnum > 0)
         ->map((_: number, i: dict<any>) => ({
           'lnum': i.lnum,
           'buffer': i.bufnr,
