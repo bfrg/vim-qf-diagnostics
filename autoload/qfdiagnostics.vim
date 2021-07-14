@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Jul 13, 2021
+# Last Change:  Jul 14, 2021
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -21,9 +21,9 @@ highlight default link QfDiagnosticsNote      Todo
 augroup qf-diagnostics-textprops
 augroup END
 
-var s:winid: number = 0
+var winid: number = 0
 
-const s:defaults: dict<any> = {
+const defaults: dict<any> = {
     'popup_create_cb': () => 0,
     'popup_scrollup': "\<c-k>",
     'popup_scrolldown': "\<c-j>",
@@ -50,12 +50,12 @@ const s:defaults: dict<any> = {
 }
 
 # Cache current quickfix list: {'id': 2, 'changedtick': 1, 'items': [...]}
-var s:curlist: dict<any> = {}
+var curlist: dict<any> = {}
 
-const s:error_types: dict<string> = {'E': 'error', 'W': 'warning', 'I': 'info', 'N': 'note'}
+const error_types: dict<string> = {'E': 'error', 'W': 'warning', 'I': 'info', 'N': 'note'}
 
 # Look-up table used for both sign names and text-property types
-const s:sign_names: dict<string> = {
+const sign_names: dict<string> = {
     'E': 'qf-diagnostics-error',
     'W': 'qf-diagnostics-warning',
     'I': 'qf-diagnostics-info',
@@ -65,7 +65,7 @@ const s:sign_names: dict<string> = {
 
 # Dictionary with (ID, 1) pairs for every placed quickfix/location-list,
 # quickfix list has ID=0, for location lists we use window-IDs
-var s:sign_placed_ids: dict<number> = {}
+var sign_placed_ids: dict<number> = {}
 
 # Similar to sign groups we use different text-property IDs so that quickfix and
 # location-list errors can be removed individually. For quickfix errors the IDs
@@ -80,10 +80,10 @@ var s:sign_placed_ids: dict<number> = {}
 #   },
 #   '1001': {...}
 # }
-var s:prop_items: dict<dict<list<any>>> = {}
+var prop_items: dict<dict<list<any>>> = {}
 
 def Get(x: string): any
-    return get(g:, 'qfdiagnostics', {})->get(x, s:defaults[x])
+    return get(g:, 'qfdiagnostics', {})->get(x, defaults[x])
 enddef
 
 def Sign_priorities(x: number): dict<number>
@@ -109,11 +109,11 @@ def Id(loclist: bool): number
 enddef
 
 def Props_placed(id: number): number
-    return has_key(s:prop_items, id)
+    return has_key(prop_items, id)
 enddef
 
 def Signs_placed(id: number): number
-    return has_key(s:sign_placed_ids, id)
+    return has_key(sign_placed_ids, id)
 enddef
 
 def Popup_filter(wid: number, key: string): bool
@@ -137,7 +137,7 @@ def Popup_filter(wid: number, key: string): bool
 enddef
 
 def Popup_callback(wid: number, result: number)
-    s:winid = 0
+    winid = 0
     prop_remove({'type': 'qf-diagnostics-popup', 'all': true})
 enddef
 
@@ -145,12 +145,14 @@ def Getxlist(loclist: bool): list<any>
     const Xgetlist = loclist ? function('getloclist', [0]) : function('getqflist')
     const qf: dict<number> = Xgetlist({'changedtick': 0, 'id': 0})
 
-    if get(s:curlist, 'id', -1) == qf.id && get(s:curlist, 'changedtick') == qf.changedtick
-        return s:curlist.items
+    # NOTE changedtick of a quickfix list is not incremented when a buffer
+    # referenced in the list is wiped out
+    if get(curlist, 'id', -1) == qf.id && get(curlist, 'changedtick') == qf.changedtick
+        return curlist.items
     endif
 
-    s:curlist = Xgetlist({'changedtick': 0, 'id': 0, 'items': 0})
-    return s:curlist.items
+    curlist = Xgetlist({'changedtick': 0, 'id': 0, 'items': 0})
+    return curlist.items
 enddef
 
 # 'xlist': quickfix or location list
@@ -210,8 +212,8 @@ def Add_textprops_on_bufread()
     var col: number
     var end_col: number
 
-    for id in keys(s:prop_items)
-        for item in get(s:prop_items[id], bufnr, [])
+    for id in keys(prop_items)
+        for item in get(prop_items[id], bufnr, [])
             max = getbufline(bufnr, item.lnum)[0]->len()
             col = item.col >= max ? max : item.col
             end_col = item.end_col >= max ? max : item.end_col
@@ -227,8 +229,8 @@ def Add_textprops_on_bufread()
 enddef
 
 def Add_textprops(xlist: list<any>, id: number)
-    s:prop_items[id] = {}
-    final bufs: dict<list<any>> = s:prop_items[id]
+    prop_items[id] = {}
+    final bufs: dict<list<any>> = prop_items[id]
     var prop_type: string
     var max: number
     var col: number
@@ -239,7 +241,7 @@ def Add_textprops(xlist: list<any>, id: number)
             if !has_key(bufs, i.bufnr)
                 bufs[i.bufnr] = []
             endif
-            prop_type = get(s:sign_names, toupper(i.type), s:sign_names[''])
+            prop_type = get(sign_names, toupper(i.type), sign_names[''])
             add(bufs[i.bufnr], {
                 'type': prop_type,
                 'lnum': i.lnum,
@@ -266,12 +268,12 @@ def Add_textprops(xlist: list<any>, id: number)
 enddef
 
 def Remove_textprops(id: number)
-    if !has_key(s:prop_items, id)
+    if !has_key(prop_items, id)
         return
     endif
 
     var bufnr: number
-    for i in get(s:prop_items, id)->keys()
+    for i in get(prop_items, id)->keys()
         bufnr = str2nr(i)
         if bufexists(bufnr)
             prop_remove({'id': id, 'type': 'qf-diagnostics-error',   'bufnr': bufnr, 'both': true, 'all': true})
@@ -282,24 +284,16 @@ def Remove_textprops(id: number)
         endif
     endfor
 
-    remove(s:prop_items, id)
-    if empty(s:prop_items)
+    remove(prop_items, id)
+    if empty(prop_items)
         autocmd! qf-diagnostics-textprops
     endif
-enddef
-
-def Remove_signs(groupid: number)
-    if !has_key(s:sign_placed_ids, groupid)
-        return
-    endif
-    Sign_group(groupid)->sign_unplace()
-    remove(s:sign_placed_ids, groupid)
 enddef
 
 def Add_signs(xlist: list<any>, id: number)
     const priorities = Get('sign_priorities')->Sign_priorities()
     const group: string = Sign_group(id)
-    s:sign_placed_ids[id] = 1
+    sign_placed_ids[id] = 1
 
     copy(xlist)
         ->filter((_: number, i: dict<any>) => bufexists(i.bufnr) && i.valid > 0 && i.lnum > 0)
@@ -308,9 +302,17 @@ def Add_signs(xlist: list<any>, id: number)
           'buffer': i.bufnr,
           'group': group,
           'priority': get(priorities, toupper(i.type), priorities['']),
-          'name': get(s:sign_names, toupper(i.type), s:sign_names[''])
+          'name': get(sign_names, toupper(i.type), sign_names[''])
         }))
         ->sign_placelist()
+enddef
+
+def Remove_signs(groupid: number)
+    if !has_key(sign_placed_ids, groupid)
+        return
+    endif
+    Sign_group(groupid)->sign_unplace()
+    remove(sign_placed_ids, groupid)
 enddef
 
 def qfdiagnostics#place(loclist: bool)
@@ -353,11 +355,11 @@ enddef
 
 def qfdiagnostics#lclear(bang: bool)
     if bang
-        keys(s:sign_placed_ids)
+        keys(sign_placed_ids)
             ->map((_: number, i: string): number => str2nr(i))
             ->filter((_: number, i: number): bool => i != 0)
             ->map((_: number, i: number): void => Remove_signs(i))
-        keys(s:prop_items)
+        keys(prop_items)
             ->map((_: number, i: string): number => str2nr(i))
             ->filter((_: number, i: number): bool => i != 0)
             ->map((_: number, i: number): void => Remove_textprops(i))
@@ -400,7 +402,7 @@ def qfdiagnostics#popup(loclist: bool): number
             extend(text, printf('%d:%d %s: %s',
                 xlist[i].lnum,
                 xlist[i].col,
-                get(s:error_types, toupper(xlist[i].type), xlist[i].type) .. (xlist[i].nr == -1 ? '' : ' ' .. xlist[i].nr),
+                get(error_types, toupper(xlist[i].type), xlist[i].type) .. (xlist[i].nr == -1 ? '' : ' ' .. xlist[i].nr),
                 trim(xlist[i].text))->split('\n')
             )
         endif
@@ -445,7 +447,7 @@ def qfdiagnostics#popup(loclist: bool): number
         'callback': Popup_callback
     }
 
-    popup_close(s:winid)
+    popup_close(winid)
 
     if Get('popup_attach')
         prop_remove({'type': 'qf-diagnostics-popup', 'all': true})
@@ -461,18 +463,18 @@ def qfdiagnostics#popup(loclist: bool): number
         })
     endif
 
-    s:winid = popup_atcursor(text, opts)
-    setwinvar(s:winid, '&breakindent', 1)
-    setwinvar(s:winid, '&tabstop', &g:tabstop)
+    winid = popup_atcursor(text, opts)
+    setwinvar(winid, '&breakindent', 1)
+    setwinvar(winid, '&tabstop', &g:tabstop)
 
-    matchadd('QfDiagnosticsLineNr',  '^\d\+\%(:\d\+\)\?',                              10, -1, {'window': s:winid})
-    matchadd('QfDiagnosticsError',   '^\d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {'window': s:winid})
-    matchadd('QfDiagnosticsWarning', '^\d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {'window': s:winid})
-    matchadd('QfDiagnosticsInfo',    '^\d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {'window': s:winid})
-    matchadd('QfDiagnosticsNote',    '^\d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {'window': s:winid})
-    Get('popup_create_cb')(s:winid, s:curlist.id, loclist)
+    matchadd('QfDiagnosticsLineNr',  '^\d\+\%(:\d\+\)\?',                              10, -1, {'window': winid})
+    matchadd('QfDiagnosticsError',   '^\d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {'window': winid})
+    matchadd('QfDiagnosticsWarning', '^\d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {'window': winid})
+    matchadd('QfDiagnosticsInfo',    '^\d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {'window': winid})
+    matchadd('QfDiagnosticsNote',    '^\d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {'window': winid})
+    Get('popup_create_cb')(winid, curlist.id, loclist)
 
-    return s:winid
+    return winid
 enddef
 
 silent! prop_type_add('qf-diagnostics-popup', {})
