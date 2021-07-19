@@ -402,7 +402,7 @@ def qfdiagnostics#popup(loclist: bool): number
             extend(text, printf('%d:%d %s: %s',
                 xlist[i].lnum,
                 xlist[i].col,
-                get(error_types, toupper(xlist[i].type), xlist[i].type) .. (xlist[i].nr == -1 ? '' : ' ' .. xlist[i].nr),
+                get(error_types, toupper(xlist[i].type), xlist[i].type) .. (xlist[i].nr < 1 ? '' : ' ' .. xlist[i].nr),
                 trim(xlist[i].text))->split('\n')
             )
         endif
