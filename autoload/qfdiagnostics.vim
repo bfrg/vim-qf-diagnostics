@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Jul 19, 2021
+# Last Change:  Jul 27, 2021
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -41,12 +41,11 @@ const defaults: dict<any> = {
     'highlight_note':    {'highlight': 'SpellRare',  'priority': 11, 'combine': true},
     'highlight_misc':    {'highlight': 'Underlined', 'priority': 10, 'combine': true},
     'signs': true,
-    'sign_priorities': 10,
-    'sign_error':   {'text': 'E>', 'texthl': 'ErrorMsg'},
-    'sign_warning': {'text': 'W>', 'texthl': 'WarningMsg'},
-    'sign_info':    {'text': 'I>', 'texthl': 'MoreMsg'},
-    'sign_note':    {'text': 'N>', 'texthl': 'Todo'},
-    'sign_misc':    {'text': '?>', 'texthl': 'Normal'}
+    'sign_error':   {'text': 'E>', 'priority': 14, 'texthl': 'ErrorMsg'},
+    'sign_warning': {'text': 'W>', 'priority': 13, 'texthl': 'WarningMsg'},
+    'sign_info':    {'text': 'I>', 'priority': 12, 'texthl': 'MoreMsg'},
+    'sign_note':    {'text': 'N>', 'priority': 11, 'texthl': 'Todo'},
+    'sign_misc':    {'text': '?>', 'priority': 10, 'texthl': 'Normal'}
 }
 
 # Cache current quickfix list: {'id': 2, 'changedtick': 1, 'items': [...]}
@@ -86,8 +85,14 @@ def Get(x: string): any
     return get(g:, 'qfdiagnostics', {})->get(x, defaults[x])
 enddef
 
-def Sign_priorities(x: number): dict<number>
-    return {'E': x + 4, 'W': x + 3, 'I': x + 2, 'N': x + 1, '': x}
+def Sign_priorities(): dict<number>
+    return {
+        'E': Get('sign_error')->get('priority', 14),
+        'W': Get('sign_warning')->get('priority', 13),
+        'I': Get('sign_info')->get('priority', 12),
+        'N': Get('sign_note')->get('priority', 11),
+         '': Get('sign_misc')->get('priority', 10)
+    }
 enddef
 
 # Place quickfix and location-list errors under different sign groups so that
@@ -291,7 +296,7 @@ def Remove_textprops(id: number)
 enddef
 
 def Add_signs(xlist: list<any>, id: number)
-    const priorities = Get('sign_priorities')->Sign_priorities()
+    const priorities: dict<number> = Sign_priorities()
     const group: string = Sign_group(id)
     sign_placed_ids[id] = 1
 

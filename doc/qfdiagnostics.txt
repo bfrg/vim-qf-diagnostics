@@ -7,8 +7,9 @@ License:    Same terms as Vim itself (see |license|)
 ==============================================================================
 INTRODUCTION                                                  *qf-diagnostics*
 
-- Highlight the diagnostics (of a project-build, linter, grep) stored in a
-  |quickfix| list in the buffer and |sign-column|.
+- Highlight the locations of the |quickfix| items (for example, errors of a
+  project-build, linter, or grep command) in the |sign-column| and in the
+  buffer using |text-properties|.
 - Display the error message for the current line in a |popup-window| next to
   the cursor.
 
@@ -28,10 +29,10 @@ POPUP WINDOW                                            *qf-diagnostics-popup*
         Move the cursor in any direction or press CTRL-C to close the popup
         window.
 
-        If not all quickfix errors (for the current line) fit into the popup
-        window, a scrollbar will appear on the right side. The popup window
-        can then be scrolled with CTRL-J and CTRL-K, or alternatively, using
-        the mouse wheel.
+        If not all errors in the current line fit into the popup window, a
+        scrollbar will appear on the right side. The popup window can then be
+        scrolled with CTRL-J and CTRL-K, or alternatively, using the mouse
+        wheel.
 
 *<plug>(qf-diagnostics-popup-loclist)*
         Same as above but checks the current |location-list| of the current
@@ -125,41 +126,30 @@ are supported:
             Whether to highlight diagnostics in the |sign-column|.
             Default: |v:true|
 
-    sign_priorities                          *g:qfdiagnostics.sign_priorities*
-            Set the offset for sign priorities for quickfix and location-list
-            items.
-            Default: 10
-
-            The plugin distinguishes between five different quickfix items:
-                error (4), warning (3), info (2), note (1), misc (0)
-
-            The numbers in the parentheses are added to the priority specified
-            above. Thus, quickfix items of type "error" have priority 14.
-            "misc" (miscellaneous) types are all items that don't have any of
-            the other types (for example |:grep| items).
-
     sign_error                                    *g:qfdiagnostics.sign_error*
             Set the sign attributes for quickfix items of type "error". See
             the {dict} argument in |sign_define()| on how to set this option.
-            Default: `{'text': 'E>', 'texthl': 'ErrorMsg'}`
+            In addition, the sign priority can be set through the "priority"
+            entry.
+            Default: `{'text': 'E>', 'priority': 14, 'texthl': 'ErrorMsg'}`
 
     sign_warning                                *g:qfdiagnostics.sign_warning*
             Set sign attributes for quickfix items of type "warning".
-            Default: `{'text': 'W>', 'texthl': 'WarningMsg'}`
+            Default: `{'text': 'W>', 'priority': 13, 'texthl': 'WarningMsg'}`
 
     sign_info                                      *g:qfdiagnostics.sign_info*
             Set sign attributes for quickfix items of type "info".
-            Default: `{'text': 'I>', 'texthl': 'MoreMsg'}`
+            Default: `{'text': 'I>', 'priority': 12, 'texthl': 'MoreMsg'}`
 
     sign_note                                      *g:qfdiagnostics.sign_note*
             Set sign attributes for quickfix items of type "note".
-            Default: `{'text': 'N>', 'texthl': 'Todo'}`
+            Default: `{'text': 'N>', 'priority': 11, 'texthl': 'Todo'}`
 
     sign_misc                                      *g:qfdiagnostics.sign_misc*
             Set sign attributes for quickfix items of type "misc". These are
             all items that don't have any of the other types (for example
             |:grep| items).
-            Default: `{'text': '?>', 'texthl': 'Normal'}`
+            Default: `{'text': '?>', 'priority': 10, 'texthl': 'Normal'}`
 
     texthl                                            *g:qfdiagnostics.texthl*
             Whether to highlight diagnostics in the text using

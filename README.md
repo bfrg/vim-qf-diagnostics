@@ -1,8 +1,9 @@
 # vim-qf-diagnostics
 
-- Highlight the diagnostics (of a project-build, linter, `grep`) stored in a
-  quickfix list in the buffer and sign column.
-- Display the error message for the current line in a popup window next to the
+- Highlight the locations of the quickfix items (for example, errors of a
+  project-build, linter, or `grep` command) in the sign column and in the buffer
+  using `text-properties`.
+- Show the error message for the current line in a popup window next to the
   cursor.
 
 ![screenshots](https://user-images.githubusercontent.com/6266600/86536450-01328680-bee8-11ea-849f-4e24809515b9.png)
@@ -18,9 +19,9 @@
 * **`<plug>(qf-diagnostics-popup-loclist)`** - Same as above but display the
   error messages from the current `location-list` of the current window.
 
-If not all quickfix errors (for the current line) fit into the popup window, a
-scrollbar will appear on the right side. The popup window can then be scrolled
-with <kbd>CTRL-J</kbd> and <kbd>CTRL-K</kbd>, or alternatively, using the mouse
+If not all errors in the current line fit into the popup window, a scrollbar
+will appear on the right side. The popup window can then be scrolled with
+<kbd>CTRL-J</kbd> and <kbd>CTRL-K</kbd>, or alternatively, using the mouse
 wheel. Pressing <kbd>CTRL-C</kbd> or moving the cursor in any direction will
 close the popup window.
 
