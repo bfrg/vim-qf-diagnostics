@@ -360,14 +360,19 @@ enddef
 
 def qfdiagnostics#lclear(bang: bool)
     if bang
-        keys(sign_placed_ids)
-            ->mapnew((_: number, i: string): number => str2nr(i))
-            ->filter((_: number, i: number): bool => i != 0)
-            ->mapnew((_: number, i: number): void => Remove_signs(i))
-        keys(prop_items)
-            ->mapnew((_: number, i: string): number => str2nr(i))
-            ->filter((_: number, i: number): bool => i != 0)
-            ->mapnew((_: number, i: number): void => Remove_textprops(i))
+        var nr: number
+        for i in keys(sign_placed_ids)
+            nr = str2nr(i)
+            if nr != 0
+                Remove_signs(nr)
+            endif
+        endfor
+        for i in keys(prop_items)
+            nr = str2nr(i)
+            if nr != 0
+                Remove_textprops(nr)
+            endif
+        endfor
     else
         const xid: number = Id(true)
         Remove_signs(xid)
