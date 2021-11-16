@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Jul 27, 2021
+# Last Change:  Nov 16, 2021
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -361,13 +361,13 @@ enddef
 def qfdiagnostics#lclear(bang: bool)
     if bang
         keys(sign_placed_ids)
-            ->map((_: number, i: string): number => str2nr(i))
+            ->mapnew((_: number, i: string): number => str2nr(i))
             ->filter((_: number, i: number): bool => i != 0)
-            ->map((_: number, i: number): void => Remove_signs(i))
+            ->mapnew((_: number, i: number): void => Remove_signs(i))
         keys(prop_items)
-            ->map((_: number, i: string): number => str2nr(i))
+            ->mapnew((_: number, i: string): number => str2nr(i))
             ->filter((_: number, i: number): bool => i != 0)
-            ->map((_: number, i: number): void => Remove_textprops(i))
+            ->mapnew((_: number, i: number): void => Remove_textprops(i))
     else
         const xid: number = Id(true)
         Remove_signs(xid)
