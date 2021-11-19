@@ -18,7 +18,7 @@ highlight default link QfDiagnosticsWarning   WarningMsg
 highlight default link QfDiagnosticsInfo      MoreMsg
 highlight default link QfDiagnosticsNote      Todo
 
-augroup qf-diagnostics-textprops
+augroup qf-diagnostics
 augroup END
 
 var popup_winid: number = 0
@@ -269,7 +269,7 @@ def Add_textprops(xlist: list<any>, id: number)
             endif
         endif
     endfor
-    autocmd! qf-diagnostics-textprops BufReadPost * Add_textprops_on_bufread()
+    autocmd! qf-diagnostics BufReadPost * Add_textprops_on_bufread()
 enddef
 
 def Remove_textprops(id: number)
@@ -291,7 +291,7 @@ def Remove_textprops(id: number)
 
     remove(prop_items, id)
     if empty(prop_items)
-        autocmd! qf-diagnostics-textprops
+        autocmd! qf-diagnostics BufReadPost
     endif
 enddef
 
@@ -318,6 +318,12 @@ def Remove_signs(groupid: number)
     endif
     Sign_group(groupid)->sign_unplace()
     remove(sign_placed_ids, groupid)
+enddef
+
+def Remove_on_winclosed()
+    const winid: number = expand('<amatch>')->str2nr()
+    Remove_signs(winid)
+    Remove_textprops(winid)
 enddef
 
 def qfdiagnostics#place(loclist: bool)
@@ -351,6 +357,10 @@ def qfdiagnostics#place(loclist: bool)
         sign_define('qf-diagnostics-misc',    Get('sign_misc'))
         Add_signs(xlist, id)
     endif
+
+    if loclist
+        execute printf('autocmd qf-diagnostics WinClosed %d ++once Remove_on_winclosed()', id)
+    endif
 enddef
 
 def qfdiagnostics#cclear()
@@ -373,10 +383,12 @@ def qfdiagnostics#lclear(bang: bool)
                 Remove_textprops(nr)
             endif
         endfor
+        autocmd! qf-diagnostics WinClosed
     else
         const xid: number = Id(true)
         Remove_signs(xid)
         Remove_textprops(xid)
+        execute printf('autocmd! qf-diagnostics WinClosed %d', xid)
     endif
 enddef
 
@@ -388,6 +400,7 @@ def qfdiagnostics#toggle(loclist: bool)
     endif
     Remove_signs(xid)
     Remove_textprops(xid)
+    execute printf('autocmd! qf-diagnostics WinClosed %d', xid)
 enddef
 
 def qfdiagnostics#popup(loclist: bool): number

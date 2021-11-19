@@ -3,11 +3,11 @@
 " File:         plugin/qfdiagnostics.vim
 " Author:       bfrg <https://github.com/bfrg>
 " Website:      https://github.com/bfrg/vim-qf-diagnostics
-" Last Change:  Jul 6, 2021
+" Last Change:  Nov 19, 2021
 " License:      Same as Vim itself (see :h license)
 " ==============================================================================
 
-if !has('patch-8.2.3019') || get(g:, 'loaded_qfdiagnostics')
+if !has('patch-8.2.3591') || get(g:, 'loaded_qfdiagnostics')
     finish
 endif
 let g:loaded_qfdiagnostics = 1
