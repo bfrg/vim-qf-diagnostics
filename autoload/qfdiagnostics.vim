@@ -370,17 +370,17 @@ enddef
 
 def qfdiagnostics#lclear(bang: bool)
     if bang
-        var nr: number
+        var id: number
         for i in keys(sign_placed_ids)
-            nr = str2nr(i)
-            if nr != 0
-                Remove_signs(nr)
+            id = str2nr(i)
+            if id != 0
+                Remove_signs(id)
             endif
         endfor
         for i in keys(prop_items)
-            nr = str2nr(i)
-            if nr != 0
-                Remove_textprops(nr)
+            id = str2nr(i)
+            if id != 0
+                Remove_textprops(id)
             endif
         endfor
         autocmd! qf-diagnostics WinClosed
