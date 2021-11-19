@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 16, 2021
+# Last Change:  Nov 19, 2021
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -21,7 +21,7 @@ highlight default link QfDiagnosticsNote      Todo
 augroup qf-diagnostics-textprops
 augroup END
 
-var winid: number = 0
+var popup_winid: number = 0
 
 const defaults: dict<any> = {
     'popup_create_cb': () => 0,
@@ -142,7 +142,7 @@ def Popup_filter(wid: number, key: string): bool
 enddef
 
 def Popup_callback(wid: number, result: number)
-    winid = 0
+    popup_winid = 0
     prop_remove({'type': 'qf-diagnostics-popup', 'all': true})
 enddef
 
@@ -457,7 +457,7 @@ def qfdiagnostics#popup(loclist: bool): number
         'callback': Popup_callback
     }
 
-    popup_close(winid)
+    popup_close(popup_winid)
 
     if Get('popup_attach')
         prop_remove({'type': 'qf-diagnostics-popup', 'all': true})
@@ -473,18 +473,18 @@ def qfdiagnostics#popup(loclist: bool): number
         })
     endif
 
-    winid = popup_atcursor(text, opts)
-    setwinvar(winid, '&breakindent', 1)
-    setwinvar(winid, '&tabstop', &g:tabstop)
+    popup_winid = popup_atcursor(text, opts)
+    setwinvar(popup_winid, '&breakindent', 1)
+    setwinvar(popup_winid, '&tabstop', &g:tabstop)
 
-    matchadd('QfDiagnosticsLineNr',  '^\d\+\%(:\d\+\)\?',                              10, -1, {'window': winid})
-    matchadd('QfDiagnosticsError',   '^\d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {'window': winid})
-    matchadd('QfDiagnosticsWarning', '^\d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {'window': winid})
-    matchadd('QfDiagnosticsInfo',    '^\d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {'window': winid})
-    matchadd('QfDiagnosticsNote',    '^\d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {'window': winid})
-    Get('popup_create_cb')(winid, curlist.id, loclist)
+    matchadd('QfDiagnosticsLineNr',  '^\d\+\%(:\d\+\)\?',                              10, -1, {'window': popup_winid})
+    matchadd('QfDiagnosticsError',   '^\d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {'window': popup_winid})
+    matchadd('QfDiagnosticsWarning', '^\d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {'window': popup_winid})
+    matchadd('QfDiagnosticsInfo',    '^\d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {'window': popup_winid})
+    matchadd('QfDiagnosticsNote',    '^\d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {'window': popup_winid})
+    Get('popup_create_cb')(popup_winid, curlist.id, loclist)
 
-    return winid
+    return popup_winid
 enddef
 
 silent! prop_type_add('qf-diagnostics-popup', {})
