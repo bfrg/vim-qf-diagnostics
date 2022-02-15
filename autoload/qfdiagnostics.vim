@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 19, 2021
+# Last Change:  Feb 15, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -326,7 +326,7 @@ def Remove_on_winclosed()
     Remove_textprops(winid)
 enddef
 
-def qfdiagnostics#place(loclist: bool)
+export def Place(loclist: bool)
     if !Get('signs') && !Get('texthl')
         return
     endif
@@ -363,12 +363,12 @@ def qfdiagnostics#place(loclist: bool)
     endif
 enddef
 
-def qfdiagnostics#cclear()
+export def Cclear()
     Remove_signs(0)
     Remove_textprops(0)
 enddef
 
-def qfdiagnostics#lclear(bang: bool)
+export def Lclear(bang: bool)
     if bang
         var id: number
         for i in keys(sign_placed_ids)
@@ -392,10 +392,10 @@ def qfdiagnostics#lclear(bang: bool)
     endif
 enddef
 
-def qfdiagnostics#toggle(loclist: bool)
+export def Toggle(loclist: bool)
     const xid: number = Id(loclist)
     if !Signs_placed(xid) && !Props_placed(xid)
-        qfdiagnostics#place(loclist)
+        Place(loclist)
         return
     endif
     Remove_signs(xid)
@@ -403,7 +403,7 @@ def qfdiagnostics#toggle(loclist: bool)
     execute printf('autocmd! qf-diagnostics WinClosed %d', xid)
 enddef
 
-def qfdiagnostics#popup(loclist: bool): number
+export def Popup(loclist: bool): number
     const xlist: list<any> = Getxlist(loclist)
 
     if empty(xlist)
