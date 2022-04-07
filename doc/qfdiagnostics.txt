@@ -119,12 +119,13 @@ are supported:
             Callback function called after the popup window is created. The
             arguments are |window-ID| of the popup window, the |quickfix-ID|
             of the current quickfix or location list, and a boolean that
-            indicates whether a quickfix or location list is used.
-            Default: {-> 0}
+            indicates whether a quickfix or location list is used. See
+            |qf-diagnostics-examples| for an example callback function.
+            Default: (empty function)
 
     signs                                               *g:qfdiagnostics.sigs*
             Whether to highlight diagnostics in the |sign-column|.
-            Default: |v:true|
+            Default: |true|
 
     sign_error                                    *g:qfdiagnostics.sign_error*
             Set the sign attributes for quickfix items of type "error". See
@@ -154,7 +155,7 @@ are supported:
     texthl                                            *g:qfdiagnostics.texthl*
             Whether to highlight diagnostics in the text using
             |text-properties|.
-            Default: |v:false|
+            Default: |false|
 
     highlight_error                          *g:qfdiagnostics.highlight_error*
             Set the appearance of text-properties for quickfix items of type
@@ -193,10 +194,10 @@ EXAMPLES                                             *qf-diagnostics-examples*
     augroup END
 <
 2. Enable border and use fancy border characters with round corners: >
-    let g:qfdiagnostics = {
-            \ 'popup_border': [],
-            \ 'popup_borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
-            \ }
+    g:qfdiagnostics = {
+        'popup_border': [],
+        'popup_borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+    }
 <
 3. Toggle the diagnostics of the quickfix and location lists with <F7> and
    <F8>, respectively: >
@@ -205,37 +206,34 @@ EXAMPLES                                             *qf-diagnostics-examples*
 <
 4. Add a callback function that highlights the warning type of gcc and clang
    compiler messages: >
-    function s:popup_cb(winid, qfid, loclist) abort
-        const title = a:loclist
-                \ ? getloclist(0, {'title': 0, 'id': a:qfid}).title
-                \ : getqflist({'title': 0, 'id': a:qfid}).title
+    def Callback(winid: number, qfid: number, is_loclist: bool)
+        const title = is_loclist
+            ? getloclist(0, {'title': 0, 'id': qfid}).title
+            : getqflist({'title': 0, 'id': qfid}).title
 
-        if title !~# '^:\=\%(gcc\|g++\|clang\|clang\)'
+        if title !~# '^:\=\%(gcc\|g++\|clang\|[gc]\=make\)'
             return
         endif
 
-        call matchadd('WarningMsg', '\[\zs.\{-}\ze]$', 10, -1,
-                \ {'window': a:winid})
-    endfunction
+        matchadd('WarningMsg', '\[\zs-W.\{-}\ze]$', 10, -1, {'window': winid})
+    enddef
 
-    let g:qfdiagnostics = {
-            \ 'popup_create_cb': funcref('s:popup_cb')
-            \ }
+    g:qfdiagnostics = {'popup_create_cb': Callback}
 <
     This will highlight "-Wunused-parameter" in the popup window for compiler
     messages like: >
      warning: unused parameter 'out' [-Wunused-parameter]
 <
 5. Toggle the text highlighting on and off: >
-    function s:diagnostics_toggle_props() abort
-        let g:qfdiagnostics = get(g:, 'qfdiagnostics', {})
-        let g:qfdiagnostics.texthl = get(g:qfdiagnostics, 'texthl', v:false)
-                \ ? v:false
-                \ : v:true
+    def Diagnostics_toggle_props()
+        g:qfdiagnostics = get(g:, 'qfdiagnostics', {})
+        g:qfdiagnostics.texthl = get(g:qfdiagnostics, 'texthl', false)
+            ? false
+            : true
         DiagnosticsPlace
-    endfunction
+    enddef
 
-    command DiagnosticsToggleHl call s:diagnostics_toggle_props()
+    command DiagnosticsToggleHl Diagnostics_toggle_props()
 <
 ==============================================================================
 POPUP HIGHLIGHTING                            *qf-diagnostics-popup-highlight*

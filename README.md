@@ -76,6 +76,29 @@ signs are placed.
        autocmd QuickfixCmdPost lmake LDiagnosticsPlace
    augroup END
    ```
+3. If you want to extend the highlighting in the popup window, you can specify a
+   callback function which will be invoked when the popup is created. For
+   example, to highlight `-Wunused-parameter` in the popup window for a compiler
+   messages like:
+   ```
+   test.c:12:23: warning: unused parameter 'out' [-Wunused-parameter]
+   ```
+   you can use the following callback function:
+   ```vim
+   def On_popup_open(winid: number, qfid: number, is_loclist: bool)
+       const title = is_loclist
+           ? getloclist(0, {'title': 0, 'id': qfid}).title
+           : getqflist({'title': 0, 'id': qfid}).title
+
+       if title !~# '^:\=\%(gcc\|g++\|clang\|[gc]\=make\)'
+           return
+       endif
+
+       matchadd('WarningMsg', '\[\zs-W.\{-}\ze]$', 10, -1, {'window': winid})
+   enddef
+
+   g:qfdiagnostics = {'popup_create_cb': On_popup_open}
+   ```
 
 
 ## Configuration
