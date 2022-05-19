@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Feb 15, 2022
+# Last Change:  May 19, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -24,42 +24,42 @@ augroup END
 var popup_winid: number = 0
 
 const defaults: dict<any> = {
-    'popup_create_cb': () => 0,
-    'popup_scrollup': "\<c-k>",
-    'popup_scrolldown': "\<c-j>",
-    'popup_border': [0, 0, 0, 0],
-    'popup_maxheight': 0,
-    'popup_maxwidth': 0,
-    'popup_borderchars': [],
-    'popup_mapping': true,
-    'popup_items': 0,
-    'popup_attach': false,
-    'texthl': false,
-    'highlight_error':   {'highlight': 'SpellBad',   'priority': 14, 'combine': true},
-    'highlight_warning': {'highlight': 'SpellCap',   'priority': 13, 'combine': true},
-    'highlight_info':    {'highlight': 'SpellLocal', 'priority': 12, 'combine': true},
-    'highlight_note':    {'highlight': 'SpellRare',  'priority': 11, 'combine': true},
-    'highlight_misc':    {'highlight': 'Underlined', 'priority': 10, 'combine': true},
-    'signs': true,
-    'sign_error':   {'text': 'E>', 'priority': 14, 'texthl': 'ErrorMsg'},
-    'sign_warning': {'text': 'W>', 'priority': 13, 'texthl': 'WarningMsg'},
-    'sign_info':    {'text': 'I>', 'priority': 12, 'texthl': 'MoreMsg'},
-    'sign_note':    {'text': 'N>', 'priority': 11, 'texthl': 'Todo'},
-    'sign_misc':    {'text': '?>', 'priority': 10, 'texthl': 'Normal'}
+    popup_create_cb: () => 0,
+    popup_scrollup: "\<c-k>",
+    popup_scrolldown: "\<c-j>",
+    popup_border: [0, 0, 0, 0],
+    popup_maxheight: 0,
+    popup_maxwidth: 0,
+    popup_borderchars: [],
+    popup_mapping: true,
+    popup_items: 0,
+    popup_attach: false,
+    texthl: false,
+    highlight_error:   {highlight: 'SpellBad',   priority: 14, combine: true},
+    highlight_warning: {highlight: 'SpellCap',   priority: 13, combine: true},
+    highlight_info:    {highlight: 'SpellLocal', priority: 12, combine: true},
+    highlight_note:    {highlight: 'SpellRare',  priority: 11, combine: true},
+    highlight_misc:    {highlight: 'Underlined', priority: 10, combine: true},
+    signs: true,
+    sign_error:   {text: 'E>', priority: 14, texthl: 'ErrorMsg'},
+    sign_warning: {text: 'W>', priority: 13, texthl: 'WarningMsg'},
+    sign_info:    {text: 'I>', priority: 12, texthl: 'MoreMsg'},
+    sign_note:    {text: 'N>', priority: 11, texthl: 'Todo'},
+    sign_misc:    {text: '?>', priority: 10, texthl: 'Normal'}
 }
 
 # Cache current quickfix list: {'id': 2, 'changedtick': 1, 'items': [...]}
 var curlist: dict<any> = {}
 
-const error_types: dict<string> = {'E': 'error', 'W': 'warning', 'I': 'info', 'N': 'note'}
+const error_types: dict<string> = {E: 'error', W: 'warning', I: 'info', N: 'note'}
 
 # Look-up table used for both sign names and text-property types
 const sign_names: dict<string> = {
-    'E': 'qf-diagnostics-error',
-    'W': 'qf-diagnostics-warning',
-    'I': 'qf-diagnostics-info',
-    'N': 'qf-diagnostics-note',
-     '': 'qf-diagnostics-misc'
+    E: 'qf-diagnostics-error',
+    W: 'qf-diagnostics-warning',
+    I: 'qf-diagnostics-info',
+    N: 'qf-diagnostics-note',
+   '': 'qf-diagnostics-misc'
 }
 
 # Dictionary with (ID, 1) pairs for every placed quickfix/location-list,
@@ -94,11 +94,11 @@ silent! prop_type_add('qf-diagnostics-misc',    Get('highlight_misc'))
 
 def Sign_priorities(): dict<number>
     return {
-        'E': Get('sign_error')->get('priority', 14),
-        'W': Get('sign_warning')->get('priority', 13),
-        'I': Get('sign_info')->get('priority', 12),
-        'N': Get('sign_note')->get('priority', 11),
-         '': Get('sign_misc')->get('priority', 10)
+        E: Get('sign_error')->get('priority', 14),
+        W: Get('sign_warning')->get('priority', 13),
+        I: Get('sign_info')->get('priority', 12),
+        N: Get('sign_note')->get('priority', 11),
+       '': Get('sign_misc')->get('priority', 10)
     }
 enddef
 
@@ -114,7 +114,7 @@ enddef
 def Id(loclist: bool): number
     if loclist
         return win_getid()->getwininfo()[0].loclist
-            ? getloclist(0, {'filewinid': 0}).filewinid
+            ? getloclist(0, {filewinid: 0}).filewinid
             : win_getid()
     endif
     return 0
@@ -132,16 +132,16 @@ def Popup_filter(wid: number, key: string): bool
     if line('$', wid) == popup_getpos(wid).core_height
         return false
     endif
-    popup_setoptions(wid, {'minheight': popup_getpos(wid).core_height})
+    popup_setoptions(wid, {minheight: popup_getpos(wid).core_height})
 
     if key ==# Get('popup_scrolldown')
         const line: number = popup_getoptions(wid).firstline
         const newline: number = line < line('$', wid) ? (line + 1) : line('$', wid)
-        popup_setoptions(wid, {'firstline': newline})
+        popup_setoptions(wid, {firstline: newline})
     elseif key ==# Get('popup_scrollup')
         const line: number = popup_getoptions(wid).firstline
         const newline: number = (line - 1) > 0 ? (line - 1) : 1
-        popup_setoptions(wid, {'firstline': newline})
+        popup_setoptions(wid, {firstline: newline})
     else
         return false
     endif
@@ -150,12 +150,12 @@ enddef
 
 def Popup_callback(wid: number, result: number)
     popup_winid = 0
-    prop_remove({'type': 'qf-diagnostics-popup', 'all': true})
+    prop_remove({type: 'qf-diagnostics-popup', all: true})
 enddef
 
 def Getxlist(loclist: bool): list<any>
     const Xgetlist = loclist ? function('getloclist', [0]) : function('getqflist')
-    const qf: dict<number> = Xgetlist({'changedtick': 0, 'id': 0})
+    const qf: dict<number> = Xgetlist({changedtick: 0, id: 0})
 
     # NOTE changedtick of a quickfix list is not incremented when a buffer
     # referenced in the list is wiped out
@@ -163,7 +163,7 @@ def Getxlist(loclist: bool): list<any>
         return curlist.items
     endif
 
-    curlist = Xgetlist({'changedtick': 0, 'id': 0, 'items': 0})
+    curlist = Xgetlist({changedtick: 0, id: 0, items: 0})
     return curlist.items
 enddef
 
@@ -230,11 +230,11 @@ def Add_textprops_on_bufread()
             col = item.col >= max ? max : item.col
             end_col = item.end_col >= max ? max : item.end_col
             prop_add(item.lnum, col, {
-                'end_lnum': item.end_lnum > 0 ? item.end_lnum : item.lnum,
-                'end_col': item.end_col > 0 ? item.end_col : item.col + 1,
-                'bufnr': bufnr,
-                'id': str2nr(id),
-                'type': item.type
+                end_lnum: item.end_lnum > 0 ? item.end_lnum : item.lnum,
+                end_col: item.end_col > 0 ? item.end_col : item.col + 1,
+                bufnr: bufnr,
+                id: str2nr(id),
+                type: item.type
             })
         endfor
     endfor
@@ -255,11 +255,11 @@ def Add_textprops(xlist: list<any>, id: number)
             endif
             prop_type = get(sign_names, toupper(i.type), sign_names[''])
             add(bufs[i.bufnr], {
-                'type': prop_type,
-                'lnum': i.lnum,
-                'col': i.col,
-                'end_lnum': get(i, 'end_lnum'),
-                'end_col': get(i, 'end_col')
+                type: prop_type,
+                lnum: i.lnum,
+                col: i.col,
+                end_lnum: get(i, 'end_lnum'),
+                end_col: get(i, 'end_col')
             })
 
             if bufloaded(i.bufnr)
@@ -267,11 +267,11 @@ def Add_textprops(xlist: list<any>, id: number)
                 col = i.col >= max ? max : i.col
                 end_col = i.end_col >= max ? max : i.end_col
                 prop_add(i.lnum, col, {
-                    'end_lnum': i.end_lnum > 0 ? i.end_lnum : i.lnum,
-                    'end_col': i.end_col > 0 ? i.end_col : i.col + 1,
-                    'bufnr': i.bufnr,
-                    'id': id,
-                    'type': prop_type
+                    end_lnum: i.end_lnum > 0 ? i.end_lnum : i.lnum,
+                    end_col: i.end_col > 0 ? i.end_col : i.col + 1,
+                    bufnr: i.bufnr,
+                    id: id,
+                    type: prop_type
                 })
             endif
         endif
@@ -288,11 +288,11 @@ def Remove_textprops(id: number)
     for i in get(prop_items, id)->keys()
         bufnr = str2nr(i)
         if bufexists(bufnr)
-            prop_remove({'id': id, 'type': 'qf-diagnostics-error',   'bufnr': bufnr, 'both': true, 'all': true})
-            prop_remove({'id': id, 'type': 'qf-diagnostics-warning', 'bufnr': bufnr, 'both': true, 'all': true})
-            prop_remove({'id': id, 'type': 'qf-diagnostics-info',    'bufnr': bufnr, 'both': true, 'all': true})
-            prop_remove({'id': id, 'type': 'qf-diagnostics-note',    'bufnr': bufnr, 'both': true, 'all': true})
-            prop_remove({'id': id, 'type': 'qf-diagnostics-misc',    'bufnr': bufnr, 'both': true, 'all': true})
+            prop_remove({id: id, type: 'qf-diagnostics-error',   bufnr: bufnr, both: true, all: true})
+            prop_remove({id: id, type: 'qf-diagnostics-warning', bufnr: bufnr, both: true, all: true})
+            prop_remove({id: id, type: 'qf-diagnostics-info',    bufnr: bufnr, both: true, all: true})
+            prop_remove({id: id, type: 'qf-diagnostics-note',    bufnr: bufnr, both: true, all: true})
+            prop_remove({id: id, type: 'qf-diagnostics-misc',    bufnr: bufnr, both: true, all: true})
         endif
     endfor
 
@@ -310,11 +310,11 @@ def Add_signs(xlist: list<any>, id: number)
     copy(xlist)
         ->filter((_: number, i: dict<any>) => i.bufnr > 0 && bufexists(i.bufnr) && i.valid && i.lnum > 0)
         ->map((_: number, i: dict<any>) => ({
-          'lnum': i.lnum,
-          'buffer': i.bufnr,
-          'group': group,
-          'priority': get(priorities, toupper(i.type), priorities['']),
-          'name': get(sign_names, toupper(i.type), sign_names[''])
+          lnum: i.lnum,
+          buffer: i.bufnr,
+          group: group,
+          priority: get(priorities, toupper(i.type), priorities['']),
+          name: get(sign_names, toupper(i.type), sign_names[''])
         }))
         ->sign_placelist()
 enddef
@@ -458,38 +458,38 @@ export def Popup(loclist: bool): number
     const col: number = &columns - pos.curscol <= width ? &columns - width - 1 : pos.curscol
 
     var opts: dict<any> = {
-        'moved': 'any',
-        'col': col,
-        'minwidth': width,
-        'maxwidth': width,
-        'maxheight': Get('popup_maxheight'),
-        'padding': [0, 1, 0, 1],
-        'border': border,
-        'borderchars': Get('popup_borderchars'),
-        'borderhighlight': ['QfDiagnosticsBorder'],
-        'highlight': 'QfDiagnostics',
-        'scrollbarhighlight': 'QfDiagnosticsScrollbar',
-        'thumbhighlight': 'QfDiagnosticsThumb',
-        'firstline': 1,
-        'mapping': Get('popup_mapping'),
-        'filtermode': 'n',
-        'filter': Popup_filter,
-        'callback': Popup_callback
+        moved: 'any',
+        col: col,
+        minwidth: width,
+        maxwidth: width,
+        maxheight: Get('popup_maxheight'),
+        padding: [0, 1, 0, 1],
+        border: border,
+        borderchars: Get('popup_borderchars'),
+        borderhighlight: ['QfDiagnosticsBorder'],
+        highlight: 'QfDiagnostics',
+        scrollbarhighlight: 'QfDiagnosticsScrollbar',
+        thumbhighlight: 'QfDiagnosticsThumb',
+        firstline: 1,
+        mapping: Get('popup_mapping'),
+        filtermode: 'n',
+        filter: Popup_filter,
+        callback: Popup_callback
     }
 
     popup_close(popup_winid)
 
     if Get('popup_attach')
-        prop_remove({'type': 'qf-diagnostics-popup', 'all': true})
+        prop_remove({type: 'qf-diagnostics-popup', all: true})
         prop_add(line('.'),
             items == 2 ? (xlist[idxs[0]].col > 0 ? xlist[idxs[0]].col : col('.')) : col('.'),
-            {'type': 'qf-diagnostics-popup'}
+            {type: 'qf-diagnostics-popup'}
         )
         extend(opts, {
-            'textprop': 'qf-diagnostics-popup',
-            'pos': 'botleft',
-            'line': 0,
-            'col': col - pos.curscol,
+            textprop: 'qf-diagnostics-popup',
+            pos: 'botleft',
+            line: 0,
+            col: col - pos.curscol,
         })
     endif
 
@@ -497,11 +497,11 @@ export def Popup(loclist: bool): number
     setwinvar(popup_winid, '&breakindent', 1)
     setwinvar(popup_winid, '&tabstop', &g:tabstop)
 
-    matchadd('QfDiagnosticsLineNr',  '^\d\+\%(:\d\+\)\?',                              10, -1, {'window': popup_winid})
-    matchadd('QfDiagnosticsError',   '^\d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {'window': popup_winid})
-    matchadd('QfDiagnosticsWarning', '^\d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {'window': popup_winid})
-    matchadd('QfDiagnosticsInfo',    '^\d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {'window': popup_winid})
-    matchadd('QfDiagnosticsNote',    '^\d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {'window': popup_winid})
+    matchadd('QfDiagnosticsLineNr',  '^\d\+\%(:\d\+\)\?',                              10, -1, {window: popup_winid})
+    matchadd('QfDiagnosticsError',   '^\d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {window: popup_winid})
+    matchadd('QfDiagnosticsWarning', '^\d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {window: popup_winid})
+    matchadd('QfDiagnosticsInfo',    '^\d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {window: popup_winid})
+    matchadd('QfDiagnosticsNote',    '^\d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {window: popup_winid})
     Get('popup_create_cb')(popup_winid, curlist.id, loclist)
 
     return popup_winid
