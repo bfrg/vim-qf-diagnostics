@@ -108,7 +108,7 @@ enddef
 # qf-diagnostics-winid, where 'winid' is the window-ID of the window the
 # location-list belongs to.
 def Sign_group(id: number): string
-    return printf('qf-diagnostics-%d', id)
+    return $'qf-diagnostics-{id}'
 enddef
 
 def Id(loclist: bool): number
@@ -134,11 +134,11 @@ def Popup_filter(wid: number, key: string): bool
     endif
     popup_setoptions(wid, {minheight: popup_getpos(wid).core_height})
 
-    if key ==# Get('popup_scrolldown')
+    if key == Get('popup_scrolldown')
         const line: number = popup_getoptions(wid).firstline
         const newline: number = line < line('$', wid) ? (line + 1) : line('$', wid)
         popup_setoptions(wid, {firstline: newline})
-    elseif key ==# Get('popup_scrollup')
+    elseif key == Get('popup_scrollup')
         const line: number = popup_getoptions(wid).firstline
         const newline: number = (line - 1) > 0 ? (line - 1) : 1
         popup_setoptions(wid, {firstline: newline})
@@ -366,7 +366,7 @@ export def Place(loclist: bool)
     endif
 
     if loclist
-        execute printf('autocmd qf-diagnostics WinClosed %d ++once Remove_on_winclosed()', id)
+        execute $'autocmd qf-diagnostics WinClosed {id} ++once Remove_on_winclosed()'
     endif
 enddef
 
@@ -395,7 +395,7 @@ export def Lclear(bang: bool)
         const xid: number = Id(true)
         Remove_signs(xid)
         Remove_textprops(xid)
-        execute printf('autocmd! qf-diagnostics WinClosed %d', xid)
+        execute $'autocmd! qf-diagnostics WinClosed {xid}'
     endif
 enddef
 
@@ -407,7 +407,7 @@ export def Toggle(loclist: bool)
     endif
     Remove_signs(xid)
     Remove_textprops(xid)
-    execute printf('autocmd! qf-diagnostics WinClosed %d', xid)
+    execute $'autocmd! qf-diagnostics WinClosed {xid}'
 enddef
 
 export def Popup(loclist: bool): number
