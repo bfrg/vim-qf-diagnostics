@@ -5,7 +5,7 @@ Website:    https://github.com/bfrg/vim-qf-diagnostics
 License:    Same terms as Vim itself (see |license|)
 
 ==============================================================================
-INTRODUCTION                                                  *qf-diagnostics*
+INTRODUCTION
 
 - Highlight the locations of the |quickfix| items (for example, errors of a
   project-build, linter, or grep command) in the |sign-column| and in the
@@ -80,8 +80,7 @@ SIGNS AND TEXT HIGHLIGHTINGS                        *qf-diagnostics-highlight*
         Toggle the diagnostics from the location list of the current window.
 
 ==============================================================================
-CONFIGURATION                                          *qf-diagnostics-config*
-                                                             *g:qfdiagnostics*
+CONFIGURATION                                                *g:qfdiagnostics*
 
 The appearance of the popup window as well as the signs and text highlights
 can be configured through the |Dictionary| g:qfdiagnostics. The following keys
@@ -123,7 +122,7 @@ are supported:
             |qf-diagnostics-examples| for an example callback function.
             Default: (empty function)
 
-    signs                                               *g:qfdiagnostics.sigs*
+    signs                                              *g:qfdiagnostics.signs*
             Whether to highlight diagnostics in the |sign-column|.
             Default: |true|
 
