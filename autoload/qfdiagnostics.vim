@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  May 19, 2022
+# Last Change:  June 05, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -182,19 +182,19 @@ def Filter_items(xlist: list<any>, items: number): list<number>
     if !items
         return len(xlist)
             ->range()
-            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr())
-            ->filter((_: number, i: number): bool => xlist[i].lnum == line('.'))
+            ->filter((_, i: number): bool => xlist[i].bufnr == bufnr())
+            ->filter((_, i: number): bool => xlist[i].lnum == line('.'))
     elseif items == 1
         return len(xlist)
             ->range()
-            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr())
-            ->filter((_: number, i: number): bool => xlist[i].lnum == line('.'))
-            ->filter((_: number, i: number): bool => xlist[i].col == col('.') || xlist[i].col == col('.') + 1 && xlist[i].col == col('$'))
+            ->filter((_, i: number): bool => xlist[i].bufnr == bufnr())
+            ->filter((_, i: number): bool => xlist[i].lnum == line('.'))
+            ->filter((_, i: number): bool => xlist[i].col == col('.') || xlist[i].col == col('.') + 1 && xlist[i].col == col('$'))
     elseif items == 2
         var idxs: list<number> = len(xlist)
             ->range()
-            ->filter((_: number, i: number): bool => xlist[i].bufnr == bufnr())
-            ->filter((_: number, i: number): bool => xlist[i].lnum == line('.'))
+            ->filter((_, i: number): bool => xlist[i].bufnr == bufnr())
+            ->filter((_, i: number): bool => xlist[i].lnum == line('.'))
 
         if empty(idxs)
             return []
@@ -212,7 +212,7 @@ def Filter_items(xlist: list<any>, items: number): list<number>
             endif
         endfor
 
-        return filter(idxs, (_: number, i: number): bool => xlist[i].col == col)
+        return filter(idxs, (_, i: number): bool => xlist[i].col == col)
     endif
     return []
 enddef
@@ -308,8 +308,8 @@ def Add_signs(xlist: list<any>, id: number)
     sign_placed_ids[id] = 1
 
     copy(xlist)
-        ->filter((_: number, i: dict<any>) => i.bufnr > 0 && bufexists(i.bufnr) && i.valid && i.lnum > 0)
-        ->map((_: number, i: dict<any>) => ({
+        ->filter((_, i: dict<any>) => i.bufnr > 0 && bufexists(i.bufnr) && i.valid && i.lnum > 0)
+        ->map((_, i: dict<any>) => ({
           lnum: i.lnum,
           buffer: i.bufnr,
           group: group,
@@ -444,7 +444,7 @@ export def Popup(loclist: bool): number
         ? max
         : len(text)
             ->range()
-            ->map((_: number, i: number): number => strdisplaywidth(text[i]))
+            ->map((_, i: number): number => strdisplaywidth(text[i]))
             ->max()
 
     const border: list<number> = Get('popup_border')
