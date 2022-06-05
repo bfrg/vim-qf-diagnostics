@@ -180,18 +180,21 @@ def Filter_items(xlist: list<any>, items: number): list<number>
     endif
 
     if !items
-        return len(xlist)
+        return xlist
+            ->len()
             ->range()
             ->filter((_, i: number): bool => xlist[i].bufnr == bufnr())
             ->filter((_, i: number): bool => xlist[i].lnum == line('.'))
     elseif items == 1
-        return len(xlist)
+        return xlist
+            ->len()
             ->range()
             ->filter((_, i: number): bool => xlist[i].bufnr == bufnr())
             ->filter((_, i: number): bool => xlist[i].lnum == line('.'))
             ->filter((_, i: number): bool => xlist[i].col == col('.') || xlist[i].col == col('.') + 1 && xlist[i].col == col('$'))
     elseif items == 2
-        var idxs: list<number> = len(xlist)
+        var idxs: list<number> = xlist
+            ->len()
             ->range()
             ->filter((_, i: number): bool => xlist[i].bufnr == bufnr())
             ->filter((_, i: number): bool => xlist[i].lnum == line('.'))
@@ -285,7 +288,7 @@ def Remove_textprops(id: number)
     endif
 
     var bufnr: number
-    for i in get(prop_items, id)->keys()
+    for i in prop_items->get(id)->keys()
         bufnr = str2nr(i)
         if bufexists(bufnr)
             prop_remove({id: id, type: 'qf-diagnostics-error',   bufnr: bufnr, both: true, all: true})
@@ -307,7 +310,8 @@ def Add_signs(xlist: list<any>, id: number)
     const group: string = Sign_group(id)
     sign_placed_ids[id] = 1
 
-    copy(xlist)
+    xlist
+        ->copy()
         ->filter((_, i: dict<any>) => i.bufnr > 0 && bufexists(i.bufnr) && i.valid && i.lnum > 0)
         ->map((_, i: dict<any>) => ({
           lnum: i.lnum,
@@ -442,7 +446,8 @@ export def Popup(loclist: bool): number
     const max: number = Get('popup_maxwidth')
     const textwidth: number = max > 0
         ? max
-        : len(text)
+        : text
+            ->len()
             ->range()
             ->map((_, i: number): number => strdisplaywidth(text[i]))
             ->max()
