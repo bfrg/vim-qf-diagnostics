@@ -85,19 +85,21 @@ signs are placed.
    ```
    you can use the following callback function:
    ```vim
+   vim9script
+
    def On_popup_open(winid: number, qfid: number, is_loclist: bool)
        const title = is_loclist
-           ? getloclist(0, {'title': 0, 'id': qfid}).title
-           : getqflist({'title': 0, 'id': qfid}).title
+           ? getloclist(0, {title: 0, id: qfid}).title
+           : getqflist({title: 0, id: qfid}).title
 
-       if title !~# '^:\=\%(gcc\|g++\|clang\|[gc]\=make\)'
+       if title !~ '^:\=\%(gcc\|g++\|clang\|[gc]\=make\)'
            return
        endif
 
-       matchadd('WarningMsg', '\[\zs-W.\{-}\ze]$', 10, -1, {'window': winid})
+       matchadd('WarningMsg', '\[\zs-W.\{-}\ze]$', 10, -1, {window: winid})
    enddef
 
-   g:qfdiagnostics = {'popup_create_cb': On_popup_open}
+   g:qfdiagnostics = {popup_create_cb: On_popup_open}
    ```
 
 

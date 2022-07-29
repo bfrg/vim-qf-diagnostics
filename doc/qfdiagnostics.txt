@@ -122,6 +122,13 @@ are supported:
             |qf-diagnostics-examples| for an example callback function.
             Default: (empty function)
 
+    popup_items                                  *g:qfdiagnostics.popup_items*
+            Which quickfix items to display in popup window. Valid values are:
+            "all"     - display all quickfix items found for the current line
+            "current" - display only item(s) for current line and exact column
+            "closest" - display item(s) that are closest to the current column
+            Default: "all"
+
     signs                                              *g:qfdiagnostics.signs*
             Whether to highlight diagnostics in the |sign-column|.
             Default: |true|
@@ -194,8 +201,8 @@ EXAMPLES                                             *qf-diagnostics-examples*
 <
 2. Enable border and use fancy border characters with round corners: >
     g:qfdiagnostics = {
-        'popup_border': [],
-        'popup_borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+        popup_border: [],
+        popup_borderchars: ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
     }
 <
 3. Toggle the diagnostics of the quickfix and location lists with <F7> and
@@ -207,14 +214,14 @@ EXAMPLES                                             *qf-diagnostics-examples*
    compiler messages: >
     def Callback(winid: number, qfid: number, is_loclist: bool)
         const title = is_loclist
-            ? getloclist(0, {'title': 0, 'id': qfid}).title
-            : getqflist({'title': 0, 'id': qfid}).title
+            ? getloclist(0, {title: 0, id: qfid}).title
+            : getqflist({title: 0, id: qfid}).title
 
-        if title !~# '^:\=\%(gcc\|g++\|clang\|[gc]\=make\)'
+        if title !~ '^:\=\%(gcc\|g++\|clang\|[gc]\=make\)'
             return
         endif
 
-        matchadd('WarningMsg', '\[\zs-W.\{-}\ze]$', 10, -1, {'window': winid})
+        matchadd('WarningMsg', '\[\zs-W.\{-}\ze]$', 10, -1, {window: winid})
     enddef
 
     g:qfdiagnostics = {'popup_create_cb': Callback}
