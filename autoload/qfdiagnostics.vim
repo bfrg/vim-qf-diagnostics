@@ -18,8 +18,7 @@ highlight default link QfDiagnosticsWarning   WarningMsg
 highlight default link QfDiagnosticsInfo      MoreMsg
 highlight default link QfDiagnosticsNote      Todo
 
-augroup qf-diagnostics
-augroup END
+autocmd_add([{group: 'qf-diagnostics'}])
 
 var popup_winid: number = 0
 
@@ -279,7 +278,13 @@ def Add_textprops(xlist: list<any>, id: number)
             endif
         endif
     endfor
-    autocmd! qf-diagnostics BufReadPost * Add_textprops_on_bufread()
+    autocmd_add([{
+        group: 'qf-diagnostics',
+        event: 'BufReadPost',
+        pattern: '*',
+        replace: true,
+        cmd: 'Add_textprops_on_bufread()'
+    }])
 enddef
 
 def Remove_textprops(id: number)
@@ -301,7 +306,7 @@ def Remove_textprops(id: number)
 
     remove(prop_items, id)
     if empty(prop_items)
-        autocmd! qf-diagnostics BufReadPost
+        autocmd_delete([{group: 'qf-diagnostics', event: 'BufReadPost'}])
     endif
 enddef
 
@@ -370,7 +375,13 @@ export def Place(loclist: bool)
     endif
 
     if loclist
-        execute $'autocmd qf-diagnostics WinClosed {id} ++once Remove_on_winclosed()'
+        autocmd_add([{
+            group: 'qf-diagnostics',
+            event: 'WinClosed',
+            pattern: string(id),
+            once: true,
+            cmd: 'Remove_on_winclosed()'
+        }])
     endif
 enddef
 
@@ -394,12 +405,16 @@ export def Lclear(bang: bool)
                 Remove_textprops(id)
             endif
         endfor
-        autocmd! qf-diagnostics WinClosed
+        autocmd_delete([{group: 'qf-diagnostics', event: 'WinClosed'}])
     else
         const xid: number = Id(true)
         Remove_signs(xid)
         Remove_textprops(xid)
-        execute $'autocmd! qf-diagnostics WinClosed {xid}'
+        autocmd_delete([{
+            group: 'qf-diagnostics',
+            event: 'WinClosed',
+            pattern: string(xid)
+        }])
     endif
 enddef
 
@@ -411,7 +426,11 @@ export def Toggle(loclist: bool)
     endif
     Remove_signs(xid)
     Remove_textprops(xid)
-    execute $'autocmd! qf-diagnostics WinClosed {xid}'
+    autocmd_delete([{
+        group: 'qf-diagnostics',
+        event: 'WinClosed',
+        pattern: string(xid)
+    }])
 enddef
 
 export def Popup(loclist: bool): number
