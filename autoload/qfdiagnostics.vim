@@ -85,12 +85,12 @@ def Get(x: string): any
     return get(g:, 'qfdiagnostics', {})->get(x, defaults[x])
 enddef
 
-silent! prop_type_add('qf-diagnostics-popup', {})
-silent! prop_type_add('qf-diagnostics-error',   Get('highlight_error'))
-silent! prop_type_add('qf-diagnostics-warning', Get('highlight_warning'))
-silent! prop_type_add('qf-diagnostics-info',    Get('highlight_info'))
-silent! prop_type_add('qf-diagnostics-note',    Get('highlight_note'))
-silent! prop_type_add('qf-diagnostics-misc',    Get('highlight_misc'))
+prop_type_add('qf-diagnostics-popup', {})
+prop_type_add('qf-diagnostics-error',   Get('highlight_error'))
+prop_type_add('qf-diagnostics-warning', Get('highlight_warning'))
+prop_type_add('qf-diagnostics-info',    Get('highlight_info'))
+prop_type_add('qf-diagnostics-note',    Get('highlight_note'))
+prop_type_add('qf-diagnostics-misc',    Get('highlight_misc'))
 
 def Sign_priorities(): dict<number>
     return {
