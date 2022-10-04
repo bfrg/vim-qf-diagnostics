@@ -153,7 +153,7 @@ def Popup_callback(wid: number, result: number)
 enddef
 
 def Getxlist(loclist: bool): list<any>
-    const Xgetlist = loclist ? function('getloclist', [0]) : function('getqflist')
+    const Xgetlist: func = loclist ? function('getloclist', [0]) : function('getqflist')
     const qf: dict<number> = Xgetlist({changedtick: 0, id: 0})
 
     # NOTE changedtick of a quickfix list is not incremented when a buffer
@@ -348,7 +348,7 @@ export def Place(loclist: bool)
     endif
 
     const xlist: list<any> = Getxlist(loclist)
-    const id = Id(loclist)
+    const id: number = Id(loclist)
     Remove_textprops(id)
     Remove_signs(id)
 
