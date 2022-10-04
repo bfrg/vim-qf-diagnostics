@@ -31,7 +31,7 @@ const defaults: dict<any> = {
     popup_maxwidth: 0,
     popup_borderchars: [],
     popup_mapping: true,
-    popup_items: 0,
+    popup_items: 'all',
     popup_attach: false,
     texthl: false,
     highlight_error:   {highlight: 'SpellBad',   priority: 14, combine: true},
@@ -168,30 +168,29 @@ enddef
 
 # 'xlist': quickfix or location list
 #
-# 'items':
-#     Option that specifies which quickfix items to display in the popup window
-#     0 - display all items in current line
-#     1 - display only item(s) in current line+column (exact match)
-#     2 - display item(s) closest to current column
-def Filter_items(xlist: list<any>, items: number): list<number>
+# 'items': which quickfix items to display in popup window
+#     'all'     - display all items in current line
+#     'current' - display only item(s) in current line+column (exact match)
+#     'closest' - display item(s) closest to current column
+def Filter_items(xlist: list<any>, items: string): list<number>
     if empty(xlist)
         return []
     endif
 
-    if !items
+    if items == 'all'
         return xlist
             ->len()
             ->range()
             ->filter((_, i: number): bool => xlist[i].bufnr == bufnr())
             ->filter((_, i: number): bool => xlist[i].lnum == line('.'))
-    elseif items == 1
+    elseif items == 'current'
         return xlist
             ->len()
             ->range()
             ->filter((_, i: number): bool => xlist[i].bufnr == bufnr())
             ->filter((_, i: number): bool => xlist[i].lnum == line('.'))
             ->filter((_, i: number): bool => xlist[i].col == col('.') || xlist[i].col == col('.') + 1 && xlist[i].col == col('$'))
-    elseif items == 2
+    elseif items == 'closest'
         var idxs: list<number> = xlist
             ->len()
             ->range()
@@ -440,7 +439,7 @@ export def Popup(loclist: bool): number
         return 0
     endif
 
-    const items: number = Get('popup_items')
+    const items: string = Get('popup_items')
     const idxs: list<number> = Filter_items(xlist, items)
 
     if empty(idxs)
@@ -477,7 +476,7 @@ export def Popup(loclist: bool): number
 
     # Column position for popup window
     const pos: dict<number> = win_getid()
-        ->screenpos(line('.'), items == 2 ? xlist[idxs[0]].col : col('.'))
+        ->screenpos(line('.'), items == 'closest' ? xlist[idxs[0]].col : col('.'))
 
     const col: number = &columns - pos.curscol <= width ? &columns - width - 1 : pos.curscol
 
@@ -506,7 +505,7 @@ export def Popup(loclist: bool): number
     if Get('popup_attach')
         prop_remove({type: 'qf-diagnostics-popup', all: true})
         prop_add(line('.'),
-            items == 2 ? (xlist[idxs[0]].col > 0 ? xlist[idxs[0]].col : col('.')) : col('.'),
+            items == 'closest' ? (xlist[idxs[0]].col > 0 ? xlist[idxs[0]].col : col('.')) : col('.'),
             {type: 'qf-diagnostics-popup'}
         )
         extend(opts, {
