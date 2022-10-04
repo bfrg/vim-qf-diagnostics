@@ -273,6 +273,10 @@ QfDiagnosticsLineNr                                   *hl-QfDiagnosticsLineNr*
                     Error line and column number in the popup window.
                     Default: |hl-Directory|
 
+QfDiagnosticsItemNr                                   *hl-QfDiagnosticsItemNr*
+                    Quickfix/location list item number in the popup window.
+                    Default: |hl-Title|
+
 QfDiagnosticsError                                     *hl-QfDiagnosticsError*
                     Highlight group name for error messages in the popup
                     window. Error messages are marked with "error" and an

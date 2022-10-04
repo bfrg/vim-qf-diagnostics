@@ -12,6 +12,7 @@ highlight default link QfDiagnostics          Pmenu
 highlight default link QfDiagnosticsBorder    Pmenu
 highlight default link QfDiagnosticsScrollbar PmenuSbar
 highlight default link QfDiagnosticsThumb     PmenuThumb
+highlight default link QfDiagnosticsItemNr    Title
 highlight default link QfDiagnosticsLineNr    Directory
 highlight default link QfDiagnosticsError     ErrorMsg
 highlight default link QfDiagnosticsWarning   WarningMsg
@@ -449,9 +450,9 @@ export def Popup(loclist: bool): number
     var text: list<string> = []
     for i in idxs
         if empty(xlist[i].type)
-            extend(text, printf('%d:%d %s', xlist[i].lnum, xlist[i].col, trim(xlist[i].text))->split('\n'))
+            extend(text, printf('(%d/%d) %d:%d %s', i + 1, len(xlist), xlist[i].lnum, xlist[i].col, trim(xlist[i].text))->split('\n'))
         else
-            extend(text, printf('%d:%d %s: %s',
+            extend(text, printf('(%d/%d) %d:%d %s: %s', i + 1, len(xlist),
                 xlist[i].lnum,
                 xlist[i].col,
                 get(error_types, toupper(xlist[i].type), xlist[i].type) .. (xlist[i].nr < 1 ? '' : ' ' .. xlist[i].nr),
@@ -520,11 +521,12 @@ export def Popup(loclist: bool): number
     setwinvar(popup_winid, '&breakindent', 1)
     setwinvar(popup_winid, '&tabstop', &g:tabstop)
 
-    matchadd('QfDiagnosticsLineNr',  '^\d\+\%(:\d\+\)\?',                              10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsError',   '^\d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsWarning', '^\d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsInfo',    '^\d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsNote',    '^\d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {window: popup_winid})
+    matchadd('QfDiagnosticsItemNr',  '^(\d\+/\d\+)',                                               10, -1, {window: popup_winid})
+    matchadd('QfDiagnosticsLineNr',  '^(\d\+/\d\+) \zs\d\+\%(:\d\+\)\?',                           10, -1, {window: popup_winid})
+    matchadd('QfDiagnosticsError',   '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {window: popup_winid})
+    matchadd('QfDiagnosticsWarning', '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {window: popup_winid})
+    matchadd('QfDiagnosticsInfo',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {window: popup_winid})
+    matchadd('QfDiagnosticsNote',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {window: popup_winid})
     Get('popup_create_cb')(popup_winid, curlist.id, loclist)
 
     return popup_winid
