@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Oct 4, 2022
+# Last Change:  Oct 8, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -296,11 +296,19 @@ def Remove_textprops(id: number)
     for i in prop_items->get(id)->keys()
         bufnr = str2nr(i)
         if bufexists(bufnr)
-            prop_remove({id: id, type: 'qf-diagnostics-error',   bufnr: bufnr, both: true, all: true})
-            prop_remove({id: id, type: 'qf-diagnostics-warning', bufnr: bufnr, both: true, all: true})
-            prop_remove({id: id, type: 'qf-diagnostics-info',    bufnr: bufnr, both: true, all: true})
-            prop_remove({id: id, type: 'qf-diagnostics-note',    bufnr: bufnr, both: true, all: true})
-            prop_remove({id: id, type: 'qf-diagnostics-misc',    bufnr: bufnr, both: true, all: true})
+            prop_remove({
+                id: id,
+                types: [
+                    'qf-diagnostics-error',
+                    'qf-diagnostics-warning',
+                    'qf-diagnostics-info',
+                    'qf-diagnostics-note',
+                    'qf-diagnostics-misc'
+                ],
+                bufnr: bufnr,
+                both: true,
+                all: true
+            })
         endif
     endfor
 
