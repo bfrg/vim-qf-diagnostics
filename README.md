@@ -6,7 +6,7 @@
 - Show the error message for the current line in a popup window next to the
   cursor.
 
-![screenshots](https://user-images.githubusercontent.com/6266600/86536450-01328680-bee8-11ea-849f-4e24809515b9.png)
+![screenshots](https://user-images.githubusercontent.com/6266600/195206925-13d8024f-0000-482a-9bf2-830d513222bf.png)
 
 ## Usage
 
