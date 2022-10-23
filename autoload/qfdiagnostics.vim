@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Oct 8, 2022
+# Last Change:  Oct 23, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -120,11 +120,11 @@ def Id(loclist: bool): number
     return 0
 enddef
 
-def Props_placed(id: number): number
+def Props_placed(id: number): bool
     return has_key(prop_items, id)
 enddef
 
-def Signs_placed(id: number): number
+def Signs_placed(id: number): bool
     return has_key(sign_placed_ids, id)
 enddef
 
@@ -288,7 +288,7 @@ def Add_textprops(xlist: list<any>, id: number)
 enddef
 
 def Remove_textprops(id: number)
-    if !has_key(prop_items, id)
+    if !Props_placed(id)
         return
     endif
 
@@ -337,10 +337,10 @@ def Add_signs(xlist: list<any>, id: number)
 enddef
 
 def Remove_signs(groupid: number)
-    if !has_key(sign_placed_ids, groupid)
+    if !Signs_placed(groupid)
         return
     endif
-    Sign_group(groupid)->sign_unplace()
+    groupid->Sign_group()->sign_unplace()
     remove(sign_placed_ids, groupid)
 enddef
 
