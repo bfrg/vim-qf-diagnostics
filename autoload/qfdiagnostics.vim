@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Oct 23, 2022
+# Last Change:  Oct 26, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -55,11 +55,11 @@ const error_types: dict<string> = {E: 'error', W: 'warning', I: 'info', N: 'note
 
 # Look-up table used for both sign names and text-property types
 const sign_names: dict<string> = {
-    E: 'qf-diagnostics-error',
-    W: 'qf-diagnostics-warning',
-    I: 'qf-diagnostics-info',
-    N: 'qf-diagnostics-note',
-   '': 'qf-diagnostics-misc'
+    E: 'qf-error',
+    W: 'qf-warning',
+    I: 'qf-info',
+    N: 'qf-note',
+   '': 'qf-misc'
 }
 
 # Dictionary with (ID, 1) pairs for every placed quickfix/location-list,
@@ -85,12 +85,12 @@ def Get(x: string): any
     return get(g:, 'qfdiagnostics', {})->get(x, defaults[x])
 enddef
 
-prop_type_add('qf-diagnostics-popup', {})
-prop_type_add('qf-diagnostics-error',   Get('highlight_error'))
-prop_type_add('qf-diagnostics-warning', Get('highlight_warning'))
-prop_type_add('qf-diagnostics-info',    Get('highlight_info'))
-prop_type_add('qf-diagnostics-note',    Get('highlight_note'))
-prop_type_add('qf-diagnostics-misc',    Get('highlight_misc'))
+prop_type_add('qf-popup', {})
+prop_type_add('qf-error',   Get('highlight_error'))
+prop_type_add('qf-warning', Get('highlight_warning'))
+prop_type_add('qf-info',    Get('highlight_info'))
+prop_type_add('qf-note',    Get('highlight_note'))
+prop_type_add('qf-misc',    Get('highlight_misc'))
 
 def Sign_priorities(): dict<number>
     return {
@@ -104,11 +104,10 @@ enddef
 
 # Place quickfix and location-list errors under different sign groups so that
 # they can be toggled separately in the sign column. Quickfix errors are placed
-# under the qf-diagnostics-0 group, and location-list errors under
-# qf-diagnostics-winid, where 'winid' is the window-ID of the window the
-# location-list belongs to.
+# under the qf-0 group, and location-list errors under qf-WINID, where WINID is
+# the window-ID of the window the location-list belongs to.
 def Sign_group(id: number): string
-    return $'qf-diagnostics-{id}'
+    return $'qf-{id}'
 enddef
 
 def Id(loclist: bool): number
@@ -150,7 +149,7 @@ enddef
 
 def Popup_callback(wid: number, result: number)
     popup_winid = 0
-    prop_remove({type: 'qf-diagnostics-popup', all: true})
+    prop_remove({type: 'qf-popup', all: true})
 enddef
 
 def Getxlist(loclist: bool): list<any>
@@ -298,13 +297,7 @@ def Remove_textprops(id: number)
         if bufexists(bufnr)
             prop_remove({
                 id: id,
-                types: [
-                    'qf-diagnostics-error',
-                    'qf-diagnostics-warning',
-                    'qf-diagnostics-info',
-                    'qf-diagnostics-note',
-                    'qf-diagnostics-misc'
-                ],
+                types: ['qf-error', 'qf-warning', 'qf-info', 'qf-note', 'qf-misc'],
                 bufnr: bufnr,
                 both: true,
                 all: true
@@ -365,20 +358,20 @@ export def Place(loclist: bool)
     endif
 
     if Get('texthl')
-        prop_type_change('qf-diagnostics-error',   Get('highlight_error'))
-        prop_type_change('qf-diagnostics-warning', Get('highlight_warning'))
-        prop_type_change('qf-diagnostics-info',    Get('highlight_info'))
-        prop_type_change('qf-diagnostics-note',    Get('highlight_note'))
-        prop_type_change('qf-diagnostics-misc',    Get('highlight_misc'))
+        prop_type_change('qf-error',   Get('highlight_error'))
+        prop_type_change('qf-warning', Get('highlight_warning'))
+        prop_type_change('qf-info',    Get('highlight_info'))
+        prop_type_change('qf-note',    Get('highlight_note'))
+        prop_type_change('qf-misc',    Get('highlight_misc'))
         Add_textprops(xlist, id)
     endif
 
     if Get('signs')
-        sign_define('qf-diagnostics-error',   Get('sign_error'))
-        sign_define('qf-diagnostics-warning', Get('sign_warning'))
-        sign_define('qf-diagnostics-info',    Get('sign_info'))
-        sign_define('qf-diagnostics-note',    Get('sign_note'))
-        sign_define('qf-diagnostics-misc',    Get('sign_misc'))
+        sign_define('qf-error',   Get('sign_error'))
+        sign_define('qf-warning', Get('sign_warning'))
+        sign_define('qf-info',    Get('sign_info'))
+        sign_define('qf-note',    Get('sign_note'))
+        sign_define('qf-misc',    Get('sign_misc'))
         Add_signs(xlist, id)
     endif
 
@@ -512,13 +505,13 @@ export def Popup(loclist: bool): number
     popup_close(popup_winid)
 
     if Get('popup_attach')
-        prop_remove({type: 'qf-diagnostics-popup', all: true})
+        prop_remove({type: 'qf-popup', all: true})
         prop_add(line('.'),
             items == 'closest' ? (xlist[idxs[0]].col > 0 ? xlist[idxs[0]].col : col('.')) : col('.'),
-            {type: 'qf-diagnostics-popup'}
+            {type: 'qf-popup'}
         )
         extend(opts, {
-            textprop: 'qf-diagnostics-popup',
+            textprop: 'qf-popup',
             pos: 'botleft',
             line: 0,
             col: col - pos.curscol,
