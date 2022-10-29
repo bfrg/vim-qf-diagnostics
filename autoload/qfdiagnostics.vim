@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Oct 29, 2022
+# Last Change:  Oct 30, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -71,8 +71,8 @@ var sign_placed_ids: dict<number> = {}
 # Dictionary of (ID, bufnr-items):
 # {
 #   '0': {
-#       bufnr_1: [{'type': 'prop-error', 'lnum': 10, 'col': 19}, {...}, ...],
-#       bufnr_2: [{'type': 'prop-info',  'lnum': 13, 'col': 19}, {...}, ...],
+#       bufnr_1: [{'type': 'qf-error', 'lnum': 10, 'col': 19}, {...}, ...],
+#       bufnr_2: [{'type': 'qf-info',  'lnum': 13, 'col': 19}, {...}, ...],
 #       ...
 #   },
 #   '1001': {...}
@@ -104,11 +104,11 @@ enddef
 # they can be toggled separately in the sign column. Quickfix errors are placed
 # under the qf-0 group, and location-list errors under qf-WINID, where WINID is
 # the window-ID of the window the location-list belongs to.
-def Sign_group(id: number): string
-    return $'qf-{id}'
+def Sign_group(group_id: number): string
+    return $'qf-{group_id}'
 enddef
 
-def Id(loclist: bool): number
+def Group_id(loclist: bool): number
     if loclist
         return win_getid()->getwininfo()[0].loclist
             ? getloclist(0, {filewinid: 0}).filewinid
@@ -117,35 +117,35 @@ def Id(loclist: bool): number
     return 0
 enddef
 
-def Props_placed(id: number): bool
-    return has_key(prop_items, id)
+def Props_placed(group_id: number): bool
+    return has_key(prop_items, group_id)
 enddef
 
-def Signs_placed(id: number): bool
-    return has_key(sign_placed_ids, id)
+def Signs_placed(group_id: number): bool
+    return has_key(sign_placed_ids, group_id)
 enddef
 
-def Popup_filter(wid: number, key: string): bool
-    if line('$', wid) == popup_getpos(wid).core_height
+def Popup_filter(winid: number, key: string): bool
+    if line('$', winid) == popup_getpos(winid).core_height
         return false
     endif
-    popup_setoptions(wid, {minheight: popup_getpos(wid).core_height})
+    popup_setoptions(winid, {minheight: popup_getpos(winid).core_height})
 
     if key == Get('popup_scrolldown')
-        const line: number = popup_getoptions(wid).firstline
-        const newline: number = line < line('$', wid) ? (line + 1) : line('$', wid)
-        popup_setoptions(wid, {firstline: newline})
+        const line: number = popup_getoptions(winid).firstline
+        const newline: number = line < line('$', winid) ? (line + 1) : line('$', winid)
+        popup_setoptions(winid, {firstline: newline})
     elseif key == Get('popup_scrollup')
-        const line: number = popup_getoptions(wid).firstline
+        const line: number = popup_getoptions(winid).firstline
         const newline: number = (line - 1) > 0 ? (line - 1) : 1
-        popup_setoptions(wid, {firstline: newline})
+        popup_setoptions(winid, {firstline: newline})
     else
         return false
     endif
     return true
 enddef
 
-def Popup_callback(wid: number, result: number)
+def Popup_callback(winid: number, result: number)
     popup_winid = 0
     prop_remove({type: 'qf-popup', all: true})
 enddef
@@ -154,7 +154,7 @@ def Getxlist(loclist: bool): list<any>
     const Xgetlist: func = loclist ? function('getloclist', [0]) : function('getqflist')
     const qf: dict<number> = Xgetlist({changedtick: 0, id: 0})
 
-    # NOTE changedtick of a quickfix list is not incremented when a buffer
+    # Note: 'changedtick' of a quickfix list is not incremented when a buffer
     # referenced in the list is wiped out
     if get(curlist, 'id', -1) == qf.id && get(curlist, 'changedtick') == qf.changedtick
         return curlist.items
@@ -239,9 +239,9 @@ def Add_textprops_on_bufread()
     endfor
 enddef
 
-def Add_textprops(xlist: list<any>, id: number)
-    prop_items[id] = {}
-    final bufs: dict<list<any>> = prop_items[id]
+def Add_textprops(xlist: list<any>, group_id: number)
+    prop_items[group_id] = {}
+    final bufs: dict<list<any>> = prop_items[group_id]
     var prop_type: string
     var max: number
     var col: number
@@ -269,7 +269,7 @@ def Add_textprops(xlist: list<any>, id: number)
                     end_lnum: i.end_lnum > 0 ? i.end_lnum : i.lnum,
                     end_col: i.end_col > 0 ? i.end_col : i.col + 1,
                     bufnr: i.bufnr,
-                    id: id,
+                    id: group_id,
                     type: prop_type
                 })
             endif
@@ -284,17 +284,17 @@ def Add_textprops(xlist: list<any>, id: number)
     }])
 enddef
 
-def Remove_textprops(id: number)
-    if !Props_placed(id)
+def Remove_textprops(group_id: number)
+    if !Props_placed(group_id)
         return
     endif
 
     var bufnr: number
-    for i in prop_items->get(id)->keys()
+    for i in prop_items->get(group_id)->keys()
         bufnr = str2nr(i)
         if bufexists(bufnr)
             prop_remove({
-                id: id,
+                id: group_id,
                 types: ['qf-error', 'qf-warning', 'qf-info', 'qf-note', 'qf-misc'],
                 bufnr: bufnr,
                 both: true,
@@ -303,16 +303,16 @@ def Remove_textprops(id: number)
         endif
     endfor
 
-    remove(prop_items, id)
+    remove(prop_items, group_id)
     if empty(prop_items)
         autocmd_delete([{group: 'qf-diagnostics', event: 'BufReadPost'}])
     endif
 enddef
 
-def Add_signs(xlist: list<any>, id: number)
+def Add_signs(xlist: list<any>, group_id: number)
     const priorities: dict<number> = Sign_priorities()
-    const group: string = Sign_group(id)
-    sign_placed_ids[id] = 1
+    const group: string = Sign_group(group_id)
+    sign_placed_ids[group_id] = 1
 
     xlist
         ->copy()
@@ -327,12 +327,12 @@ def Add_signs(xlist: list<any>, id: number)
         ->sign_placelist()
 enddef
 
-def Remove_signs(groupid: number)
-    if !Signs_placed(groupid)
+def Remove_signs(group_id: number)
+    if !Signs_placed(group_id)
         return
     endif
-    groupid->Sign_group()->sign_unplace()
-    remove(sign_placed_ids, groupid)
+    group_id->Sign_group()->sign_unplace()
+    remove(sign_placed_ids, group_id)
 enddef
 
 def Remove_on_winclosed()
@@ -347,9 +347,9 @@ export def Place(loclist: bool)
     endif
 
     const xlist: list<any> = Getxlist(loclist)
-    const id: number = Id(loclist)
-    Remove_textprops(id)
-    Remove_signs(id)
+    const group_id: number = Group_id(loclist)
+    Remove_textprops(group_id)
+    Remove_signs(group_id)
 
     if empty(xlist)
         return
@@ -361,7 +361,7 @@ export def Place(loclist: bool)
         prop_type_change('qf-info',    Get('highlight_info'))
         prop_type_change('qf-note',    Get('highlight_note'))
         prop_type_change('qf-misc',    Get('highlight_misc'))
-        Add_textprops(xlist, id)
+        Add_textprops(xlist, group_id)
     endif
 
     if Get('signs')
@@ -370,14 +370,14 @@ export def Place(loclist: bool)
         sign_define('qf-info',    Get('sign_info'))
         sign_define('qf-note',    Get('sign_note'))
         sign_define('qf-misc',    Get('sign_misc'))
-        Add_signs(xlist, id)
+        Add_signs(xlist, group_id)
     endif
 
     if loclist
         autocmd_add([{
             group: 'qf-diagnostics',
             event: 'WinClosed',
-            pattern: string(id),
+            pattern: string(group_id),
             replace: true,
             once: true,
             cmd: 'Remove_on_winclosed()'
@@ -407,29 +407,29 @@ export def Lclear(bang: bool)
         endfor
         autocmd_delete([{group: 'qf-diagnostics', event: 'WinClosed'}])
     else
-        const xid: number = Id(true)
-        Remove_signs(xid)
-        Remove_textprops(xid)
+        const group_id: number = Group_id(true)
+        Remove_signs(group_id)
+        Remove_textprops(group_id)
         autocmd_delete([{
             group: 'qf-diagnostics',
             event: 'WinClosed',
-            pattern: string(xid)
+            pattern: string(group_id)
         }])
     endif
 enddef
 
 export def Toggle(loclist: bool)
-    const xid: number = Id(loclist)
-    if !Signs_placed(xid) && !Props_placed(xid)
+    const group_id: number = Group_id(loclist)
+    if !Signs_placed(group_id) && !Props_placed(group_id)
         Place(loclist)
         return
     endif
-    Remove_signs(xid)
-    Remove_textprops(xid)
+    Remove_signs(group_id)
+    Remove_textprops(group_id)
     autocmd_delete([{
         group: 'qf-diagnostics',
         event: 'WinClosed',
-        pattern: string(xid)
+        pattern: string(group_id)
     }])
 enddef
 
