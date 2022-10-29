@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Oct 26, 2022
+# Last Change:  Oct 29, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -18,8 +18,6 @@ highlight default link QfDiagnosticsError     ErrorMsg
 highlight default link QfDiagnosticsWarning   WarningMsg
 highlight default link QfDiagnosticsInfo      MoreMsg
 highlight default link QfDiagnosticsNote      Todo
-
-autocmd_add([{group: 'qf-diagnostics'}])
 
 var popup_winid: number = 0
 
@@ -380,6 +378,7 @@ export def Place(loclist: bool)
             group: 'qf-diagnostics',
             event: 'WinClosed',
             pattern: string(id),
+            replace: true,
             once: true,
             cmd: 'Remove_on_winclosed()'
         }])
