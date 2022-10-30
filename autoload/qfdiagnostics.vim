@@ -248,31 +248,34 @@ def Add_textprops(xlist: list<any>, group_id: number)
     var end_col: number
 
     for i in xlist
-        if i.bufnr > 0 && bufexists(i.bufnr) && i.valid && i.lnum > 0 && i.col > 0
-            if !has_key(bufs, i.bufnr)
-                bufs[i.bufnr] = []
-            endif
-            prop_type = get(sign_names, toupper(i.type), sign_names[''])
-            add(bufs[i.bufnr], {
-                type: prop_type,
-                lnum: i.lnum,
-                col: i.col,
-                end_lnum: get(i, 'end_lnum'),
-                end_col: get(i, 'end_col')
-            })
+        if i.bufnr < 1 || i.lnum < 1 || i.col < 1 || !i.valid || !bufexists(i.bufnr)
+            continue
+        endif
 
-            if bufloaded(i.bufnr)
-                max = getbufline(i.bufnr, i.lnum)[0]->len()
-                col = i.col >= max ? max : i.col
-                end_col = i.end_col >= max ? max : i.end_col
-                prop_add(i.lnum, col, {
-                    end_lnum: i.end_lnum > 0 ? i.end_lnum : i.lnum,
-                    end_col: i.end_col > 0 ? i.end_col : i.col + 1,
-                    bufnr: i.bufnr,
-                    id: group_id,
-                    type: prop_type
-                })
-            endif
+        if !has_key(bufs, i.bufnr)
+            bufs[i.bufnr] = []
+        endif
+
+        prop_type = get(sign_names, toupper(i.type), sign_names[''])
+        add(bufs[i.bufnr], {
+            type: prop_type,
+            lnum: i.lnum,
+            col: i.col,
+            end_lnum: get(i, 'end_lnum'),
+            end_col: get(i, 'end_col')
+        })
+
+        if bufloaded(i.bufnr)
+            max = getbufline(i.bufnr, i.lnum)[0]->len()
+            col = i.col >= max ? max : i.col
+            end_col = i.end_col >= max ? max : i.end_col
+            prop_add(i.lnum, col, {
+                end_lnum: i.end_lnum > 0 ? i.end_lnum : i.lnum,
+                end_col: i.end_col > 0 ? i.end_col : i.col + 1,
+                bufnr: i.bufnr,
+                id: group_id,
+                type: prop_type
+            })
         endif
     endfor
     autocmd_add([{
