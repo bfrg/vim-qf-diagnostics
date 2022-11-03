@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 2, 2022
+# Last Change:  Nov 3, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -429,11 +429,13 @@ export def Toggle(loclist: bool)
     endif
     Remove_signs(group_id)
     Remove_textprops(group_id)
-    autocmd_delete([{
-        group: 'qf-diagnostics',
-        event: 'WinClosed',
-        pattern: string(group_id)
-    }])
+    if loclist
+        autocmd_delete([{
+            group: 'qf-diagnostics',
+            event: 'WinClosed',
+            pattern: string(group_id)
+        }])
+    endif
 enddef
 
 export def Popup(loclist: bool): number
