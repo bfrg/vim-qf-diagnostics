@@ -485,9 +485,7 @@ export def Popup(loclist: bool): number
     const width: number = textwidth + pad > &columns ? &columns - pad : textwidth
 
     # Column position for popup window
-    const pos: dict<number> = win_getid()
-        ->screenpos(line('.'), items == 'closest' ? xlist[idxs[0]].col : col('.'))
-
+    const pos: dict<number> = screenpos(win_getid(), line('.'), items == 'closest' ? xlist[idxs[0]].col : col('.'))
     const col: number = &columns - pos.curscol <= width ? &columns - width - 1 : pos.curscol
 
     var opts: dict<any> = {
