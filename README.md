@@ -1,7 +1,7 @@
 # vim-qf-diagnostics
 
-- Highlight the locations of the quickfix items (for example, errors of a
-  project-build, linter, or `grep` command) in the sign column and in the buffer
+- Highlight the locations of the quickfix items (errors of a project-build,
+  linter, or locations of a `grep` search) in the sign column, and in the text
   using `text-properties`.
 - Show the error message for the current line in a popup window next to the
   cursor.
@@ -36,8 +36,7 @@ nmap gH <plug>(qf-diagnostics-popup-loclist)
 
 The items in the quickfix and location list can be highlighted in the sign
 column and in the buffer directly. Both highlightings are optional and can be
-individually configured in [`g:qfdiagnostics`](#configuration). By default, only
-signs are placed.
+individually configured in [`g:qfdiagnostics`](#configuration).
 
 | Command                 | Description                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------ |
@@ -49,8 +48,8 @@ signs are placed.
 | `:LDiagnosticsToggle`   | Toggle the diagnostics from the location list.                                       |
 
 **Notes:**
-* `:DiagnosticsPlace` and `:LDiagnosticsPlace` will first remove any
-  highlightings that have been previously placed by the respective command.
+* `:DiagnosticsPlace` and `:LDiagnosticsPlace` each will first remove any
+  highlightings that have been previously placed by the same command.
 * `:LDiagnosticsPlace` can be run in multiple windows to simultaneously
   highlight diagnostics from several location lists.
 * `:LDiagnosticsClear` must always be run in the same window where
@@ -76,6 +75,9 @@ signs are placed.
        autocmd QuickfixCmdPost lmake LDiagnosticsPlace
    augroup END
    ```
+   **Note:** it is not necessary to run `DiagnosticsClear` on `QuickfixCmdPre`
+   since `DiagnosticsPlace` automatically clears previously placed
+   highlightings before adding new ones.
 3. If you want to extend the highlighting in the popup window, you can specify a
    callback function which will be invoked when the popup is created. For
    example, to highlight `-Wunused-parameter` in the popup window for a compiler

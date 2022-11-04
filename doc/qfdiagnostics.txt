@@ -138,56 +138,56 @@ are supported:
             the {dict} argument in |sign_define()| on how to set this option.
             In addition, the sign priority can be set through the "priority"
             entry.
-            Default: `{'text': 'E>', 'priority': 14, 'texthl': 'ErrorMsg'}`
+            Default: `{text: 'E>', priority: 14, texthl: 'ErrorMsg'}`
 
     sign_warning                                *g:qfdiagnostics.sign_warning*
             Set sign attributes for quickfix items of type "warning".
-            Default: `{'text': 'W>', 'priority': 13, 'texthl': 'WarningMsg'}`
+            Default: `{text: 'W>', priority: 13, texthl: 'WarningMsg'}`
 
     sign_info                                      *g:qfdiagnostics.sign_info*
             Set sign attributes for quickfix items of type "info".
-            Default: `{'text': 'I>', 'priority': 12, 'texthl': 'MoreMsg'}`
+            Default: `{text: 'I>', priority: 12, texthl: 'MoreMsg'}`
 
     sign_note                                      *g:qfdiagnostics.sign_note*
             Set sign attributes for quickfix items of type "note".
-            Default: `{'text': 'N>', 'priority': 11, 'texthl': 'Todo'}`
+            Default: `{text: 'N>', priority: 11, texthl: 'Todo'}`
 
     sign_misc                                      *g:qfdiagnostics.sign_misc*
             Set sign attributes for quickfix items of type "misc". These are
             all items that don't have any of the other types (for example
             |:grep| items).
-            Default: `{'text': '?>', 'priority': 10, 'texthl': 'Normal'}`
+            Default: `{text: '?>', priority: 10, texthl: 'Normal'}`
 
     texthl                                            *g:qfdiagnostics.texthl*
             Whether to highlight diagnostics in the text using
             |text-properties|.
-            Default: |false|
+            Default: |true|
 
     highlight_error                          *g:qfdiagnostics.highlight_error*
             Set the appearance of text-properties for quickfix items of type
             "error". See the {props} argument in |prop_type_add()| for more
             details.
-            Default: `{'highlight': 'SpellBad', 'priority': 14, 'combine': 1}`
+            Default: `{highlight: 'SpellBad', priority: 14, combine: 1}`
 
     highlight_warning                      *g:qfdiagnostics.highlight_warning*
             Set the appearance of text-properties for quickfix items of type
             "warning".
-            Default: `{'highlight': 'SpellCap', 'priority': 13, 'combine': 1}`
+            Default: `{highlight: 'SpellCap', priority: 13, combine: 1}`
 
     highlight_info                            *g:qfdiagnostics.highlight_info*
             Set the appearance of text-properties for quickfix items of type
             "info".
-            Default: `{'highlight': 'SpellLocal', 'priority': 12, 'combine': 1}`
+            Default: `{highlight: 'SpellLocal', priority: 12, combine: 1}`
 
     highlight_note                            *g:qfdiagnostics.highlight_note*
             Set the appearance of text-properties for quickfix items of type
             "note".
-            Default: `{'highlight': 'SpellRare', 'priority': 11, 'combine': 1}`
+            Default: `{highlight: 'SpellRare', priority: 11, combine: 1}`
 
     highlight_misc                            *g:qfdiagnostics.highlight_misc*
             Set the appearance of text-properties for quickfix items of type
             "misc".
-            Default: `{'highlight': 'Underlined', 'priority': 10, 'combine': 1}`
+            Default: `{highlight: 'Underlined', priority: 10, combine: 1}`
 
 ==============================================================================
 EXAMPLES                                             *qf-diagnostics-examples*
@@ -199,6 +199,10 @@ EXAMPLES                                             *qf-diagnostics-examples*
         autocmd QuickfixCmdPost lmake LDiagnosticsPlace
     augroup END
 <
+   Note: it's not necessary to run |DiagnosticsClear| (or |LDiagnosticsClear|)
+   on |QuickfixCmdPre| since |DiagnosticsPlace| automatically clears
+   previously placed highlightings before adding new ones.
+
 2. Enable border and use fancy border characters with round corners: >
     g:qfdiagnostics = {
         popup_border: [],

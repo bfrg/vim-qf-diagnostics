@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 3, 2022
+# Last Change:  Nov 4, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -32,7 +32,7 @@ const defaults: dict<any> = {
     popup_mapping: true,
     popup_items: 'all',
     popup_attach: true,
-    texthl: false,
+    texthl: true,
     highlight_error:   {highlight: 'SpellBad',   priority: 14, combine: true},
     highlight_warning: {highlight: 'SpellCap',   priority: 13, combine: true},
     highlight_info:    {highlight: 'SpellLocal', priority: 12, combine: true},
