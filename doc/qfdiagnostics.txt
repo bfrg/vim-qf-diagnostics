@@ -297,6 +297,6 @@ QfDiagnosticsInfo                                       *hl-QfDiagnosticsInfo*
 
 QfDiagnosticsNote                                       *hl-QfDiagnosticsNote*
                     Same as |QfDiagnosticsError| but for note messages.
-                    Default: |hl-Todo|
+                    Default: |hl-MoreMsg|
 
  vim:tw=78:et:ft=help:norl:

@@ -8,16 +8,18 @@ vim9script
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
-highlight default link QfDiagnostics          Pmenu
-highlight default link QfDiagnosticsBorder    Pmenu
-highlight default link QfDiagnosticsScrollbar PmenuSbar
-highlight default link QfDiagnosticsThumb     PmenuThumb
-highlight default link QfDiagnosticsItemNr    Title
-highlight default link QfDiagnosticsLineNr    Directory
-highlight default link QfDiagnosticsError     ErrorMsg
-highlight default link QfDiagnosticsWarning   WarningMsg
-highlight default link QfDiagnosticsInfo      MoreMsg
-highlight default link QfDiagnosticsNote      Todo
+hlset([
+    {name: 'QfDiagnostics',          linksto: 'Pmenu',      default: true},
+    {name: 'QfDiagnosticsBorder',    linksto: 'Pmenu',      default: true},
+    {name: 'QfDiagnosticsScrollbar', linksto: 'PmenuSbar',  default: true},
+    {name: 'QfDiagnosticsThumb',     linksto: 'PmenuThumb', default: true},
+    {name: 'QfDiagnosticsItemNr',    linksto: 'Title',      default: true},
+    {name: 'QfDiagnosticsLineNr',    linksto: 'Directory',  default: true},
+    {name: 'QfDiagnosticsError',     linksto: 'ErrorMsg',   default: true},
+    {name: 'QfDiagnosticsWarning',   linksto: 'WarningMsg', default: true},
+    {name: 'QfDiagnosticsInfo',      linksto: 'MoreMsg',    default: true},
+    {name: 'QfDiagnosticsNote',      linksto: 'MoreMsg',    default: true},
+])
 
 var popup_winid: number = 0
 
