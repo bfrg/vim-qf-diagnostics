@@ -455,16 +455,18 @@ export def Popup(loclist: bool): number
     endif
 
     var text: list<string> = []
+    var longtype: string
+
     for i in idxs
         if empty(xlist[i].type)
-            extend(text, printf('(%d/%d) %d:%d %s', i + 1, len(xlist), xlist[i].lnum, xlist[i].col, trim(xlist[i].text))->split('\n'))
+            extend(text, $'({i + 1}/{len(xlist)}) {xlist[i].lnum}:{xlist[i].col} {trim(xlist[i].text)}'->split('\n'))
         else
-            extend(text, printf('(%d/%d) %d:%d %s: %s', i + 1, len(xlist),
-                xlist[i].lnum,
-                xlist[i].col,
-                get(error_types, toupper(xlist[i].type), xlist[i].type) .. (xlist[i].nr < 1 ? '' : ' ' .. xlist[i].nr),
-                trim(xlist[i].text))->split('\n')
-            )
+            longtype = get(error_types, toupper(xlist[i].type), xlist[i].type)
+            if xlist[i].nr < 1
+                extend(text, $'({i + 1}/{len(xlist)}) {xlist[i].lnum}:{xlist[i].col} {longtype}: {trim(xlist[i].text)}'->split('\n'))
+            else
+                extend(text, $'({i + 1}/{len(xlist)}) {xlist[i].lnum}:{xlist[i].col} {longtype} {xlist[i].nr}: {trim(xlist[i].text)}'->split('\n'))
+            endif
         endif
     endfor
 
