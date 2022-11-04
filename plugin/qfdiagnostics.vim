@@ -4,7 +4,7 @@ vim9script
 # File:         plugin/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  May 19, 2022
+# Last Change:  Nov 4, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -26,3 +26,6 @@ command -bar -bang LDiagnosticsClear diagnostics.Lclear(<bang>false)
 
 command -bar  DiagnosticsToggle diagnostics.Toggle(false)
 command -bar LDiagnosticsToggle diagnostics.Toggle(true)
+
+command -bar  DiagnosicsToggleHover diagnostics.Auto(false)
+command -bar LDiagnosicsToggleHover diagnostics.Auto(true)

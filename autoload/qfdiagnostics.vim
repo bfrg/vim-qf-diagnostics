@@ -22,8 +22,12 @@ hlset([
 ])
 
 var popup_winid: number = 0
+var timer: number = 0
+var lastpos: list<number> = [0, 0, 0]
 
 const defaults: dict<any> = {
+    popup_delay: 200,
+    cursormoved: 'popup',
     popup_create_cb: () => 0,
     popup_scrollup: "\<c-k>",
     popup_scrolldown: "\<c-j>",
@@ -538,3 +542,95 @@ export def Popup(loclist: bool): number
 
     return popup_winid
 enddef
+
+
+export def Auto(loclist: bool)
+    if exists('#qf-diagnostics-auto#CursorMoved')
+        Remove_events()
+    else
+        Init_events(loclist)
+    endif
+enddef
+
+def Remove_events()
+    autocmd_delete([{group: 'qf-diagnostics-auto'}])
+    popup_close(popup_winid)
+    timer_stop(timer)
+    popup_winid = 0
+    timer = 0
+    lastpos = [0, 0, 0]
+enddef
+
+def Init_events(loclist: bool)
+    autocmd_add([{
+        group: 'qf-diagnostics-auto',
+        event: 'CursorMoved',
+        pattern: '*',
+        replace: true,
+        cmd: $'Cursor_moved_cb({loclist})'
+    }])
+    # autocmd_add([{
+    #     group: 'qf-diagnostics-auto',
+    #     event: 'CursorMoved',
+    #     pattern: '*',
+    #     replace: true,
+    #     cmd: $'Cursor_moved_cb({loclist}, {Get('cursormoved') == 'popup' ? Popup_open : Echo_message})'
+    # }])
+enddef
+
+def Popup_auto_toggle(loclist: bool)
+    if exists('#qf-diagnostics-auto#CursorMoved')
+        Remove_events()
+    else
+        Init_events(loclist)
+    endif
+enddef
+
+def Popup_open(loclist: bool, tid: number)
+    popup_winid = Popup(loclist)
+enddef
+
+def Cursor_moved_cb(loclist: bool)
+    const size: number = loclist
+        ? getloclist(0, {size: 0}).size
+        : getqflist({size: 0}).size
+
+    if !empty(&buftype) || mode() != 'n' || !size
+        return
+    endif
+
+    timer_stop(timer)
+    const curpos: list<number> = [win_getid(), line('.'), col('.')]
+
+    if curpos == lastpos
+        return
+    endif
+
+    lastpos = curpos
+    popup_close(popup_winid)
+    timer = timer_start(Get('popup_delay'), funcref(Popup_open, [loclist]))
+    # timer = timer_start(Get('popup_delay'), funcref(Echo_message, [loclist]))
+enddef
+
+# def Echo_message(loclist: bool, tid: number)
+#     const xlist: list<any> = loclist ? getloclist(0) : getqflist()
+#
+#     if empty(xlist)
+#         return
+#     endif
+#
+#     const idxs: list<number> = Filter_items(xlist, 'closest')
+#
+#     if empty(idxs)
+#         echo ''
+#         return
+#     endif
+#
+#     const text = empty(xlist[idxs[0]].type) ? trim(xlist[idxs[0]].text)->split('\n')[0][: &columns - 1]
+#         : printf('%s: %s',
+#             get(error_types, toupper(xlist[idxs[0]].type), 'unknown'),
+#             trim(xlist[idxs[0]].text)->split('\n')[0]
+#           )[: &columns - 1]
+#
+#     echo text
+# enddef
