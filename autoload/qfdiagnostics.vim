@@ -62,6 +62,15 @@ const sign_names: dict<string> = {
    '': 'qf-misc'
 }
 
+# Look-up table used for quickfix types
+const popup_prop_types: dict<string> = {
+    E: 'qf-popup-error',
+    W: 'qf-popup-warning',
+    I: 'qf-popup-info',
+    N: 'qf-popup-note',
+   '': 'qf-popup-misc'
+}
+
 # Dictionary with (ID, 1) pairs for every placed quickfix/location-list,
 # quickfix list has ID=0, for location lists we use window-IDs
 var sign_placed_ids: dict<number> = {}
@@ -86,6 +95,13 @@ def Get(x: string): any
 enddef
 
 prop_type_add('qf-popup', {})
+prop_type_add('qf-popup-item-nr', {highlight: 'QfDiagnosticsItemNr'})
+prop_type_add('qf-popup-line-nr', {highlight: 'QfDiagnosticsLineNr'})
+prop_type_add('qf-popup-error',   {highlight: 'QfDiagnosticsError'})
+prop_type_add('qf-popup-warning', {highlight: 'QfDiagnosticsWarning'})
+prop_type_add('qf-popup-info',    {highlight: 'QfDiagnosticsInfo'})
+prop_type_add('qf-popup-note',    {highlight: 'QfDiagnosticsNote'})
+prop_type_add('qf-popup-misc',    {highlight: 'QfDiagnostics'})
 prop_type_add('qf-error',   Get('highlight_error'))
 prop_type_add('qf-warning', Get('highlight_warning'))
 prop_type_add('qf-info',    Get('highlight_info'))
@@ -454,18 +470,55 @@ export def Popup(loclist: bool): number
         return 0
     endif
 
-    var text: list<string> = []
+    var text: list<dict<any>> = []
+    var lines: list<dict<any>>
+    var items_len: number
+    var location_len: number
+    var longtype: string
+
     for i in idxs
+        lines = xlist[i].text
+            ->trim()
+            ->split('\n')
+            ->map((_, j: string): dict<string> => ({text: j}))
+
+        items_len = 3 + strlen(i + 1) + xlist->len()->strlen()
+        location_len = 1 + strlen(xlist[i].lnum) + strlen(xlist[i].col)
+        lines[0].props = [
+            {
+                col: 1,
+                length: items_len,
+                type: 'qf-popup-item-nr'
+            },
+            {
+                col: items_len + 2,
+                length: location_len,
+                type: 'qf-popup-line-nr'
+            }
+        ]
+
         if empty(xlist[i].type)
-            extend(text, printf('(%d/%d) %d:%d %s', i + 1, len(xlist), xlist[i].lnum, xlist[i].col, trim(xlist[i].text))->split('\n'))
+            lines[0].text = $'({i + 1}/{len(xlist)}) {xlist[i].lnum}:{xlist[i].col} {lines[0].text}'
         else
-            extend(text, printf('(%d/%d) %d:%d %s: %s', i + 1, len(xlist),
-                xlist[i].lnum,
-                xlist[i].col,
-                get(error_types, toupper(xlist[i].type), xlist[i].type) .. (xlist[i].nr < 1 ? '' : ' ' .. xlist[i].nr),
-                trim(xlist[i].text))->split('\n')
-            )
+            longtype = get(error_types, toupper(xlist[i].type), xlist[i].type)
+            if xlist[i].nr < 1
+                lines[0].text = $'({i + 1}/{len(xlist)}) {xlist[i].lnum}:{xlist[i].col} {longtype}: {lines[0].text}'
+                add(lines[0].props, {
+                    col: items_len + location_len + 3,
+                    length: strlen(longtype) + 1,
+                    type: get(popup_prop_types, toupper(xlist[i].type), '')
+                })
+            else
+                lines[0].text = $'({i + 1}/{len(xlist)}) {xlist[i].lnum}:{xlist[i].col} {longtype} {xlist[i].nr}: {lines[0].text}'
+                add(lines[0].props, {
+                    col: items_len + location_len + 3,
+                    length: strlen(longtype) + strlen(xlist[i].nr) + 2,
+                    type: get(popup_prop_types, toupper(xlist[i].type), '')
+                })
+            endif
         endif
+
+        extend(text, lines)
     endfor
 
     # Maximum width for popup window
@@ -475,7 +528,7 @@ export def Popup(loclist: bool): number
         : text
             ->len()
             ->range()
-            ->map((_, i: number): number => strdisplaywidth(text[i]))
+            ->map((_, i: number): number => strdisplaywidth(text[i].text))
             ->max()
 
     const border: list<number> = Get('popup_border')
@@ -527,13 +580,6 @@ export def Popup(loclist: bool): number
     popup_winid = popup_atcursor(text, opts)
     setwinvar(popup_winid, '&breakindent', 1)
     setwinvar(popup_winid, '&tabstop', &g:tabstop)
-
-    matchadd('QfDiagnosticsItemNr',  '^(\d\+/\d\+)',                                               10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsLineNr',  '^(\d\+/\d\+) \zs\d\+\%(:\d\+\)\?',                           10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsError',   '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsWarning', '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsInfo',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsNote',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {window: popup_winid})
     Get('popup_create_cb')(popup_winid, curlist.id, loclist)
 
     return popup_winid
