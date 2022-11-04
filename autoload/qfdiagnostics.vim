@@ -227,7 +227,7 @@ def Add_textprops_on_bufread()
 
     for id in keys(prop_items)
         for item in get(prop_items[id], bufnr, [])
-            max = getbufline(bufnr, item.lnum)[0]->len()
+            max = getbufline(bufnr, item.lnum)[0]->strlen()
             col = item.col >= max ? max : item.col
             end_col = item.end_col >= max ? max : item.end_col
             prop_add(item.lnum, col, {
