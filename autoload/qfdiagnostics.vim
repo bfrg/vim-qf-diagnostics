@@ -268,7 +268,7 @@ def Add_textprops(xlist: list<any>, group_id: number)
         })
 
         if bufloaded(i.bufnr)
-            max = getbufline(i.bufnr, i.lnum)[0]->len()
+            max = getbufline(i.bufnr, i.lnum)[0]->strlen()
             col = i.col >= max ? max : i.col
             end_col = i.end_col >= max ? max : i.end_col
             prop_add(i.lnum, col, {
