@@ -167,27 +167,27 @@ are supported:
             Set the appearance of text-properties for quickfix items of type
             "error". See the {props} argument in |prop_type_add()| for more
             details.
-            Default: `{highlight: 'SpellBad', priority: 14, combine: 1}`
+            Default: `{highlight: 'SpellBad', priority: 14}`
 
     highlight_warning                      *g:qfdiagnostics.highlight_warning*
             Set the appearance of text-properties for quickfix items of type
             "warning".
-            Default: `{highlight: 'SpellCap', priority: 13, combine: 1}`
+            Default: `{highlight: 'SpellCap', priority: 13}`
 
     highlight_info                            *g:qfdiagnostics.highlight_info*
             Set the appearance of text-properties for quickfix items of type
             "info".
-            Default: `{highlight: 'SpellLocal', priority: 12, combine: 1}`
+            Default: `{highlight: 'SpellLocal', priority: 12}`
 
     highlight_note                            *g:qfdiagnostics.highlight_note*
             Set the appearance of text-properties for quickfix items of type
             "note".
-            Default: `{highlight: 'SpellRare', priority: 11, combine: 1}`
+            Default: `{highlight: 'SpellRare', priority: 11}`
 
     highlight_misc                            *g:qfdiagnostics.highlight_misc*
             Set the appearance of text-properties for quickfix items of type
             "misc".
-            Default: `{highlight: 'Underlined', priority: 10, combine: 1}`
+            Default: `{highlight: 'Underlined', priority: 10}`
 
 ==============================================================================
 EXAMPLES                                             *qf-diagnostics-examples*

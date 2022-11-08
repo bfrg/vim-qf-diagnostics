@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 4, 2022
+# Last Change:  Nov 8, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -35,11 +35,11 @@ const defaults: dict<any> = {
     popup_items: 'all',
     popup_attach: true,
     texthl: true,
-    highlight_error:   {highlight: 'SpellBad',   priority: 14, combine: true},
-    highlight_warning: {highlight: 'SpellCap',   priority: 13, combine: true},
-    highlight_info:    {highlight: 'SpellLocal', priority: 12, combine: true},
-    highlight_note:    {highlight: 'SpellRare',  priority: 11, combine: true},
-    highlight_misc:    {highlight: 'Underlined', priority: 10, combine: true},
+    highlight_error:   {highlight: 'SpellBad',   priority: 14},
+    highlight_warning: {highlight: 'SpellCap',   priority: 13},
+    highlight_info:    {highlight: 'SpellLocal', priority: 12},
+    highlight_note:    {highlight: 'SpellRare',  priority: 11},
+    highlight_misc:    {highlight: 'Underlined', priority: 10},
     signs: true,
     sign_error:   {text: 'E>', priority: 14, texthl: 'ErrorMsg'},
     sign_warning: {text: 'W>', priority: 13, texthl: 'WarningMsg'},
@@ -269,6 +269,9 @@ def Add_textprops(xlist: list<any>, group_id: number)
 
         if bufloaded(i.bufnr)
             max = getbufline(i.bufnr, i.lnum)[0]->strlen()
+            if max == 0
+                continue
+            endif
             col = i.col >= max ? max : i.col
             end_col = i.end_col >= max ? max : i.end_col
             prop_add(i.lnum, col, {
