@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 8, 2022
+# Last Change:  Nov 14, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -220,16 +220,31 @@ enddef
 
 def Add_textprops_on_bufread()
     const bufnr: number = expand('<abuf>')->str2nr()
-
     var max: number
     var col: number
+    var end_max: number
     var end_col: number
 
     for id in keys(prop_items)
         for item in get(prop_items[id], bufnr, [])
             max = getbufline(bufnr, item.lnum)[0]->strlen()
+
+            # Sanity check if bufline is empty
+            if max == 0
+                continue
+            endif
+
             col = item.col >= max ? max : item.col
             end_col = item.end_col >= max ? max : item.end_col
+            if item.end_col > 0
+                end_max = item.end_lnum > 0 && item.end_lnum != item.lnum
+                    ? getbufline(bufnr, item.end_lnum)[0]->strlen() + 1
+                    : max + 1
+                end_col = item.end_col >= end_max ? end_max : item.end_col
+            else
+                end_col = col + 1
+            endif
+
             prop_add(item.lnum, col, {
                 end_lnum: item.end_lnum > 0 ? item.end_lnum : item.lnum,
                 end_col: item.end_col > 0 ? item.end_col : item.col + 1,
@@ -247,6 +262,7 @@ def Add_textprops(xlist: list<any>, group_id: number)
     var prop_type: string
     var max: number
     var col: number
+    var end_max: number
     var end_col: number
 
     for i in xlist
@@ -269,20 +285,33 @@ def Add_textprops(xlist: list<any>, group_id: number)
 
         if bufloaded(i.bufnr)
             max = getbufline(i.bufnr, i.lnum)[0]->strlen()
+
+            # Sanity check if bufline is empty
             if max == 0
                 continue
             endif
+
             col = i.col >= max ? max : i.col
             end_col = i.end_col >= max ? max : i.end_col
+            if i.end_col > 0
+                end_max = i.end_lnum > 0 && i.end_lnum != i.lnum
+                    ? getbufline(i.bufnr, i.end_lnum)[0]->strlen() + 1
+                    : max + 1
+                end_col = i.end_col >= end_max ? end_max : i.end_col
+            else
+                end_col = col + 1
+            endif
+
             prop_add(i.lnum, col, {
                 end_lnum: i.end_lnum > 0 ? i.end_lnum : i.lnum,
-                end_col: i.end_col > 0 ? i.end_col : i.col + 1,
+                end_col: end_col,
                 bufnr: i.bufnr,
                 id: group_id,
                 type: prop_type
             })
         endif
     endfor
+
     autocmd_add([{
         group: 'qf-diagnostics',
         event: 'BufReadPost',
