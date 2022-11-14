@@ -279,8 +279,8 @@ def Add_textprops(xlist: list<any>, group_id: number)
             type: prop_type,
             lnum: i.lnum,
             col: i.col,
-            end_lnum: get(i, 'end_lnum'),
-            end_col: get(i, 'end_col')
+            end_lnum: i.end_lnum,
+            end_col: i.end_col
         })
 
         if bufloaded(i.bufnr)
