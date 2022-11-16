@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 14, 2022
+# Last Change:  Nov 17, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -35,17 +35,17 @@ const defaults: dict<any> = {
     popup_items: 'all',
     popup_attach: true,
     texthl: true,
-    highlight_error:   {highlight: 'SpellBad',   priority: 14},
-    highlight_warning: {highlight: 'SpellCap',   priority: 13},
-    highlight_info:    {highlight: 'SpellLocal', priority: 12},
-    highlight_note:    {highlight: 'SpellRare',  priority: 11},
-    highlight_misc:    {highlight: 'Underlined', priority: 10},
+    text_error:   {highlight: 'SpellBad',   priority: 14},
+    text_warning: {highlight: 'SpellCap',   priority: 13},
+    text_info:    {highlight: 'SpellLocal', priority: 12},
+    text_note:    {highlight: 'SpellRare',  priority: 11},
+    text_other:   {highlight: 'Underlined', priority: 10},
     signs: true,
     sign_error:   {text: 'E>', priority: 14, texthl: 'ErrorMsg'},
     sign_warning: {text: 'W>', priority: 13, texthl: 'WarningMsg'},
     sign_info:    {text: 'I>', priority: 12, texthl: 'MoreMsg'},
     sign_note:    {text: 'N>', priority: 11, texthl: 'Todo'},
-    sign_misc:    {text: '?>', priority: 10, texthl: 'Normal'}
+    sign_other:   {text: '?>', priority: 10, texthl: 'Normal'}
 }
 
 # Cache current quickfix list: {'id': 2, 'changedtick': 1, 'items': [...]}
@@ -59,7 +59,7 @@ const sign_names: dict<string> = {
     W: 'qf-warning',
     I: 'qf-info',
     N: 'qf-note',
-   '': 'qf-misc'
+   '': 'qf-other'
 }
 
 # Dictionary with (ID, 1) pairs for every placed quickfix/location-list,
@@ -86,11 +86,11 @@ def Get(x: string): any
 enddef
 
 prop_type_add('qf-popup', {})
-prop_type_add('qf-error',   Get('highlight_error'))
-prop_type_add('qf-warning', Get('highlight_warning'))
-prop_type_add('qf-info',    Get('highlight_info'))
-prop_type_add('qf-note',    Get('highlight_note'))
-prop_type_add('qf-misc',    Get('highlight_misc'))
+prop_type_add('qf-error',   Get('text_error'))
+prop_type_add('qf-warning', Get('text_warning'))
+prop_type_add('qf-info',    Get('text_info'))
+prop_type_add('qf-note',    Get('text_note'))
+prop_type_add('qf-other',   Get('text_other'))
 
 def Sign_priorities(): dict<number>
     return {
@@ -98,7 +98,7 @@ def Sign_priorities(): dict<number>
         W: Get('sign_warning')->get('priority', 13),
         I: Get('sign_info')->get('priority', 12),
         N: Get('sign_note')->get('priority', 11),
-       '': Get('sign_misc')->get('priority', 10)
+       '': Get('sign_other')->get('priority', 10)
     }
 enddef
 
@@ -332,7 +332,7 @@ def Remove_textprops(group_id: number)
         if bufexists(bufnr)
             prop_remove({
                 id: group_id,
-                types: ['qf-error', 'qf-warning', 'qf-info', 'qf-note', 'qf-misc'],
+                types: ['qf-error', 'qf-warning', 'qf-info', 'qf-note', 'qf-other'],
                 bufnr: bufnr,
                 both: true,
                 all: true
@@ -393,11 +393,11 @@ export def Place(loclist: bool)
     endif
 
     if Get('texthl')
-        prop_type_change('qf-error',   Get('highlight_error'))
-        prop_type_change('qf-warning', Get('highlight_warning'))
-        prop_type_change('qf-info',    Get('highlight_info'))
-        prop_type_change('qf-note',    Get('highlight_note'))
-        prop_type_change('qf-misc',    Get('highlight_misc'))
+        prop_type_change('qf-error',   Get('text_error'))
+        prop_type_change('qf-warning', Get('text_warning'))
+        prop_type_change('qf-info',    Get('text_info'))
+        prop_type_change('qf-note',    Get('text_note'))
+        prop_type_change('qf-other',   Get('text_other'))
         Add_textprops(xlist, group_id)
     endif
 
@@ -406,7 +406,7 @@ export def Place(loclist: bool)
         sign_define('qf-warning', Get('sign_warning'))
         sign_define('qf-info',    Get('sign_info'))
         sign_define('qf-note',    Get('sign_note'))
-        sign_define('qf-misc',    Get('sign_misc'))
+        sign_define('qf-other',   Get('sign_other'))
         Add_signs(xlist, group_id)
     endif
 

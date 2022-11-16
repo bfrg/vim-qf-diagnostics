@@ -152,10 +152,10 @@ are supported:
             Set sign attributes for quickfix items of type "note".
             Default: `{text: 'N>', priority: 11, texthl: 'Todo'}`
 
-    sign_misc                                      *g:qfdiagnostics.sign_misc*
-            Set sign attributes for quickfix items of type "misc". These are
-            all items that don't have any of the other types (for example
-            |:grep| items).
+    sign_other                                    *g:qfdiagnostics.sign_other*
+            Set sign attributes for quickfix items that are neither "error",
+            nor "warning", "info" or "note" type, i.e. everything else, for
+            example, |:grep| items.
             Default: `{text: '?>', priority: 10, texthl: 'Normal'}`
 
     texthl                                            *g:qfdiagnostics.texthl*
@@ -163,30 +163,31 @@ are supported:
             |text-properties|.
             Default: |true|
 
-    highlight_error                          *g:qfdiagnostics.highlight_error*
+    text_error                                    *g:qfdiagnostics.text_error*
             Set the appearance of text-properties for quickfix items of type
             "error". See the {props} argument in |prop_type_add()| for more
             details.
             Default: `{highlight: 'SpellBad', priority: 14}`
 
-    highlight_warning                      *g:qfdiagnostics.highlight_warning*
+    text_warning                                *g:qfdiagnostics.text_warning*
             Set the appearance of text-properties for quickfix items of type
             "warning".
             Default: `{highlight: 'SpellCap', priority: 13}`
 
-    highlight_info                            *g:qfdiagnostics.highlight_info*
+    text_info                                      *g:qfdiagnostics.text_info*
             Set the appearance of text-properties for quickfix items of type
             "info".
             Default: `{highlight: 'SpellLocal', priority: 12}`
 
-    highlight_note                            *g:qfdiagnostics.highlight_note*
+    text_note                                      *g:qfdiagnostics.text_note*
             Set the appearance of text-properties for quickfix items of type
             "note".
             Default: `{highlight: 'SpellRare', priority: 11}`
 
-    highlight_misc                            *g:qfdiagnostics.highlight_misc*
-            Set the appearance of text-properties for quickfix items of type
-            "misc".
+    text_other                                    *g:qfdiagnostics.text_other*
+            Set the appearance of text-properties for quickfix items that are
+            neither "error", nor "warning", "info" or "note" type, i.e.
+            everything else, for example, |:grep| items.
             Default: `{highlight: 'Underlined', priority: 10}`
 
 ==============================================================================
