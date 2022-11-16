@@ -21,7 +21,7 @@ hlset([
     {name: 'QfDiagnosticsNote',      linksto: 'MoreMsg',    default: true},
 ])
 
-var popup_winid: number = 0
+var popup_id: number = 0
 
 const defaults: dict<any> = {
     popup_create_cb: () => 0,
@@ -51,15 +51,26 @@ const defaults: dict<any> = {
 # Cache current quickfix list: {'id': 2, 'changedtick': 1, 'items': [...]}
 var curlist: dict<any> = {}
 
-const error_types: dict<string> = {E: 'error', W: 'warning', I: 'info', N: 'note'}
+# Look-up table used for popup window to display nice text instead of error
+# character
+const typename: dict<string> = {E: 'error', W: 'warning', I: 'info', N: 'note'}
 
-# Look-up table used for both sign names and text-property types
-const sign_names: dict<string> = {
+# Look-up table used for sign names
+const signname: dict<string> = {
     E: 'qf-error',
     W: 'qf-warning',
     I: 'qf-info',
     N: 'qf-note',
    '': 'qf-other'
+}
+
+# Look-up table used for text-property types for text-highlightings
+const texttype: dict<string> = {
+    E: 'qf-text-error',
+    W: 'qf-text-warning',
+    I: 'qf-text-info',
+    N: 'qf-text-note',
+   '': 'qf-text-other'
 }
 
 # Dictionary with (ID, 1) pairs for every placed quickfix/location-list,
@@ -73,8 +84,8 @@ var sign_placed_ids: dict<number> = {}
 # Dictionary of (ID, bufnr-items):
 # {
 #   '0': {
-#       bufnr_1: [{'type': 'qf-error', 'lnum': 10, 'col': 19}, {...}, ...],
-#       bufnr_2: [{'type': 'qf-info',  'lnum': 13, 'col': 19}, {...}, ...],
+#       bufnr_1: [{'type': 'qf-text-error', 'lnum': 10, 'col': 19}, {...}, ...],
+#       bufnr_2: [{'type': 'qf-text-info',  'lnum': 13, 'col': 19}, {...}, ...],
 #       ...
 #   },
 #   '1001': {...}
@@ -86,11 +97,11 @@ def Get(x: string): any
 enddef
 
 prop_type_add('qf-popup', {})
-prop_type_add('qf-error',   Get('text_error'))
-prop_type_add('qf-warning', Get('text_warning'))
-prop_type_add('qf-info',    Get('text_info'))
-prop_type_add('qf-note',    Get('text_note'))
-prop_type_add('qf-other',   Get('text_other'))
+prop_type_add('qf-text-error',   Get('text_error'))
+prop_type_add('qf-text-warning', Get('text_warning'))
+prop_type_add('qf-text-info',    Get('text_info'))
+prop_type_add('qf-text-note',    Get('text_note'))
+prop_type_add('qf-text-other',   Get('text_other'))
 
 def Sign_priorities(): dict<number>
     return {
@@ -148,7 +159,7 @@ def Popup_filter(winid: number, key: string): bool
 enddef
 
 def Popup_callback(winid: number, result: number)
-    popup_winid = 0
+    popup_id = 0
     prop_remove({type: 'qf-popup', all: true})
 enddef
 
@@ -274,7 +285,7 @@ def Add_textprops(xlist: list<any>, group_id: number)
             bufs[i.bufnr] = []
         endif
 
-        prop_type = get(sign_names, toupper(i.type), sign_names[''])
+        prop_type = get(texttype, toupper(i.type), texttype[''])
         add(bufs[i.bufnr], {
             type: prop_type,
             lnum: i.lnum,
@@ -332,7 +343,7 @@ def Remove_textprops(group_id: number)
         if bufexists(bufnr)
             prop_remove({
                 id: group_id,
-                types: ['qf-error', 'qf-warning', 'qf-info', 'qf-note', 'qf-other'],
+                types: ['qf-text-error', 'qf-text-warning', 'qf-text-info', 'qf-text-note', 'qf-text-other'],
                 bufnr: bufnr,
                 both: true,
                 all: true
@@ -359,7 +370,7 @@ def Add_signs(xlist: list<any>, group_id: number)
             buffer: i.bufnr,
             group: group,
             priority: get(priorities, toupper(i.type), priorities['']),
-            name: get(sign_names, toupper(i.type), sign_names[''])
+            name: get(signname, toupper(i.type), signname[''])
         }))
         ->sign_placelist()
 enddef
@@ -393,11 +404,11 @@ export def Place(loclist: bool)
     endif
 
     if Get('texthl')
-        prop_type_change('qf-error',   Get('text_error'))
-        prop_type_change('qf-warning', Get('text_warning'))
-        prop_type_change('qf-info',    Get('text_info'))
-        prop_type_change('qf-note',    Get('text_note'))
-        prop_type_change('qf-other',   Get('text_other'))
+        prop_type_change('qf-text-error',   Get('text_error'))
+        prop_type_change('qf-text-warning', Get('text_warning'))
+        prop_type_change('qf-text-info',    Get('text_info'))
+        prop_type_change('qf-text-note',    Get('text_note'))
+        prop_type_change('qf-text-other',   Get('text_other'))
         Add_textprops(xlist, group_id)
     endif
 
@@ -493,7 +504,7 @@ export def Popup(loclist: bool): number
         if empty(xlist[i].type)
             extend(text, $'({i + 1}/{len(xlist)}) {xlist[i].lnum}:{xlist[i].col} {trim(xlist[i].text)}'->split('\n'))
         else
-            longtype = get(error_types, toupper(xlist[i].type), xlist[i].type)
+            longtype = get(typename, toupper(xlist[i].type), xlist[i].type)
             if xlist[i].nr < 1
                 extend(text, $'({i + 1}/{len(xlist)}) {xlist[i].lnum}:{xlist[i].col} {longtype}: {trim(xlist[i].text)}'->split('\n'))
             else
@@ -540,7 +551,7 @@ export def Popup(loclist: bool): number
         callback: Popup_callback
     }
 
-    popup_close(popup_winid)
+    popup_close(popup_id)
 
     if Get('popup_attach')
         prop_remove({type: 'qf-popup', all: true})
@@ -556,17 +567,17 @@ export def Popup(loclist: bool): number
         })
     endif
 
-    popup_winid = popup_atcursor(text, opts)
-    setwinvar(popup_winid, '&breakindent', 1)
-    setwinvar(popup_winid, '&tabstop', &g:tabstop)
+    popup_id = popup_atcursor(text, opts)
+    setwinvar(popup_id, '&breakindent', 1)
+    setwinvar(popup_id, '&tabstop', &g:tabstop)
 
-    matchadd('QfDiagnosticsItemNr',  '^(\d\+/\d\+)',                                               10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsLineNr',  '^(\d\+/\d\+) \zs\d\+\%(:\d\+\)\?',                           10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsError',   '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsWarning', '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsInfo',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {window: popup_winid})
-    matchadd('QfDiagnosticsNote',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {window: popup_winid})
-    Get('popup_create_cb')(popup_winid, curlist.id, loclist)
+    matchadd('QfDiagnosticsItemNr',  '^(\d\+/\d\+)',                                               10, -1, {window: popup_id})
+    matchadd('QfDiagnosticsLineNr',  '^(\d\+/\d\+) \zs\d\+\%(:\d\+\)\?',                           10, -1, {window: popup_id})
+    matchadd('QfDiagnosticsError',   '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<error\>\%(:\| \d\+:\)',   10, -1, {window: popup_id})
+    matchadd('QfDiagnosticsWarning', '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {window: popup_id})
+    matchadd('QfDiagnosticsInfo',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {window: popup_id})
+    matchadd('QfDiagnosticsNote',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {window: popup_id})
+    Get('popup_create_cb')(popup_id, curlist.id, loclist)
 
-    return popup_winid
+    return popup_id
 enddef
