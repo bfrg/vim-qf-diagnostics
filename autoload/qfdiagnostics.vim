@@ -24,7 +24,7 @@ hlset([
 var popup_id: number = 0
 
 const defaults: dict<any> = {
-    popup_create_cb: () => 0,
+    popup_create_cb: (_, _, _) => 0,
     popup_scrollup: "\<c-k>",
     popup_scrolldown: "\<c-j>",
     popup_border: [0, 0, 0, 0],
