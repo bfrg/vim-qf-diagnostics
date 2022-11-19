@@ -138,25 +138,25 @@ are supported:
             the {dict} argument in |sign_define()| on how to set this option.
             In addition, the sign priority can be set through the "priority"
             entry.
-            Default: `{text: 'E>', priority: 14, texthl: 'ErrorMsg'}`
+            Default: `{text: 'E', priority: 14, texthl: 'ErrorMsg'}`
 
     sign_warning                                *g:qfdiagnostics.sign_warning*
             Set sign attributes for quickfix items of type "warning".
-            Default: `{text: 'W>', priority: 13, texthl: 'WarningMsg'}`
+            Default: `{text: 'W', priority: 13, texthl: 'WarningMsg'}`
 
     sign_info                                      *g:qfdiagnostics.sign_info*
             Set sign attributes for quickfix items of type "info".
-            Default: `{text: 'I>', priority: 12, texthl: 'MoreMsg'}`
+            Default: `{text: 'I', priority: 12, texthl: 'MoreMsg'}`
 
     sign_note                                      *g:qfdiagnostics.sign_note*
             Set sign attributes for quickfix items of type "note".
-            Default: `{text: 'N>', priority: 11, texthl: 'Todo'}`
+            Default: `{text: 'N', priority: 11, texthl: 'Todo'}`
 
     sign_other                                    *g:qfdiagnostics.sign_other*
             Set sign attributes for quickfix items that are neither "error",
             nor "warning", "info" or "note" type, i.e. everything else, for
             example, |:grep| items.
-            Default: `{text: '?>', priority: 10, texthl: 'Normal'}`
+            Default: `{text: '?', priority: 10, texthl: 'Normal'}`
 
     texthl                                            *g:qfdiagnostics.texthl*
             Whether to highlight diagnostics in the text using

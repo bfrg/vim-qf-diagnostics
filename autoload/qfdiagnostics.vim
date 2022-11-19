@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 19, 2022
+# Last Change:  Nov 20, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -41,11 +41,11 @@ const defaults: dict<any> = {
     text_note:    {highlight: 'SpellRare',  priority: 11},
     text_other:   {highlight: 'Underlined', priority: 10},
     signs: true,
-    sign_error:   {text: 'E>', priority: 14, texthl: 'ErrorMsg'},
-    sign_warning: {text: 'W>', priority: 13, texthl: 'WarningMsg'},
-    sign_info:    {text: 'I>', priority: 12, texthl: 'MoreMsg'},
-    sign_note:    {text: 'N>', priority: 11, texthl: 'Todo'},
-    sign_other:   {text: '?>', priority: 10, texthl: 'Normal'}
+    sign_error:   {text: 'E', priority: 14, texthl: 'ErrorMsg'},
+    sign_warning: {text: 'W', priority: 13, texthl: 'WarningMsg'},
+    sign_info:    {text: 'I', priority: 12, texthl: 'MoreMsg'},
+    sign_note:    {text: 'N', priority: 11, texthl: 'Todo'},
+    sign_other:   {text: '?', priority: 10, texthl: 'Normal'}
 }
 
 # Cache current quickfix list: {'id': 2, 'changedtick': 1, 'items': [...]}
