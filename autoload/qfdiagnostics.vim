@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 17, 2022
+# Last Change:  Nov 19, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -92,24 +92,24 @@ var sign_placed_ids: dict<number> = {}
 # }
 var prop_items: dict<dict<list<any>>> = {}
 
-def Get(x: string): any
+def Getopt(x: string): any
     return get(g:, 'qfdiagnostics', {})->get(x, defaults[x])
 enddef
 
 prop_type_add('qf-popup', {})
-prop_type_add('qf-text-error',   Get('text_error'))
-prop_type_add('qf-text-warning', Get('text_warning'))
-prop_type_add('qf-text-info',    Get('text_info'))
-prop_type_add('qf-text-note',    Get('text_note'))
-prop_type_add('qf-text-other',   Get('text_other'))
+prop_type_add('qf-text-error',   Getopt('text_error'))
+prop_type_add('qf-text-warning', Getopt('text_warning'))
+prop_type_add('qf-text-info',    Getopt('text_info'))
+prop_type_add('qf-text-note',    Getopt('text_note'))
+prop_type_add('qf-text-other',   Getopt('text_other'))
 
 def Sign_priorities(): dict<number>
     return {
-        E: Get('sign_error')->get('priority', 14),
-        W: Get('sign_warning')->get('priority', 13),
-        I: Get('sign_info')->get('priority', 12),
-        N: Get('sign_note')->get('priority', 11),
-       '': Get('sign_other')->get('priority', 10)
+        E: Getopt('sign_error')->get('priority', 14),
+        W: Getopt('sign_warning')->get('priority', 13),
+        I: Getopt('sign_info')->get('priority', 12),
+        N: Getopt('sign_note')->get('priority', 11),
+       '': Getopt('sign_other')->get('priority', 10)
     }
 enddef
 
@@ -144,11 +144,11 @@ def Popup_filter(winid: number, key: string): bool
     endif
     popup_setoptions(winid, {minheight: popup_getpos(winid).core_height})
 
-    if key == Get('popup_scrolldown')
+    if key == Getopt('popup_scrolldown')
         const line: number = popup_getoptions(winid).firstline
         const newline: number = line < line('$', winid) ? (line + 1) : line('$', winid)
         popup_setoptions(winid, {firstline: newline})
-    elseif key == Get('popup_scrollup')
+    elseif key == Getopt('popup_scrollup')
         const line: number = popup_getoptions(winid).firstline
         const newline: number = (line - 1) > 0 ? (line - 1) : 1
         popup_setoptions(winid, {firstline: newline})
@@ -390,7 +390,7 @@ def Remove_on_winclosed()
 enddef
 
 export def Place(loclist: bool)
-    if !Get('signs') && !Get('texthl')
+    if !Getopt('signs') && !Getopt('texthl')
         return
     endif
 
@@ -403,21 +403,21 @@ export def Place(loclist: bool)
         return
     endif
 
-    if Get('texthl')
-        prop_type_change('qf-text-error',   Get('text_error'))
-        prop_type_change('qf-text-warning', Get('text_warning'))
-        prop_type_change('qf-text-info',    Get('text_info'))
-        prop_type_change('qf-text-note',    Get('text_note'))
-        prop_type_change('qf-text-other',   Get('text_other'))
+    if Getopt('texthl')
+        prop_type_change('qf-text-error',   Getopt('text_error'))
+        prop_type_change('qf-text-warning', Getopt('text_warning'))
+        prop_type_change('qf-text-info',    Getopt('text_info'))
+        prop_type_change('qf-text-note',    Getopt('text_note'))
+        prop_type_change('qf-text-other',   Getopt('text_other'))
         Add_textprops(xlist, group_id)
     endif
 
-    if Get('signs')
-        sign_define('qf-error',   Get('sign_error'))
-        sign_define('qf-warning', Get('sign_warning'))
-        sign_define('qf-info',    Get('sign_info'))
-        sign_define('qf-note',    Get('sign_note'))
-        sign_define('qf-other',   Get('sign_other'))
+    if Getopt('signs')
+        sign_define('qf-error',   Getopt('sign_error'))
+        sign_define('qf-warning', Getopt('sign_warning'))
+        sign_define('qf-info',    Getopt('sign_info'))
+        sign_define('qf-note',    Getopt('sign_note'))
+        sign_define('qf-other',   Getopt('sign_other'))
         Add_signs(xlist, group_id)
     endif
 
@@ -490,7 +490,7 @@ export def Popup(loclist: bool): number
         return 0
     endif
 
-    const items: string = Get('popup_items')
+    const items: string = Getopt('popup_items')
     const idxs: list<number> = Filter_items(xlist, items)
 
     if empty(idxs)
@@ -514,7 +514,7 @@ export def Popup(loclist: bool): number
     endfor
 
     # Maximum width for popup window
-    const max: number = Get('popup_maxwidth')
+    const max: number = Getopt('popup_maxwidth')
     const textwidth: number = max > 0
         ? max
         : text
@@ -523,7 +523,7 @@ export def Popup(loclist: bool): number
             ->map((_, i: number): number => strdisplaywidth(text[i]))
             ->max()
 
-    const border: list<number> = Get('popup_border')
+    const border: list<number> = Getopt('popup_border')
     const pad: number = get(border, 1, 1) + get(border, 3, 1) + 3
     const width: number = textwidth + pad > &columns ? &columns - pad : textwidth
 
@@ -536,16 +536,16 @@ export def Popup(loclist: bool): number
         col: col,
         minwidth: width,
         maxwidth: width,
-        maxheight: Get('popup_maxheight'),
+        maxheight: Getopt('popup_maxheight'),
         padding: [0, 1, 0, 1],
         border: border,
-        borderchars: Get('popup_borderchars'),
+        borderchars: Getopt('popup_borderchars'),
         borderhighlight: ['QfDiagnosticsBorder'],
         highlight: 'QfDiagnostics',
         scrollbarhighlight: 'QfDiagnosticsScrollbar',
         thumbhighlight: 'QfDiagnosticsThumb',
         firstline: 1,
-        mapping: Get('popup_mapping'),
+        mapping: Getopt('popup_mapping'),
         filtermode: 'n',
         filter: Popup_filter,
         callback: Popup_callback
@@ -553,7 +553,7 @@ export def Popup(loclist: bool): number
 
     popup_close(popup_id)
 
-    if Get('popup_attach')
+    if Getopt('popup_attach')
         prop_remove({type: 'qf-popup', all: true})
         prop_add(line('.'),
             items == 'closest' ? (xlist[idxs[0]].col > 0 ? xlist[idxs[0]].col : col('.')) : col('.'),
@@ -577,7 +577,7 @@ export def Popup(loclist: bool): number
     matchadd('QfDiagnosticsWarning', '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {window: popup_id})
     matchadd('QfDiagnosticsInfo',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {window: popup_id})
     matchadd('QfDiagnosticsNote',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {window: popup_id})
-    Get('popup_create_cb')(popup_id, curlist.id, loclist)
+    Getopt('popup_create_cb')(popup_id, curlist.id, loclist)
 
     return popup_id
 enddef
