@@ -13,16 +13,17 @@ if get(g:, 'loaded_qfdiagnostics')
 endif
 g:loaded_qfdiagnostics = 1
 
-import autoload 'qfdiagnostics.vim' as diagnostics
+import autoload '../autoload/qfdiagnostics/popup.vim'
+import autoload '../autoload/qfdiagnostics/highlight.vim'
 
-nnoremap <plug>(qf-diagnostics-popup-quickfix) <scriptcmd>diagnostics.Popup(false)<cr>
-nnoremap <plug>(qf-diagnostics-popup-loclist)  <scriptcmd>diagnostics.Popup(true)<cr>
+nnoremap <plug>(qf-diagnostics-popup-quickfix) <scriptcmd>popup.Show(false)<cr>
+nnoremap <plug>(qf-diagnostics-popup-loclist)  <scriptcmd>popup.Show(true)<cr>
 
-command -nargs=? -bar -complete=custom,diagnostics.Complete  DiagnosticsPlace diagnostics.Place(false, <q-args>)
-command -nargs=? -bar -complete=custom,diagnostics.Complete LDiagnosticsPlace diagnostics.Place(true,  <q-args>)
+command -nargs=? -bar -complete=custom,highlight.Complete  DiagnosticsPlace highlight.Place(false, <q-args>)
+command -nargs=? -bar -complete=custom,highlight.Complete LDiagnosticsPlace highlight.Place(true,  <q-args>)
 
-command -bar        DiagnosticsClear diagnostics.Cclear()
-command -bar -bang LDiagnosticsClear diagnostics.Lclear(<bang>false)
+command -bar        DiagnosticsClear highlight.Cclear()
+command -bar -bang LDiagnosticsClear highlight.Lclear(<bang>false)
 
-command -nargs=? -bar -complete=custom,diagnostics.Complete  DiagnosticsToggle diagnostics.Toggle(false, <q-args>)
-command -nargs=? -bar -complete=custom,diagnostics.Complete LDiagnosticsToggle diagnostics.Toggle(true,  <q-args>)
+command -nargs=? -bar -complete=custom,highlight.Complete  DiagnosticsToggle highlight.Toggle(false, <q-args>)
+command -nargs=? -bar -complete=custom,highlight.Complete LDiagnosticsToggle highlight.Toggle(true,  <q-args>)
