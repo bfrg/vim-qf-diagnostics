@@ -3,6 +3,8 @@
 - Highlight the locations of the quickfix items (errors of a project-build,
   linter, or locations of a `grep` search) in the sign column, and in the text
   using `text-properties`.
+- Display the error messages next to the lines containing the errors using
+  `virtual-text`.
 - Show the error message for the current line in a popup window next to the
   cursor.
 
@@ -32,11 +34,13 @@ nmap gh <plug>(qf-diagnostics-popup-quickfix)
 nmap gH <plug>(qf-diagnostics-popup-loclist)
 ```
 
-### Signs and text highlightings
+### Signs, text-highlightings and virtual text
 
-The items in the quickfix and location list can be highlighted in the sign
-column and in the buffer directly. Both highlightings are optional and can be
-individually configured in [`g:qfdiagnostics`](#configuration).
+The items in the quickfix and/or location list can be highlighted in the sign
+column and in the buffer using text-properties. Optionally, the error text can
+be displayed as virtual text next to the line containing the error. Signs,
+text-highlightings and virtual text are all optional and can be individually
+configured in [`g:qfdiagnostics`](#configuration).
 
 | Command                 | Description                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------ |
@@ -48,13 +52,12 @@ individually configured in [`g:qfdiagnostics`](#configuration).
 | `:LDiagnosticsToggle`   | Toggle the diagnostics from the location list.                                       |
 
 **Notes:**
-* `:DiagnosticsPlace` and `:LDiagnosticsPlace` each will first remove any
-  highlightings that have been previously placed by the same command.
+* `:DiagnosticsPlace` and `:LDiagnosticsPlace` first remove all highlightings
+  that have previously been placed by the same command.
 * `:LDiagnosticsPlace` can be run in multiple windows to simultaneously
   highlight diagnostics from several location lists.
-* `:LDiagnosticsClear` must always be run in the same window where
-  `:LDiagnosticsPlace` has been executed to remove the previously placed
-  diagnostics.
+* `:LDiagnosticsClear` must be run in the same window where `:LDiagnosticsPlace`
+  has been executed to remove the previously placed diagnostics.
 * To remove the highlightings of all diagnostics from all location lists at
   once, run `:LDiagnosticsClear!`.
 
@@ -107,10 +110,10 @@ individually configured in [`g:qfdiagnostics`](#configuration).
 
 ## Configuration
 
-The appearance of the popup window, the signs and text highlightings can be
-configured through the variable `g:qfdiagnostics`. For all supported entries,
-see `:help qf-diagnostics-config`, and `:help qf-diagnostics-examples` for a few
-examples.
+The appearance of the popup window, the signs, text-highlightings and virtual
+textcan be configured through the variable `g:qfdiagnostics`. For all supported
+entries, see `:help qf-diagnostics-config`, as well as `:help
+qf-diagnostics-examples` for a few examples.
 
 All highlighting groups used in the popup window are described in `:help
 qf-dagnostics-popup-highlight`.

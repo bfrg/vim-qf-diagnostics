@@ -10,6 +10,8 @@ INTRODUCTION
 - Highlight the locations of the |quickfix| items (for example, errors of a
   project-build, linter, or grep command) in the |sign-column| and in the
   buffer using |text-properties|.
+- Display the error messages next to the lines containing the errors using
+  |virtual-text|.
 - Display the error message for the current line in a |popup-window| next to
   the cursor.
 
@@ -44,23 +46,30 @@ POPUP WINDOW                                            *qf-diagnostics-popup*
 ==============================================================================
 SIGNS AND TEXT HIGHLIGHTINGS                        *qf-diagnostics-highlight*
 
-:DiagnosticsPlace                                          *:DiagnosticsPlace*
+:DiagnosticsPlace [arg]                                    *:DiagnosticsPlace*
         Highlight the diagnostics from the current quickfix list. The command
-        will first remove the highlightings that have been previously placed
-        by the same command.
+        will first remove any previously placed signs and text-properties.
 
-        By default the plugin will place only |signs| in the |sign-column|.
-        Optionally, the error locations can also be highlighted in the text
-        directly. Sign and text highlighting can be individually enabled or
-        disabled in |g:qfdiagnostics| (see below).
+        [arg] is optional and specifies where |virtual-text| is displayed. The
+        following values are supported:
+
+            after   after the end of the buffer line
+            right   right-aligned in the current window
+            below   below the line with the error
+            above   above the line with the error
+
+        By default, the plugin will place |signs| in the |sign-column| and add
+        text-highlightings using |text-properties|. virtual text is disabled
+        by default. Signs, text-highlightings and virtual-text can be
+        individually enabled or disabled in |g:qfdiagnostics| (see below).
 
 :DiagnosticsClear                                          *:DiagnosticsClear*
         Remove the highlightings placed by |:DiagnosticsPlace|.
 
-:DiagnosticsToggle                                        *:DiagnosticsToggle*
+:DiagnosticsToggle [arg]                                  *:DiagnosticsToggle*
         Toggle the diagnostics from the quickfix list.
 
-:LDiagnosticsPlace                                        *:LDiagnosticsPlace*
+:LDiagnosticsPlace [arg]                                  *:LDiagnosticsPlace*
         Same as |:DiagnosticsPlace| but use the current location list of the
         current window. This command can be run in multiple windows to
         simultaneously highlight the diagnostics from several location lists.
@@ -76,7 +85,7 @@ SIGNS AND TEXT HIGHLIGHTINGS                        *qf-diagnostics-highlight*
         lists at once. This is like running |:LDiagnosticsClear| in every
         window where |:LDiagnosticsPlace| has been run.
 
-:LDiagnosticsToggle                                      *:LDiagnosticsToggle*
+:LDiagnosticsToggle [arg]                                *:LDiagnosticsToggle*
         Toggle the diagnostics from the location list of the current window.
 
 ==============================================================================
@@ -159,14 +168,14 @@ are supported:
             Default: `{text: '?', priority: 10, texthl: 'Normal'}`
 
     texthl                                            *g:qfdiagnostics.texthl*
-            Whether to highlight diagnostics in the text using
+            Whether to highlight the error locations in the text using
             |text-properties|.
             Default: |true|
 
     text_error                                    *g:qfdiagnostics.text_error*
             Set the appearance of text-properties for quickfix items of type
             "error". See the {props} argument in |prop_type_add()| for more
-            details.
+            details. The important entries are "highlight" and "priority".
             Default: `{highlight: 'SpellBad', priority: 14}`
 
     text_warning                                *g:qfdiagnostics.text_warning*
@@ -190,17 +199,67 @@ are supported:
             everything else, for example, |:grep| items.
             Default: `{highlight: 'Underlined', priority: 10}`
 
+    virttext                                        *g:qfdiagnostics.virttext*
+            Whether to display the error messages next to the line containing
+            the error as virtual text.
+            Default: |false|
+
+    virt_padding                                *g:qfdiagnostics.virt_padding*
+            Padding between the end of the buffer line and the virtual text.
+            Default: 2
+
+    virt_align                                    *g:qfdiagnostics.virt_align*
+            Specifies where to display the virtual text. Possible values:
+                after   after the end of the buffer line
+                right   right-aligned in the current window
+                below   below the line with the error
+                above   above the line with the error
+            Default: "right"
+
+            Note that this value can be overridden with any of the commands
+            that place highlightings. For example, ":DiagnosticsPlace below"
+            will display virtual text below the lines containing the errors,
+            even if "virt_align" is set to "right".
+
+    virt_error                                    *g:qfdiagnostics.virt_error*
+            Set the appearance of virtual text for quickfix items of type
+            "error". Must be a dictionary containing any of the two entries:
+                highlight   highlighting for virtual text
+                prefix      prefix prepended before the virtual text
+            Default: `{highlight: 'ErrorMsg', prefix: ''}`
+
+    virt_warning                                *g:qfdiagnostics.virt_warning*
+            Set the appearance of virtual text for quickfix items of type
+            "warning".
+            Default: `{highlight: 'WarningMsg', prefix: ''}`
+
+    virt_info                                      *g:qfdiagnostics.virt_info*
+            Set the appearance of virtual text for quickfix items of type
+            "info".
+            Default: `{highlight: 'MoreMsg', prefix: ''}`
+
+    virt_note                                      *g:qfdiagnostics.virt_note*
+            Set the appearance of virtual text for quickfix items of type
+            "note".
+            Default: `{highlight: 'MoreMsg', prefix: ''}`
+
+    virt_other                                    *g:qfdiagnostics.virt_other*
+            Set the appearance of virtual text for quickfix items that are
+            neither "error", nor "warning", "info" or "note" type, i.e.
+            everything else, for example, |:grep| items.
+            Default: `{highlight: 'Normal', prefix: ''}`
+
 ==============================================================================
 EXAMPLES                                             *qf-diagnostics-examples*
 
-1. Place the signs automatically after running |:make| or |:lmake|: >
+1. Place the diagnostics automatically after running |:make| or |:lmake|: >
     augroup qf-diagnostics-user
         autocmd!
         autocmd QuickfixCmdPost  make  DiagnosticsPlace
         autocmd QuickfixCmdPost lmake LDiagnosticsPlace
     augroup END
 <
-   Note: it's not necessary to run |DiagnosticsClear| (or |LDiagnosticsClear|)
+   Note: it's not required to run |DiagnosticsClear| (or |LDiagnosticsClear|)
    on |QuickfixCmdPre| since |DiagnosticsPlace| automatically clears
    previously placed highlightings before adding new ones.
 
@@ -216,7 +275,7 @@ EXAMPLES                                             *qf-diagnostics-examples*
     nnoremap <F8> <Cmd>LDiagnosticsToggle<Cr>
 <
 4. Add a callback function that highlights the warning type of gcc and clang
-   compiler messages: >
+   compiler messages in the popup window: >
     def Callback(winid: number, qfid: number, is_loclist: bool)
         const title = is_loclist
             ? getloclist(0, {title: 0, id: qfid}).title
@@ -235,7 +294,7 @@ EXAMPLES                                             *qf-diagnostics-examples*
     messages like: >
      warning: unused parameter 'out' [-Wunused-parameter]
 <
-5. Toggle the text highlighting on and off: >
+5. Toggle the text-highlightings on and off: >
     def Diagnostics_toggle_props()
         g:qfdiagnostics = get(g:, 'qfdiagnostics', {})
         g:qfdiagnostics.texthl = get(g:qfdiagnostics, 'texthl', false)

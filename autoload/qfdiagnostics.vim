@@ -1,10 +1,10 @@
 vim9script
 # ==============================================================================
-# Display quickfix errors in popup window and sign column
+# Highlight quickfix errors and show error messages in popup window
 # File:         autoload/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 20, 2022
+# Last Change:  Nov 22, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -45,11 +45,16 @@ const defaults: dict<any> = {
     sign_warning: {text: 'W', priority: 13, texthl: 'WarningMsg'},
     sign_info:    {text: 'I', priority: 12, texthl: 'MoreMsg'},
     sign_note:    {text: 'N', priority: 11, texthl: 'Todo'},
-    sign_other:   {text: '?', priority: 10, texthl: 'Normal'}
+    sign_other:   {text: '?', priority: 10, texthl: 'Normal'},
+    virttext: false,
+    virt_padding: 2,
+    virt_align: 'right',
+    virt_error:   {prefix: '', highlight: 'ErrorMsg'},
+    virt_warning: {prefix: '', highlight: 'WarningMsg'},
+    virt_info:    {prefix: '', highlight: 'MoreMsg'},
+    virt_note:    {prefix: '', highlight: 'MoreMsg'},
+    virt_other:   {prefix: '', highlight: 'Normal'}
 }
-
-# Cache current quickfix list: {'id': 2, 'changedtick': 1, 'items': [...]}
-var curlist: dict<any> = {}
 
 # Look-up table used for popup window to display nice text instead of error
 # character
@@ -73,24 +78,94 @@ const texttype: dict<string> = {
    '': 'qf-text-other'
 }
 
-# Dictionary with (ID, 1) pairs for every placed quickfix/location-list,
-# quickfix list has ID=0, for location lists we use window-IDs
-var sign_placed_ids: dict<number> = {}
+# Look-up table used for text-property types for virtual text
+const virttype: dict<string> = {
+    E: 'qf-virt-error',
+    W: 'qf-virt-warning',
+    I: 'qf-virt-info',
+    N: 'qf-virt-note',
+   '': 'qf-virt-other'
+}
 
-# Similar to sign groups we use different text-property IDs so that quickfix and
-# location-list errors can be removed individually. For quickfix errors the IDs
-# are set to 0, and for location-list errors the IDs are set to the window-ID of
-# the window the location-list belongs to.
-# Dictionary of (ID, bufnr-items):
-# {
-#   '0': {
-#       bufnr_1: [{'type': 'qf-text-error', 'lnum': 10, 'col': 19}, {...}, ...],
-#       bufnr_2: [{'type': 'qf-text-info',  'lnum': 13, 'col': 19}, {...}, ...],
-#       ...
-#   },
-#   '1001': {...}
-# }
-var prop_items: dict<dict<list<any>>> = {}
+# Cached quickfix and location lists (for each window), accessed by 0 (quickfix)
+# and window ID (location-list)
+#
+#   {
+#       0: {
+#           id: 2,
+#           changedtick: 4,
+#           items: [ getqflist()->filter() … ]
+#       },
+#       1001: {…}
+#   }
+#
+var qfs: dict<dict<any>> = {}
+
+# Quickfix and location-lists grouped by buffer numbers. Each list stores the
+# indexes in the original list, like qfs[0].items
+#
+#   {
+#       0: {
+#           bufnr_1: [0, 1, 2],
+#           bufnr_2: [3],
+#           bufnr_3: [4, 5],
+#           …
+#       },
+#       1001: {…}
+#   }
+#
+var buffers: dict<dict<list<number>>> = {}
+
+# Boolean indicating whether signs have been placed for a quickfix and/or
+# location list
+#
+#   {
+#       0: true,
+#       1001: false,
+#   }
+#
+var signs_added: dict<bool> = {}
+
+# Boolean indicating whether text-highlighting has been added for a list
+#
+#   {
+#       0: true,
+#       1001: false,
+#   }
+#
+var texthl_added: dict<bool> = {}
+
+# Cached virtual-text IDs for each list
+#
+#   {
+#       0: {
+#           bufnr_1: [-1, -2, -3],
+#           bufnr_2: [-1],
+#           bufnr_3: [-1, -2],
+#           …
+#       },
+#       1001: {…}
+#   }
+var virt_IDs: dict<dict<list<number>>> = {}
+
+# Boolean indicating whether virtual text has been added for a list
+#
+#   {
+#       0: true,
+#       1001: false,
+#   }
+#
+var virttext_added: dict<bool> = {}
+
+# virtual-text 'align' option for each list, i.e. it is possible to have
+# different 'align' for quickfix and each location list
+#
+#   {
+#       0: 'right',
+#       1001: 'below',
+#   }
+#
+var virttext_align: dict<string> = {}
 
 def Getopt(x: string): any
     return get(g:, 'qfdiagnostics', {})->get(x, defaults[x])
@@ -102,6 +177,11 @@ prop_type_add('qf-text-warning', Getopt('text_warning'))
 prop_type_add('qf-text-info',    Getopt('text_info'))
 prop_type_add('qf-text-note',    Getopt('text_note'))
 prop_type_add('qf-text-other',   Getopt('text_other'))
+prop_type_add('qf-virt-error',   Getopt('virt_error'))
+prop_type_add('qf-virt-warning', Getopt('virt_warning'))
+prop_type_add('qf-virt-info',    Getopt('virt_info'))
+prop_type_add('qf-virt-note',    Getopt('virt_note'))
+prop_type_add('qf-virt-other',   Getopt('virt_other'))
 
 def Sign_priorities(): dict<number>
     return {
@@ -113,12 +193,36 @@ def Sign_priorities(): dict<number>
     }
 enddef
 
-# Place quickfix and location-list errors under different sign groups so that
-# they can be toggled separately in the sign column. Quickfix errors are placed
-# under the qf-0 group, and location-list errors under qf-WINID, where WINID is
-# the window-ID of the window the location-list belongs to.
-def Sign_group(group_id: number): string
-    return $'qf-{group_id}'
+def Virttext_prefix(): dict<string>
+    return {
+        E: Getopt('virt_error')->get('prefix', ''),
+        W: Getopt('virt_warning')->get('prefix', ''),
+        I: Getopt('virt_info')->get('prefix', ''),
+        N: Getopt('virt_note')->get('prefix', ''),
+       '': Getopt('virt_other')->get('prefix', '')
+    }
+enddef
+
+# Group quickfix list 'items' by buffer number
+def Group_by_bufnr(items: list<dict<any>>): dict<list<number>>
+    final bufgroups: dict<list<number>> = {}
+
+    for [idx: number, item: dict<any>] in items(items)
+        if !has_key(bufgroups, item.bufnr)
+            bufgroups[item.bufnr] = []
+        endif
+        add(bufgroups[item.bufnr], idx)
+    endfor
+
+    return bufgroups
+enddef
+
+# Quickfix and location-list errors are placed under different sign groups so
+# that signs can be toggled separately in the sign column. Quickfix errors are
+# placed under the qf-0 group, and location-list errors under qf-WINID, where
+# WINID is the window-ID of the window the location-list belongs to.
+def Sign_group(group: number): string
+    return $'qf-{group}'
 enddef
 
 def Group_id(loclist: bool): number
@@ -130,12 +234,16 @@ def Group_id(loclist: bool): number
     return 0
 enddef
 
-def Props_placed(group_id: number): bool
-    return has_key(prop_items, group_id)
+def Signs_added(group: number): bool
+    return get(signs_added, group, false)
 enddef
 
-def Signs_placed(group_id: number): bool
-    return has_key(sign_placed_ids, group_id)
+def Texthl_added(group: number): bool
+    return get(texthl_added, group, false)
+enddef
+
+def Virttext_added(group: number): bool
+    return get(virttext_added, group, false)
 enddef
 
 def Popup_filter(winid: number, key: string): bool
@@ -161,20 +269,6 @@ enddef
 def Popup_callback(winid: number, result: number)
     popup_id = 0
     prop_remove({type: 'qf-popup', all: true})
-enddef
-
-def Getxlist(loclist: bool): list<any>
-    const Xgetlist: func = loclist ? function('getloclist', [0]) : function('getqflist')
-    const qf: dict<number> = Xgetlist({changedtick: 0, id: 0})
-
-    # Note: 'changedtick' of a quickfix list is not incremented when a buffer
-    # referenced in the list is wiped out
-    if get(curlist, 'id', -1) == qf.id && get(curlist, 'changedtick') == qf.changedtick
-        return curlist.items
-    endif
-
-    curlist = Xgetlist({changedtick: 0, id: 0, items: 0})
-    return curlist.items
 enddef
 
 # 'xlist': quickfix or location list
@@ -229,188 +323,246 @@ def Filter_items(xlist: list<any>, items: string): list<number>
     return []
 enddef
 
-def Add_textprops_on_bufread()
-    const bufnr: number = expand('<abuf>')->str2nr()
+def Texthl_add(bufnr: number, group: number, maxlnum: number)
+    const items: list<dict<any>> = qfs[group].items
     var max: number
-    var col: number
     var end_max: number
+    var col: number
     var end_col: number
 
-    for id in keys(prop_items)
-        for item in get(prop_items[id], bufnr, [])
-            max = getbufline(bufnr, item.lnum)[0]->strlen()
+    for idx in buffers[group][bufnr]
+        const item: dict<any> = items[idx]
+        max = bufnr->getbufline(item.lnum)[0]->strlen()
 
-            # Sanity check if bufline is empty
-            if max == 0
-                continue
-            endif
-
-            col = item.col >= max ? max : item.col
-            end_col = item.end_col >= max ? max : item.end_col
-            if item.end_col > 0
-                end_max = item.end_lnum > 0 && item.end_lnum != item.lnum
-                    ? getbufline(bufnr, item.end_lnum)[0]->strlen() + 1
-                    : max + 1
-                end_col = item.end_col >= end_max ? end_max : item.end_col
-            else
-                end_col = col + 1
-            endif
-
-            prop_add(item.lnum, col, {
-                end_lnum: item.end_lnum > 0 ? item.end_lnum : item.lnum,
-                end_col: item.end_col > 0 ? item.end_col : item.col + 1,
-                bufnr: bufnr,
-                id: str2nr(id),
-                type: item.type
-            })
-        endfor
-    endfor
-enddef
-
-def Add_textprops(xlist: list<any>, group_id: number)
-    prop_items[group_id] = {}
-    final bufs: dict<list<any>> = prop_items[group_id]
-    var prop_type: string
-    var max: number
-    var col: number
-    var end_max: number
-    var end_col: number
-
-    for i in xlist
-        if i.bufnr < 1 || i.lnum < 1 || i.col < 1 || !i.valid || !bufexists(i.bufnr)
+        # Sanity checks (should we call prop_add() inside a try/catch? block)
+        if max == 0 || item.lnum > maxlnum
             continue
         endif
 
-        if !has_key(bufs, i.bufnr)
-            bufs[i.bufnr] = []
+        col = item.col < max ? item.col : max
+        if item.end_col > 0
+            end_max = item.end_lnum > 0 && item.end_lnum != item.lnum
+                ? bufnr->getbufline(item.end_lnum)[0]->strlen() + 1
+                : max + 1
+            end_col = item.end_col < end_max ? item.end_col : end_max
+        else
+            end_col = col + 1
         endif
 
-        prop_type = get(texttype, toupper(i.type), texttype[''])
-        add(bufs[i.bufnr], {
-            type: prop_type,
-            lnum: i.lnum,
-            col: i.col,
-            end_lnum: i.end_lnum,
-            end_col: i.end_col
+        prop_add(item.lnum, col, {
+            type: get(texttype, toupper(item.type), texttype['']),
+            bufnr: bufnr,
+            id: group,
+            end_lnum: item.end_lnum > 0 ? item.end_lnum : item.lnum,
+            end_col: end_col
         })
-
-        if bufloaded(i.bufnr)
-            max = getbufline(i.bufnr, i.lnum)[0]->strlen()
-
-            # Sanity check if bufline is empty
-            if max == 0
-                continue
-            endif
-
-            col = i.col >= max ? max : i.col
-            end_col = i.end_col >= max ? max : i.end_col
-            if i.end_col > 0
-                end_max = i.end_lnum > 0 && i.end_lnum != i.lnum
-                    ? getbufline(i.bufnr, i.end_lnum)[0]->strlen() + 1
-                    : max + 1
-                end_col = i.end_col >= end_max ? end_max : i.end_col
-            else
-                end_col = col + 1
-            endif
-
-            prop_add(i.lnum, col, {
-                end_lnum: i.end_lnum > 0 ? i.end_lnum : i.lnum,
-                end_col: end_col,
-                bufnr: i.bufnr,
-                id: group_id,
-                type: prop_type
-            })
-        endif
     endfor
-
-    autocmd_add([{
-        group: 'qf-diagnostics',
-        event: 'BufReadPost',
-        pattern: '*',
-        replace: true,
-        cmd: 'Add_textprops_on_bufread()'
-    }])
 enddef
 
-def Remove_textprops(group_id: number)
-    if !Props_placed(group_id)
-        return
+def Virttext_add(bufnr: number, group: number, maxlnum: number)
+    const items: list<dict<any>> = qfs[group].items
+    const text_align: string = virttext_align[group]
+    const prefix: dict<string> = Virttext_prefix()
+    const padding: number = Getopt('virt_padding')
+    var virtid: number
+
+    # We need to reset virtual-text IDs here because when a buffer is unloaded,
+    # for example, after :edit, the buffer is freed and text-properties are
+    # removed, The old cached virtual-text IDs are not valid anymore.
+    virt_IDs[group][bufnr] = []
+
+    for idx in buffers[group][bufnr]
+        const item: dict<any> = items[idx]
+
+        # Sanity checks (should we call prop_add() inside a try/catch? block)
+        if item.lnum > maxlnum
+            continue
+        endif
+
+        virtid = prop_add(item.lnum, 0, {
+            type: get(virttype, toupper(item.type), virttype['']),
+            bufnr: bufnr,
+            text: prefix[toupper(item.type)] .. item.text->split('\n')[0]->trim(),
+            text_align: text_align,
+            text_padding_left: text_align == 'below' || text_align == 'above' ? indent(item.lnum) : padding,
+        })
+
+        # Save the text-prop ID for later when removing virtual text
+        add(virt_IDs[group][bufnr], virtid)
+    endfor
+enddef
+
+# Add text-properties to 'bufnr' using the items stored in 'group'
+def Props_add(bufnr: number, group: number, maxlnum: number)
+    if Getopt('virttext')
+        Virttext_add(bufnr, group, maxlnum)
     endif
 
-    var bufnr: number
-    for i in prop_items->get(group_id)->keys()
-        bufnr = str2nr(i)
-        if bufexists(bufnr)
+    if Getopt('texthl')
+        Texthl_add(bufnr, group, maxlnum)
+    endif
+enddef
+
+def Texthl_remove(group: number)
+    for bufnr in keys(buffers[group])
+        if bufnr->str2nr()->bufexists()
             prop_remove({
-                id: group_id,
+                id: group,
+                bufnr: str2nr(bufnr),
                 types: ['qf-text-error', 'qf-text-warning', 'qf-text-info', 'qf-text-note', 'qf-text-other'],
-                bufnr: bufnr,
                 both: true,
                 all: true
             })
         endif
     endfor
+    remove(texthl_added, group)
+enddef
 
-    remove(prop_items, group_id)
-    if empty(prop_items)
-        autocmd_delete([{group: 'qf-diagnostics', event: 'BufReadPost'}])
+def Virttext_remove(group: number)
+    for bufnr in keys(virt_IDs[group])
+        if !bufnr->str2nr()->bufexists()
+            continue
+        endif
+        for id in virt_IDs[group][bufnr]
+            prop_remove({
+                id: id,
+                bufnr: str2nr(bufnr),
+                types: ['qf-virt-error', 'qf-virt-warning', 'qf-virt-info', 'qf-virt-note', 'qf-virt-other'],
+                both: true,
+                all: true
+            })
+        endfor
+    endfor
+    remove(virttext_added, group)
+    remove(virttext_align, group)
+    remove(virt_IDs, group)
+enddef
+
+def Props_remove(group: number)
+    if !has_key(qfs, group)
+        return
+    endif
+
+    if Virttext_added(group)
+        Virttext_remove(group)
+    endif
+
+    if Texthl_added(group)
+        Texthl_remove(group)
+    endif
+
+    # Remove cached data for 'group'
+    remove(qfs, group)
+    remove(buffers, group)
+
+    if empty(qfs)
+        autocmd_delete([
+            {group: 'qf-diagnostics', event: 'BufWinEnter'},
+            {group: 'qf-diagnostics', event: 'BufReadPost'}
+        ])
     endif
 enddef
 
-def Add_signs(xlist: list<any>, group_id: number)
+def Signs_add(group: number)
     const priorities: dict<number> = Sign_priorities()
-    const group: string = Sign_group(group_id)
-    sign_placed_ids[group_id] = 1
+    const signgroup: string = Sign_group(group)
 
-    xlist
-        ->copy()
-        ->filter((_, i: dict<any>) => i.bufnr > 0 && bufexists(i.bufnr) && i.valid && i.lnum > 0)
-        ->map((_, i: dict<any>) => ({
+    qfs[group].items
+        ->mapnew((_, i: dict<any>): dict<any> => ({
             lnum: i.lnum,
             buffer: i.bufnr,
-            group: group,
+            group: signgroup,
             priority: get(priorities, toupper(i.type), priorities['']),
             name: get(signname, toupper(i.type), signname[''])
         }))
         ->sign_placelist()
+
+    signs_added[group] = true
 enddef
 
-def Remove_signs(group_id: number)
-    if !Signs_placed(group_id)
+def Signs_remove(group: number)
+    if !Signs_added(group)
         return
     endif
-    group_id->Sign_group()->sign_unplace()
-    remove(sign_placed_ids, group_id)
+    group->Sign_group()->sign_unplace()
+    remove(signs_added, group)
 enddef
 
-def Remove_on_winclosed()
+# Re-apply text-properties to a buffer that was reloaded with ':edit'. Since we
+# are postponing adding text-properties until the buffer is displayed in a
+# window, we return when the buffer isn't displayed in a window. For example,
+# when we call bufload(bufnr), BufRead is triggered but we don't want to add
+# text-properties until BufWinEnter is triggered. Is this good?
+def On_bufread()
+    const bufnr: number = expand('<abuf>')->str2nr()
+    const wins: list<number> = win_findbuf(bufnr)
+
+    if empty(wins)
+        return
+    endif
+
+    for group in keys(virt_IDs)
+        if has_key(virt_IDs[group], bufnr)
+            Props_add(bufnr, str2nr(group), line('$', wins[0]))
+        endif
+    endfor
+enddef
+
+# We add text-properties to the buffer only after it's displayed in a window
+#
+# TODO:
+# - Should we check quickfix's 'changedtick', and if it changed, get new
+#   quickfix list, re-group items, and delete old text-properties before adding
+#   new ones?
+# - Check if quickfix list with given quickfix-ID still exists, if it doesn't,
+#   we need to remove ALL text-properties, and don't add new ones
+#
+def On_bufwinenter()
+    const bufnr: number = expand('<abuf>')->str2nr()
+    const wins: list<number> = win_findbuf(bufnr)
+    for group in keys(virt_IDs)
+        # If no text-property IDs saved for a buffer, virtual text hasn't been
+        # added yet
+        if has_key(virt_IDs[group], bufnr) && empty(virt_IDs[group][bufnr])
+            Props_add(bufnr, str2nr(group), line('$', wins[0]))
+        endif
+    endfor
+enddef
+
+# When a window is closed, remove all text-properties and signs that were added
+# from a location list, and delete all data stored for that window
+def On_winclosed()
     const winid: number = expand('<amatch>')->str2nr()
-    Remove_signs(winid)
-    Remove_textprops(winid)
+    Signs_remove(winid)
+    Props_remove(winid)
 enddef
 
-export def Place(loclist: bool)
-    if !Getopt('signs') && !Getopt('texthl')
+export def Complete(arglead: string, cmdline: string, curpos: number): string
+    return join(['after', 'right', 'below', 'above'], "\n")
+enddef
+
+export def Place(loclist: bool, align: string)
+    if !Getopt('signs') && !Getopt('texthl') && !Getopt('virttext')
         return
     endif
 
-    const xlist: list<any> = Getxlist(loclist)
-    const group_id: number = Group_id(loclist)
-    Remove_textprops(group_id)
-    Remove_signs(group_id)
+    const group: number = Group_id(loclist)
+    final xlist: dict<any> = loclist
+        ? getloclist(0, {items: 0, id: 0, changedtick: 0})
+        : getqflist({items: 0, id: 0, changedtick: 0})
 
-    if empty(xlist)
+    # Remove previously placed text-properties and signs
+    Signs_remove(group)
+    Props_remove(group)
+
+    # Remove invalid quickfix items
+    filter(xlist.items, (_, i: dict<any>): bool => !(i.lnum < 1 || !i.valid || i.bufnr < 1 || !bufexists(i.bufnr)))
+
+    if empty(xlist.items)
         return
     endif
 
-    if Getopt('texthl')
-        prop_type_change('qf-text-error',   Getopt('text_error'))
-        prop_type_change('qf-text-warning', Getopt('text_warning'))
-        prop_type_change('qf-text-info',    Getopt('text_info'))
-        prop_type_change('qf-text-note',    Getopt('text_note'))
-        prop_type_change('qf-text-other',   Getopt('text_other'))
-        Add_textprops(xlist, group_id)
-    endif
+    qfs[group] = xlist
 
     if Getopt('signs')
         sign_define('qf-error',   Getopt('sign_error'))
@@ -418,73 +570,137 @@ export def Place(loclist: bool)
         sign_define('qf-info',    Getopt('sign_info'))
         sign_define('qf-note',    Getopt('sign_note'))
         sign_define('qf-other',   Getopt('sign_other'))
-        Add_signs(xlist, group_id)
+        Signs_add(group)
     endif
+
+    if !Getopt('texthl') && !Getopt('virttext')
+        return
+    endif
+
+    buffers[group] = Group_by_bufnr(xlist.items)
+    virttext_align[group] = align ?? Getopt('virt_align')
+    virt_IDs[group] = {}
+
+    for buf in keys(buffers[group])
+        virt_IDs[group][buf] = []
+    endfor
+
+    # Dictionary with buffers that are displayed in a window
+    const displayed: dict<list<number>> = buffers[group]
+        ->mapnew((b: string, _): list<number> => b->str2nr()->win_findbuf())
+        ->filter((_, i: list<number>): bool => !empty(i))
+
+    if Getopt('texthl')
+        prop_type_change('qf-text-error',   Getopt('text_error'))
+        prop_type_change('qf-text-warning', Getopt('text_warning'))
+        prop_type_change('qf-text-info',    Getopt('text_info'))
+        prop_type_change('qf-text-note',    Getopt('text_note'))
+        prop_type_change('qf-text-other',   Getopt('text_other'))
+        for [buf: string, wins: list<number>] in items(displayed)
+            Texthl_add(str2nr(buf), group, line('$', wins[0]))
+        endfor
+        texthl_added[group] = true
+    endif
+
+    if Getopt('virttext')
+        prop_type_change('qf-virt-error',   Getopt('virt_error'))
+        prop_type_change('qf-virt-warning', Getopt('virt_warning'))
+        prop_type_change('qf-virt-info',    Getopt('virt_info'))
+        prop_type_change('qf-virt-note',    Getopt('virt_note'))
+        prop_type_change('qf-virt-other',   Getopt('virt_other'))
+        for [buf: string, wins: list<number>] in items(displayed)
+            Virttext_add(str2nr(buf), group, line('$', wins[0]))
+        endfor
+        virttext_added[group] = true
+    endif
+
+    autocmd_add([
+        {
+            group: 'qf-diagnostics',
+            event: 'BufWinEnter',
+            pattern: '*',
+            replace: true,
+            cmd: "On_bufwinenter()"
+        },
+        {
+            group: 'qf-diagnostics',
+            event: 'BufReadPost',
+            replace: true,
+            pattern: '*',
+            cmd: "On_bufread()"
+        }
+    ])
 
     if loclist
         autocmd_add([{
             group: 'qf-diagnostics',
             event: 'WinClosed',
-            pattern: string(group_id),
+            pattern: string(group),
             replace: true,
             once: true,
-            cmd: 'Remove_on_winclosed()'
+            cmd: 'On_winclosed()'
         }])
     endif
 enddef
 
 export def Cclear()
-    Remove_signs(0)
-    Remove_textprops(0)
+    Signs_remove(0)
+    Props_remove(0)
 enddef
 
 export def Lclear(bang: bool)
     if bang
         var id: number
-        for i in keys(sign_placed_ids)
+        for i in keys(qfs)
             id = str2nr(i)
             if id != 0
-                Remove_signs(id)
+                Signs_remove(id)
             endif
         endfor
-        for i in keys(prop_items)
+        for i in keys(qfs)
             id = str2nr(i)
             if id != 0
-                Remove_textprops(id)
+                Props_remove(id)
             endif
         endfor
         autocmd_delete([{group: 'qf-diagnostics', event: 'WinClosed'}])
     else
-        const group_id: number = Group_id(true)
-        Remove_signs(group_id)
-        Remove_textprops(group_id)
+        const group: number = Group_id(true)
+        Signs_remove(group)
+        Props_remove(group)
         autocmd_delete([{
             group: 'qf-diagnostics',
             event: 'WinClosed',
-            pattern: string(group_id)
+            pattern: string(group)
         }])
     endif
 enddef
 
-export def Toggle(loclist: bool)
-    const group_id: number = Group_id(loclist)
-    if !Signs_placed(group_id) && !Props_placed(group_id)
-        Place(loclist)
+export def Toggle(loclist: bool, align: string)
+    const group: number = Group_id(loclist)
+
+    if !Signs_added(group) && !Texthl_added(group) && !Virttext_added(group)
+        Place(loclist, align)
         return
     endif
-    Remove_signs(group_id)
-    Remove_textprops(group_id)
+
+    Signs_remove(group)
+    Props_remove(group)
+
     if loclist
         autocmd_delete([{
             group: 'qf-diagnostics',
             event: 'WinClosed',
-            pattern: string(group_id)
+            pattern: string(group)
         }])
     endif
 enddef
 
 export def Popup(loclist: bool): number
-    const xlist: list<any> = Getxlist(loclist)
+    const qf: dict<any> = loclist
+        ? getloclist(0, {id: 0, items: 0})
+        : getqflist({id: 0, items: 0})
+    const xlist: list<any> = qf.items
 
     if empty(xlist)
         return 0
@@ -577,7 +793,7 @@ export def Popup(loclist: bool): number
     matchadd('QfDiagnosticsWarning', '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {window: popup_id})
     matchadd('QfDiagnosticsInfo',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {window: popup_id})
     matchadd('QfDiagnosticsNote',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {window: popup_id})
-    Getopt('popup_create_cb')(popup_id, curlist.id, loclist)
+    Getopt('popup_create_cb')(popup_id, qf.id, loclist)
 
     return popup_id
 enddef
