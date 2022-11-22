@@ -7,13 +7,58 @@ License:    Same terms as Vim itself (see |license|)
 ==============================================================================
 INTRODUCTION
 
-- Highlight the locations of the |quickfix| items (for example, errors of a
-  project-build, linter, or grep command) in the |sign-column| and in the
+- Highlight the locations of the |quickfix| items (for example, compile errors
+  of a project-build, linter, or grep command) in the |sign-column| and in the
   buffer using |text-properties|.
 - Display the error messages next to the lines containing the errors using
   |virtual-text|.
 - Display the error message for the current line in a |popup-window| next to
   the cursor.
+
+==============================================================================
+SIGNS AND TEXT HIGHLIGHTINGS                        *qf-diagnostics-highlight*
+
+:DiagnosticsPlace [arg]                                    *:DiagnosticsPlace*
+        Highlight the diagnostics in the current quickfix list. The command
+        will first remove any previously placed signs and text-properties.
+
+        By default, the command will place |signs| in the |sign-column| and
+        add text-highlightings using |text-properties|. |virtual-text| is
+        disabled by default. Signs, text-highlightings and virtual text can be
+        individually enabled or disabled in |g:qfdiagnostics| (see below).
+
+        [arg] is optional and specifies where virtual text is displayed. The
+        following values are supported:
+            after   after the end of the buffer line
+            right   right-aligned in the current window
+            below   below the line with the error
+            above   above the line with the error
+        Note: This will override the value specified in |g:qfdiagnostics|.
+
+:DiagnosticsClear                                          *:DiagnosticsClear*
+        Remove the highlightings placed by |:DiagnosticsPlace|.
+
+:DiagnosticsToggle [arg]                                  *:DiagnosticsToggle*
+        Toggle the diagnostics from the quickfix list.
+
+:LDiagnosticsPlace [arg]                                  *:LDiagnosticsPlace*
+        Same as |:DiagnosticsPlace| but use the current location list of the
+        current window. This command can be run in multiple windows to
+        simultaneously highlight the diagnostics from several location lists.
+
+:LDiagnosticsClear[!]                                     *:LDiagnosticsClear*
+        Remove the highlightings placed by |:LDiagnosticsPlace|.
+
+        Note: The command must be run in the same window where
+        |:LDiagnosticsPlace| has been executed to remove the previously placed
+        highlights.
+
+        Add ! to remove the highlightings of all diagnostics from all location
+        lists at once. This is like running |:LDiagnosticsClear| in every
+        window where |:LDiagnosticsPlace| has been run.
+
+:LDiagnosticsToggle [arg]                                *:LDiagnosticsToggle*
+        Toggle the diagnostics from the location list of the current window.
 
 ==============================================================================
 POPUP WINDOW                                            *qf-diagnostics-popup*
@@ -43,51 +88,6 @@ POPUP WINDOW                                            *qf-diagnostics-popup*
         Example: >
             nmap gH <plug>(qf-diagnostics-popup-loclist)
 <
-==============================================================================
-SIGNS AND TEXT HIGHLIGHTINGS                        *qf-diagnostics-highlight*
-
-:DiagnosticsPlace [arg]                                    *:DiagnosticsPlace*
-        Highlight the diagnostics from the current quickfix list. The command
-        will first remove any previously placed signs and text-properties.
-
-        [arg] is optional and specifies where |virtual-text| is displayed. The
-        following values are supported:
-
-            after   after the end of the buffer line
-            right   right-aligned in the current window
-            below   below the line with the error
-            above   above the line with the error
-
-        By default, the plugin will place |signs| in the |sign-column| and add
-        text-highlightings using |text-properties|. virtual text is disabled
-        by default. Signs, text-highlightings and virtual-text can be
-        individually enabled or disabled in |g:qfdiagnostics| (see below).
-
-:DiagnosticsClear                                          *:DiagnosticsClear*
-        Remove the highlightings placed by |:DiagnosticsPlace|.
-
-:DiagnosticsToggle [arg]                                  *:DiagnosticsToggle*
-        Toggle the diagnostics from the quickfix list.
-
-:LDiagnosticsPlace [arg]                                  *:LDiagnosticsPlace*
-        Same as |:DiagnosticsPlace| but use the current location list of the
-        current window. This command can be run in multiple windows to
-        simultaneously highlight the diagnostics from several location lists.
-
-:LDiagnosticsClear[!]                                     *:LDiagnosticsClear*
-        Remove the highlightings placed by |:LDiagnosticsPlace|.
-
-        Note: The command must be run in the same window where
-        |:LDiagnosticsPlace| has been executed to remove the previously placed
-        highlights.
-
-        Add ! to remove the highlightings of all diagnostics from all location
-        lists at once. This is like running |:LDiagnosticsClear| in every
-        window where |:LDiagnosticsPlace| has been run.
-
-:LDiagnosticsToggle [arg]                                *:LDiagnosticsToggle*
-        Toggle the diagnostics from the location list of the current window.
-
 ==============================================================================
 CONFIGURATION                                                *g:qfdiagnostics*
 
@@ -274,8 +274,10 @@ EXAMPLES                                             *qf-diagnostics-examples*
     nnoremap <F7> <Cmd>DiagnosticsToggle<Cr>
     nnoremap <F8> <Cmd>LDiagnosticsToggle<Cr>
 <
-4. Add a callback function that highlights the warning type of gcc and clang
-   compiler messages in the popup window: >
+4. If you want to extend the highlighting in the popup window, you can add a
+   callback function which will be invoked when the popup window is created.
+   For example, the following example highlights the warning type of gcc and
+   clang compiler messages in the popup window: >
     def Callback(winid: number, qfid: number, is_loclist: bool)
         const title = is_loclist
             ? getloclist(0, {title: 0, id: qfid}).title

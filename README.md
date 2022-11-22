@@ -2,44 +2,24 @@
 
 - Highlight the locations of the quickfix items (errors of a project-build,
   linter, or locations of a `grep` search) in the sign column, and in the text
-  using `text-properties`.
+  using `text-properties` (top screenshot, left).
 - Display the error messages next to the lines containing the errors using
-  `virtual-text`.
+  `virtual-text` (bottom screenshot).
 - Show the error message for the current line in a popup window next to the
-  cursor.
+  cursor (top screenshot, right).
 
 ![screenshots](https://user-images.githubusercontent.com/6266600/195206925-13d8024f-0000-482a-9bf2-830d513222bf.png)
+![virtual text](https://user-images.githubusercontent.com/6266600/203429280-b39e7b72-0191-476c-acc4-f72efe7cb1a3.png)
+
 
 ## Usage
-
-### Popup window
-
-* **`<plug>(qf-diagnostics-popup-quickfix)`** - Display a popup window at the
-  current cursor position with the error message found for the current line in
-  the `quickfix` list. If the line contains several errors, all entries are
-  collected and displayed in the same popup window.
-* **`<plug>(qf-diagnostics-popup-loclist)`** - Same as above but display the
-  error messages from the current `location-list` of the current window.
-
-If not all errors in the current line fit into the popup window, a scrollbar
-will appear on the right side. The popup window can then be scrolled with
-<kbd>CTRL-J</kbd> and <kbd>CTRL-K</kbd>, or alternatively, using the mouse
-wheel. Pressing <kbd>CTRL-C</kbd> or moving the cursor in any direction will
-close the popup window.
-
-#### Examples
-
-```vim
-nmap gh <plug>(qf-diagnostics-popup-quickfix)
-nmap gH <plug>(qf-diagnostics-popup-loclist)
-```
 
 ### Signs, text-highlightings and virtual text
 
 The items in the quickfix and/or location list can be highlighted in the sign
 column and in the buffer using text-properties. Optionally, the error text can
 be displayed as virtual text next to the line containing the error. Signs,
-text-highlightings and virtual text are all optional and can be individually
+text-highlightings and virtual text are each optional and can be individually
 configured in [`g:qfdiagnostics`](#configuration).
 
 | Command                 | Description                                                                          |
@@ -81,37 +61,34 @@ configured in [`g:qfdiagnostics`](#configuration).
    **Note:** it is not necessary to run `DiagnosticsClear` on `QuickfixCmdPre`
    since `DiagnosticsPlace` automatically clears previously placed
    highlightings before adding new ones.
-3. If you want to extend the highlighting in the popup window, you can specify a
-   callback function which will be invoked when the popup is created. For
-   example, to highlight `-Wunused-parameter` in the popup window for a compiler
-   messages like:
-   ```
-   test.c:12:23: warning: unused parameter 'out' [-Wunused-parameter]
-   ```
-   you can use the following callback function:
-   ```vim
-   vim9script
 
-   def On_popup_open(winid: number, qfid: number, is_loclist: bool)
-       const title = is_loclist
-           ? getloclist(0, {title: 0, id: qfid}).title
-           : getqflist({title: 0, id: qfid}).title
+### Popup window
 
-       if title !~ '^:\=\%(gcc\|g++\|clang\|[gc]\=make\)'
-           return
-       endif
+* **`<plug>(qf-diagnostics-popup-quickfix)`** - Display a popup window at the
+  current cursor position with the error message found for the current line in
+  the `quickfix` list. If the line contains several errors, all entries are
+  collected and displayed in the same popup window.
+* **`<plug>(qf-diagnostics-popup-loclist)`** - Same as above but display the
+  error messages from the current `location-list` of the current window.
 
-       matchadd('WarningMsg', '\[\zs-W.\{-}\ze]$', 10, -1, {window: winid})
-   enddef
+If not all errors in the current line fit into the popup window, a scrollbar
+will appear on the right side. The popup window can then be scrolled with
+<kbd>CTRL-J</kbd> and <kbd>CTRL-K</kbd>, or alternatively, using the mouse
+wheel. Pressing <kbd>CTRL-C</kbd> or moving the cursor in any direction will
+close the popup window.
 
-   g:qfdiagnostics = {popup_create_cb: On_popup_open}
-   ```
+#### Examples
+
+```vim
+nmap gh <plug>(qf-diagnostics-popup-quickfix)
+nmap gH <plug>(qf-diagnostics-popup-loclist)
+```
 
 
 ## Configuration
 
 The appearance of the popup window, the signs, text-highlightings and virtual
-textcan be configured through the variable `g:qfdiagnostics`. For all supported
+text can be configured through the variable `g:qfdiagnostics`. For all supported
 entries, see `:help qf-diagnostics-config`, as well as `:help
 qf-diagnostics-examples` for a few examples.
 
