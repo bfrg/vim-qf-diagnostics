@@ -16,11 +16,11 @@
 
 ### Signs, text-highlightings and virtual text
 
-The items in the quickfix and/or location list can be highlighted in the sign
-column and in the buffer using text-properties. Optionally, the error text can
-be displayed as virtual text next to the line containing the error. Signs,
+The locations in the quickfix and/or location list can be highlighted in the
+sign column and in the buffer using text-properties. Optionally, the error text
+can be displayed as virtual text next to the line containing the error. Signs,
 text-highlightings and virtual text are each optional and can be individually
-configured in [`g:qfdiagnostics`](#configuration).
+turned off in [`g:qfdiagnostics`](#configuration).
 
 | Command                 | Description                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------ |
@@ -87,10 +87,10 @@ nmap gH <plug>(qf-diagnostics-popup-loclist)
 
 ## Configuration
 
-The appearance of the popup window, the signs, text-highlightings and virtual
-text can be configured through the variable `g:qfdiagnostics`. For all supported
-entries, see `:help qf-diagnostics-config`, as well as `:help
-qf-diagnostics-examples` for a few examples.
+The appearance of the popup window, signs, text-highlightings and virtual text
+can be configured through `g:qfdiagnostics`. For all supported entries, see
+`:help g:qfdiagnostics`, as well as `:help qf-diagnostics-examples` for a few
+examples.
 
 All highlighting groups used in the popup window are described in `:help
 qf-dagnostics-popup-highlight`.
