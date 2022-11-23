@@ -563,3 +563,15 @@ export def Toggle(loclist: bool)
         }])
     endif
 enddef
+
+export def Debug(): dict<any>
+    return {
+        qfs: deepcopy(qfs),
+        buffers: deepcopy(buffers),
+        signs: deepcopy(signs_added),
+        texthl: deepcopy(texthl_added),
+        virt_IDs: deepcopy(virt_IDs),
+        virttext: deepcopy(virttext_added),
+        virt_align: deepcopy(virttext_align)
+    }
+enddef
