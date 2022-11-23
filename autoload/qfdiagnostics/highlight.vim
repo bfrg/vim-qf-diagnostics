@@ -10,6 +10,17 @@ vim9script
 
 import './config.vim'
 
+prop_type_add('qf-text-error',   config.Getopt('text_error'))
+prop_type_add('qf-text-warning', config.Getopt('text_warning'))
+prop_type_add('qf-text-info',    config.Getopt('text_info'))
+prop_type_add('qf-text-note',    config.Getopt('text_note'))
+prop_type_add('qf-text-other',   config.Getopt('text_other'))
+prop_type_add('qf-virt-error',   config.Getopt('virt_error'))
+prop_type_add('qf-virt-warning', config.Getopt('virt_warning'))
+prop_type_add('qf-virt-info',    config.Getopt('virt_info'))
+prop_type_add('qf-virt-note',    config.Getopt('virt_note'))
+prop_type_add('qf-virt-other',   config.Getopt('virt_other'))
+
 # Look-up table used for sign names
 const signname: dict<string> = {
     E: 'qf-error',
@@ -116,17 +127,6 @@ var virttext_added: dict<bool> = {}
 #   }
 #
 var virttext_align: dict<string> = {}
-
-prop_type_add('qf-text-error',   config.Getopt('text_error'))
-prop_type_add('qf-text-warning', config.Getopt('text_warning'))
-prop_type_add('qf-text-info',    config.Getopt('text_info'))
-prop_type_add('qf-text-note',    config.Getopt('text_note'))
-prop_type_add('qf-text-other',   config.Getopt('text_other'))
-prop_type_add('qf-virt-error',   config.Getopt('virt_error'))
-prop_type_add('qf-virt-warning', config.Getopt('virt_warning'))
-prop_type_add('qf-virt-info',    config.Getopt('virt_info'))
-prop_type_add('qf-virt-note',    config.Getopt('virt_note'))
-prop_type_add('qf-virt-other',   config.Getopt('virt_other'))
 
 def Sign_priorities(): dict<number>
     return {
