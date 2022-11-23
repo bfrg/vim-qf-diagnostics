@@ -18,30 +18,22 @@ INTRODUCTION
 ==============================================================================
 SIGNS AND TEXT HIGHLIGHTINGS                        *qf-diagnostics-highlight*
 
-:DiagnosticsPlace [arg]                                    *:DiagnosticsPlace*
+:DiagnosticsPlace                                          *:DiagnosticsPlace*
         Highlight the diagnostics in the current quickfix list. The command
         will first remove any previously placed signs and text-properties.
 
-        By default, the command will place |signs| in the |sign-column| and
-        add text-highlightings using |text-properties|. |virtual-text| is
-        disabled by default. Signs, text-highlightings and virtual text can be
+        By default, the command places |signs| in the |sign-column| and adds
+        text-highlightings using |text-properties|. |virtual-text| is disabled
+        by default. Signs, text-highlightings and virtual text can be
         individually enabled or disabled in |g:qfdiagnostics| (see below).
-
-        [arg] is optional and specifies where virtual text is displayed. The
-        following values are supported:
-            after   after the end of the buffer line
-            right   right-aligned in the current window
-            below   below the line with the error
-            above   above the line with the error
-        Note: This will override the value specified in |g:qfdiagnostics|.
 
 :DiagnosticsClear                                          *:DiagnosticsClear*
         Remove the highlightings placed by |:DiagnosticsPlace|.
 
-:DiagnosticsToggle [arg]                                  *:DiagnosticsToggle*
+:DiagnosticsToggle                                        *:DiagnosticsToggle*
         Toggle the diagnostics from the quickfix list.
 
-:LDiagnosticsPlace [arg]                                  *:LDiagnosticsPlace*
+:LDiagnosticsPlace                                        *:LDiagnosticsPlace*
         Same as |:DiagnosticsPlace| but use the current location list of the
         current window. This command can be run in multiple windows to
         simultaneously highlight the diagnostics from several location lists.
@@ -57,7 +49,7 @@ SIGNS AND TEXT HIGHLIGHTINGS                        *qf-diagnostics-highlight*
         lists at once. This is like running |:LDiagnosticsClear| in every
         window where |:LDiagnosticsPlace| has been run.
 
-:LDiagnosticsToggle [arg]                                *:LDiagnosticsToggle*
+:LDiagnosticsToggle                                      *:LDiagnosticsToggle*
         Toggle the diagnostics from the location list of the current window.
 
 ==============================================================================
@@ -166,17 +158,12 @@ are supported:
             Default: 2
 
     virt_align                                    *g:qfdiagnostics.virt_align*
-            Specifies where to display the virtual text. Possible values are:
+            Specifies where to display virtual text. Possible values are:
                 after   after the end of the buffer text
                 right   right-aligned in the current window
                 below   below the line with the error
                 above   above the line with the error
             Default: "right"
-
-            Note: This value can be overridden with any of the commands
-            that place highlightings. For example, "|:DiagnosticsPlace| below"
-            will display virtual text below the lines containing the errors,
-            even if "virt_align" is set to "right".
 
     virt_error                                    *g:qfdiagnostics.virt_error*
             Set the appearance of virtual text for quickfix items of type

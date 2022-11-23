@@ -409,7 +409,7 @@ export def Complete(arglead: string, cmdline: string, curpos: number): string
     return join(['after', 'right', 'below', 'above'], "\n")
 enddef
 
-export def Place(loclist: bool, align: string)
+export def Place(loclist: bool)
     if !config.Getopt('signs') && !config.Getopt('texthl') && !config.Getopt('virttext')
         return
     endif
@@ -446,7 +446,7 @@ export def Place(loclist: bool, align: string)
     endif
 
     buffers[group] = Group_by_bufnr(xlist.items)
-    virttext_align[group] = align ?? config.Getopt('virt_align')
+    virttext_align[group] = config.Getopt('virt_align')
     virt_IDs[group] = {}
 
     for buf in keys(buffers[group])
@@ -544,11 +544,11 @@ export def Lclear(bang: bool)
     endif
 enddef
 
-export def Toggle(loclist: bool, align: string)
+export def Toggle(loclist: bool)
     const group: number = Group_id(loclist)
 
     if !Signs_added(group) && !Texthl_added(group) && !Virttext_added(group)
-        Place(loclist, align)
+        Place(loclist)
         return
     endif
 
