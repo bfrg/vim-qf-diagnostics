@@ -64,11 +64,14 @@ turned off in [`g:qfdiagnostics`](#configuration).
 
 ### Popup window
 
-* **`<plug>(qf-diagnostics-popup-quickfix)`** - Display a popup window at the
+Users who find virtual text too distracting can instead use a popup window for
+displaying error messages. The following `<plug>` mappings are provided:
+
+* **`<plug>(qf-diagnostics-popup-quickfix)`** — Display a popup window at the
   current cursor position with the error message found for the current line in
   the `quickfix` list. If the line contains several errors, all entries are
   collected and displayed in the same popup window.
-* **`<plug>(qf-diagnostics-popup-loclist)`** - Same as above but display the
+* **`<plug>(qf-diagnostics-popup-loclist)`** — Same as above but display the
   error messages from the current `location-list` of the current window.
 
 If not all errors in the current line fit into the popup window, a scrollbar
@@ -83,6 +86,7 @@ close the popup window.
 nmap gh <plug>(qf-diagnostics-popup-quickfix)
 nmap gH <plug>(qf-diagnostics-popup-loclist)
 ```
+Mnemonic: _go hover_
 
 
 ## Configuration
