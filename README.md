@@ -8,9 +8,8 @@
 - Show the error message for the current line in a popup window next to the
   cursor (top screenshot, right).
 
-![screenshots](https://user-images.githubusercontent.com/6266600/195206925-13d8024f-0000-482a-9bf2-830d513222bf.png)
-![virtual text](https://user-images.githubusercontent.com/6266600/203429280-b39e7b72-0191-476c-acc4-f72efe7cb1a3.png)
-
+![screenshot1](https://user-images.githubusercontent.com/6266600/203570744-ad5db96a-30c0-44e6-aa87-780ac3ffd5a1.png)
+![screenshot2](https://user-images.githubusercontent.com/6266600/203570749-6c4abf68-8420-4f10-871f-a6c9bb5a6340.png)
 
 ## Usage
 
