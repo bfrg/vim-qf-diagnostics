@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics/highlight.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 23, 2022
+# Last Change:  Nov 24, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -151,12 +151,14 @@ enddef
 # Group quickfix list 'items' by buffer number
 def Group_by_bufnr(items: list<dict<any>>): dict<list<number>>
     final bufgroups: dict<list<number>> = {}
+    var idx: number = -1
 
-    for [idx: number, item: dict<any>] in items(items)
-        if !has_key(bufgroups, item.bufnr)
-            bufgroups[item.bufnr] = []
+    for i in items
+        ++idx
+        if !has_key(bufgroups, i.bufnr)
+            bufgroups[i.bufnr] = []
         endif
-        add(bufgroups[item.bufnr], idx)
+        add(bufgroups[i.bufnr], idx)
     endfor
 
     return bufgroups
