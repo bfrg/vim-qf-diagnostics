@@ -4,11 +4,11 @@ vim9script
 # File:         autoload/qfdiagnostics/highlight.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 22, 2022
+# Last Change:  Nov 23, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
-import autoload './config.vim'
+import './config.vim'
 
 # Look-up table used for sign names
 const signname: dict<string> = {
