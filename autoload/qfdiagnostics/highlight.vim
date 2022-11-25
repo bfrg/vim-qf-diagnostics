@@ -525,11 +525,6 @@ export def Lclear(bang: bool)
             id = str2nr(i)
             if id != 0
                 Signs_remove(id)
-            endif
-        endfor
-        for i in keys(qfs)
-            id = str2nr(i)
-            if id != 0
                 Props_remove(id)
             endif
         endfor
