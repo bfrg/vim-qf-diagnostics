@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics/highlight.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 24, 2022
+# Last Change:  Nov 25, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -205,7 +205,7 @@ def Texthl_add(bufnr: number, group: number, maxlnum: number)
         max = bufnr->getbufline(item.lnum)[0]->strlen()
 
         # Sanity checks (should we call prop_add() inside a try/catch? block)
-        if max == 0 || item.lnum > maxlnum
+        if item.col == 0 || max == 0 || item.lnum > maxlnum
             continue
         endif
 
