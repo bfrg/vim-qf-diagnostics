@@ -9,7 +9,8 @@
   cursor (top screenshot, right).
 
 ![screenshot1](https://user-images.githubusercontent.com/6266600/203570744-ad5db96a-30c0-44e6-aa87-780ac3ffd5a1.png)
-![screenshot2](https://user-images.githubusercontent.com/6266600/203570749-6c4abf68-8420-4f10-871f-a6c9bb5a6340.png)
+![screenshot2](https://user-images.githubusercontent.com/6266600/203899380-ae800092-3c91-45e3-9c84-2e224dd24b65.png)
+
 
 ## Usage
 
