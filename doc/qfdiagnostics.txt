@@ -7,8 +7,8 @@ License:    Same terms as Vim itself (see |license|)
 ==============================================================================
 INTRODUCTION
 
-- Highlight the locations of the |quickfix| items (for example, compile errors
-  of a project-build, linter, or grep command) in the |sign-column| and in the
+- Highlight the locations in the |quickfix| list (for example, compile errors
+  of a project-build, linter, or grep search) in the |sign-column| and in the
   buffer using |text-properties|.
 - Display the error messages next to the lines containing the errors using
   |virtual-text|.
