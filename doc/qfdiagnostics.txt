@@ -83,7 +83,7 @@ POPUP WINDOW                                            *qf-diagnostics-popup*
 ==============================================================================
 CONFIGURATION                                                *g:qfdiagnostics*
 
-The appearance of the popup window as well as the signs and text-highlightings
+The appearance of the signs, text-highlightings, virtual text and popup window
 can be configured through the |Dictionary| g:qfdiagnostics. The following keys
 are supported:
 
