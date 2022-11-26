@@ -4,7 +4,7 @@ vim9script
 # File:         plugin/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 23, 2022
+# Last Change:  Nov 26, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -22,8 +22,8 @@ nnoremap <plug>(qf-diagnostics-popup-loclist)  <scriptcmd>popup.Show(true)<cr>
 command -bar  DiagnosticsPlace highlight.Place(false)
 command -bar LDiagnosticsPlace highlight.Place(true)
 
-command -bar        DiagnosticsClear highlight.Cclear()
-command -bar -bang LDiagnosticsClear highlight.Lclear(<bang>false)
+command -bar        DiagnosticsClear highlight.Clear(false)
+command -bar -bang LDiagnosticsClear highlight.Clear(true, <bang>false)
 
 command -bar  DiagnosticsToggle highlight.Toggle(false)
 command -bar LDiagnosticsToggle highlight.Toggle(true)

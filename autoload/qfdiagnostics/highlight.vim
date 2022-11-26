@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics/highlight.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 25, 2022
+# Last Change:  Nov 26, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -513,31 +513,31 @@ export def Place(loclist: bool)
     endif
 enddef
 
-export def Cclear()
-    Signs_remove(0)
-    Props_remove(0)
-enddef
-
-export def Lclear(bang: bool)
-    if bang
-        var id: number
-        for i in keys(qfs)
-            id = str2nr(i)
-            if id != 0
-                Signs_remove(id)
-                Props_remove(id)
-            endif
-        endfor
-        autocmd_delete([{group: 'qf-diagnostics', event: 'WinClosed'}])
+export def Clear(loclist: bool, bang: bool = false)
+    if loclist
+        if bang
+            var id: number
+            for i in keys(qfs)
+                id = str2nr(i)
+                if id != 0
+                    Signs_remove(id)
+                    Props_remove(id)
+                endif
+            endfor
+            autocmd_delete([{group: 'qf-diagnostics', event: 'WinClosed'}])
+        else
+            const group: number = Group_id(true)
+            Signs_remove(group)
+            Props_remove(group)
+            autocmd_delete([{
+                group: 'qf-diagnostics',
+                event: 'WinClosed',
+                pattern: string(group)
+            }])
+        endif
     else
-        const group: number = Group_id(true)
-        Signs_remove(group)
-        Props_remove(group)
-        autocmd_delete([{
-            group: 'qf-diagnostics',
-            event: 'WinClosed',
-            pattern: string(group)
-        }])
+        Signs_remove(0)
+        Props_remove(0)
     endif
 enddef
 
