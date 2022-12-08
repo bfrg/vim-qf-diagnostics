@@ -266,43 +266,23 @@ def Props_add(bufnr: number, group: number, maxlnum: number)
     endif
 enddef
 
-def Texthl_remove(group: number)
+def Props_remove_list(group: number, type: string)
     for bufnr in keys(buffers[group])
         if bufnr->str2nr()->bufexists()
             prop_remove({
                 bufnr: str2nr(bufnr),
                 types: [
-                    $'qf-{group}-text-error',
-                    $'qf-{group}-text-warning',
-                    $'qf-{group}-text-info',
-                    $'qf-{group}-text-note',
-                    $'qf-{group}-text-other'
+                    $'qf-{group}-{type}-error',
+                    $'qf-{group}-{type}-warning',
+                    $'qf-{group}-{type}-info',
+                    $'qf-{group}-{type}-note',
+                    $'qf-{group}-{type}-other'
                 ],
                 all: true
             })
         endif
     endfor
-    remove(texthl_added, group)
-enddef
-
-def Virttext_remove(group: number)
-    for bufnr in keys(buffers[group])
-        if bufnr->str2nr()->bufexists()
-            prop_remove({
-                bufnr: str2nr(bufnr),
-                types: [
-                    $'qf-{group}-virt-error',
-                    $'qf-{group}-virt-warning',
-                    $'qf-{group}-virt-info',
-                    $'qf-{group}-virt-note',
-                    $'qf-{group}-virt-other'
-                ],
-                all: true
-            })
-        endif
-    endfor
-    remove(virttext_added, group)
-    remove(virttext_align, group)
+    Prop_types_delete(group, type)
 enddef
 
 def Props_remove(group: number)
@@ -311,13 +291,14 @@ def Props_remove(group: number)
     endif
 
     if Virttext_added(group)
-        Virttext_remove(group)
-        Prop_types_delete(group, 'virt')
+        Props_remove_list(group, 'virt')
+        remove(virttext_added, group)
+        remove(virttext_align, group)
     endif
 
     if Texthl_added(group)
-        Texthl_remove(group)
-        Prop_types_delete(group, 'text')
+        Props_remove_list(group, 'text')
+        remove(texthl_added, group)
     endif
 
     # Remove cached data for 'group'
