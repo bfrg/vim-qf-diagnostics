@@ -250,7 +250,7 @@ def Virttext_add(bufnr: number, group: number, maxlnum: number)
         virtid = prop_add(item.lnum, 0, {
             type: Get_prop_type(group, 'virt', item.type),
             bufnr: bufnr,
-            text: prefix[toupper(item.type)] .. item.text->split('\n')[0]->trim(),
+            text: get(prefix, toupper(item.type), prefix['']) .. item.text->split('\n')[0]->trim(),
             text_align: text_align,
             text_padding_left: text_align == 'below' || text_align == 'above' ? indent(item.lnum) : padding,
         })
