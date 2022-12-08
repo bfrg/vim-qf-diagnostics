@@ -4,22 +4,11 @@ vim9script
 # File:         autoload/qfdiagnostics/highlight.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 26, 2022
+# Last Change:  Dec 8, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
 import './config.vim'
-
-prop_type_add('qf-text-error',   config.Getopt('text_error'))
-prop_type_add('qf-text-warning', config.Getopt('text_warning'))
-prop_type_add('qf-text-info',    config.Getopt('text_info'))
-prop_type_add('qf-text-note',    config.Getopt('text_note'))
-prop_type_add('qf-text-other',   config.Getopt('text_other'))
-prop_type_add('qf-virt-error',   config.Getopt('virt_error'))
-prop_type_add('qf-virt-warning', config.Getopt('virt_warning'))
-prop_type_add('qf-virt-info',    config.Getopt('virt_info'))
-prop_type_add('qf-virt-note',    config.Getopt('virt_note'))
-prop_type_add('qf-virt-other',   config.Getopt('virt_other'))
 
 # Look-up table used for sign names
 const signname: dict<string> = {
@@ -28,24 +17,6 @@ const signname: dict<string> = {
     I: 'qf-info',
     N: 'qf-note',
    '': 'qf-other'
-}
-
-# Look-up table used for text-property types for text-highlightings
-const texttype: dict<string> = {
-    E: 'qf-text-error',
-    W: 'qf-text-warning',
-    I: 'qf-text-info',
-    N: 'qf-text-note',
-   '': 'qf-text-other'
-}
-
-# Look-up table used for text-property types for virtual text
-const virttype: dict<string> = {
-    E: 'qf-virt-error',
-    W: 'qf-virt-warning',
-    I: 'qf-virt-info',
-    N: 'qf-virt-note',
-   '': 'qf-virt-other'
 }
 
 # Cached quickfix and location lists (for each window), accessed by 0 (quickfix)
@@ -148,6 +119,33 @@ def Virttext_prefix(): dict<string>
     }
 enddef
 
+def Prop_types_add(group: number, type: string)
+    prop_type_add($'qf-{group}-{type}-error',   config.Getopt($'{type}_error'))
+    prop_type_add($'qf-{group}-{type}-warning', config.Getopt($'{type}_warning'))
+    prop_type_add($'qf-{group}-{type}-info',    config.Getopt($'{type}_info'))
+    prop_type_add($'qf-{group}-{type}-note',    config.Getopt($'{type}_note'))
+    prop_type_add($'qf-{group}-{type}-other',   config.Getopt($'{type}_other'))
+enddef
+
+def Prop_types_delete(group: number, type: string)
+    prop_type_delete($'qf-{group}-{type}-error')
+    prop_type_delete($'qf-{group}-{type}-warning')
+    prop_type_delete($'qf-{group}-{type}-info')
+    prop_type_delete($'qf-{group}-{type}-note')
+    prop_type_delete($'qf-{group}-{type}-other')
+enddef
+
+def Get_prop_type(group: number, type: string, errortype: string): string
+    const map: dict<string> = {
+        E: $'qf-{group}-{type}-error',
+        W: $'qf-{group}-{type}-warning',
+        I: $'qf-{group}-{type}-info',
+        N: $'qf-{group}-{type}-note',
+       '': $'qf-{group}-{type}-other',
+    }
+    return get(map, toupper(errortype), map[''])
+enddef
+
 # Group quickfix list 'items' by buffer number
 def Group_by_bufnr(items: list<dict<any>>): dict<list<number>>
     final bufgroups: dict<list<number>> = {}
@@ -220,7 +218,7 @@ def Texthl_add(bufnr: number, group: number, maxlnum: number)
         endif
 
         prop_add(item.lnum, col, {
-            type: get(texttype, toupper(item.type), texttype['']),
+            type: Get_prop_type(group, 'text', item.type),
             bufnr: bufnr,
             id: group,
             end_lnum: item.end_lnum > 0 ? item.end_lnum : item.lnum,
@@ -250,7 +248,7 @@ def Virttext_add(bufnr: number, group: number, maxlnum: number)
         endif
 
         virtid = prop_add(item.lnum, 0, {
-            type: get(virttype, toupper(item.type), virttype['']),
+            type: Get_prop_type(group, 'virt', item.type),
             bufnr: bufnr,
             text: prefix[toupper(item.type)] .. item.text->split('\n')[0]->trim(),
             text_align: text_align,
@@ -279,7 +277,13 @@ def Texthl_remove(group: number)
             prop_remove({
                 id: group,
                 bufnr: str2nr(bufnr),
-                types: ['qf-text-error', 'qf-text-warning', 'qf-text-info', 'qf-text-note', 'qf-text-other'],
+                types: [
+                    $'qf-{group}-text-error',
+                    $'qf-{group}-text-warning',
+                    $'qf-{group}-text-info',
+                    $'qf-{group}-text-note',
+                    $'qf-{group}-text-other'
+                ],
                 both: true,
                 all: true
             })
@@ -297,7 +301,13 @@ def Virttext_remove(group: number)
             prop_remove({
                 id: id,
                 bufnr: str2nr(bufnr),
-                types: ['qf-virt-error', 'qf-virt-warning', 'qf-virt-info', 'qf-virt-note', 'qf-virt-other'],
+                types: [
+                    $'qf-{group}-virt-error',
+                    $'qf-{group}-virt-warning',
+                    $'qf-{group}-virt-info',
+                    $'qf-{group}-virt-note',
+                    $'qf-{group}-virt-other'
+                ],
                 both: true,
                 all: true
             })
@@ -315,10 +325,12 @@ def Props_remove(group: number)
 
     if Virttext_added(group)
         Virttext_remove(group)
+        Prop_types_delete(group, 'virt')
     endif
 
     if Texthl_added(group)
         Texthl_remove(group)
+        Prop_types_delete(group, 'text')
     endif
 
     # Remove cached data for 'group'
@@ -461,11 +473,7 @@ export def Place(loclist: bool)
         ->filter((_, i: list<number>): bool => !empty(i))
 
     if config.Getopt('texthl')
-        prop_type_change('qf-text-error',   config.Getopt('text_error'))
-        prop_type_change('qf-text-warning', config.Getopt('text_warning'))
-        prop_type_change('qf-text-info',    config.Getopt('text_info'))
-        prop_type_change('qf-text-note',    config.Getopt('text_note'))
-        prop_type_change('qf-text-other',   config.Getopt('text_other'))
+        Prop_types_add(group, 'text')
         for [buf: string, wins: list<number>] in items(displayed)
             Texthl_add(str2nr(buf), group, line('$', wins[0]))
         endfor
@@ -473,11 +481,7 @@ export def Place(loclist: bool)
     endif
 
     if config.Getopt('virttext')
-        prop_type_change('qf-virt-error',   config.Getopt('virt_error'))
-        prop_type_change('qf-virt-warning', config.Getopt('virt_warning'))
-        prop_type_change('qf-virt-info',    config.Getopt('virt_info'))
-        prop_type_change('qf-virt-note',    config.Getopt('virt_note'))
-        prop_type_change('qf-virt-other',   config.Getopt('virt_other'))
+        Prop_types_add(group, 'virt')
         for [buf: string, wins: list<number>] in items(displayed)
             Virttext_add(str2nr(buf), group, line('$', wins[0]))
         endfor
