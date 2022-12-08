@@ -1,10 +1,10 @@
 vim9script
 # ==============================================================================
-# Highlight quickfix errors and show error messages in popup window
+# Highlight quickfix locations and show error messages in popup window
 # File:         plugin/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Nov 26, 2022
+# Last Change:  Dec 8, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
