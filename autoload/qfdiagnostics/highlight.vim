@@ -382,10 +382,6 @@ def On_winclosed()
     Props_remove(winid)
 enddef
 
-export def Complete(arglead: string, cmdline: string, curpos: number): string
-    return join(['after', 'right', 'below', 'above'], "\n")
-enddef
-
 export def Place(loclist: bool)
     if !config.Getopt('signs') && !config.Getopt('texthl') && !config.Getopt('virttext')
         return
