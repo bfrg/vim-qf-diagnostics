@@ -128,14 +128,6 @@ def Prop_types_add(group: number, type: string)
     prop_type_add($'qf-{group}-{type}-other',   config.Getopt($'{type}_other'))
 enddef
 
-def Prop_types_delete(group: number, type: string)
-    prop_type_delete($'qf-{group}-{type}-error')
-    prop_type_delete($'qf-{group}-{type}-warning')
-    prop_type_delete($'qf-{group}-{type}-info')
-    prop_type_delete($'qf-{group}-{type}-note')
-    prop_type_delete($'qf-{group}-{type}-other')
-enddef
-
 def Get_prop_type(group: number, type: string, errortype: string): string
     const map: dict<string> = {
         E: $'qf-{group}-{type}-error',
@@ -282,7 +274,11 @@ def Props_remove_list(group: number, type: string)
             })
         endif
     endfor
-    Prop_types_delete(group, type)
+    prop_type_delete($'qf-{group}-{type}-error')
+    prop_type_delete($'qf-{group}-{type}-warning')
+    prop_type_delete($'qf-{group}-{type}-info')
+    prop_type_delete($'qf-{group}-{type}-note')
+    prop_type_delete($'qf-{group}-{type}-other')
 enddef
 
 def Props_remove(group: number)
