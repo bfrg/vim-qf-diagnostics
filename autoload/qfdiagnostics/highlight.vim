@@ -67,18 +67,19 @@ var signs_added: dict<bool> = {}
 #
 var texthl_added: dict<bool> = {}
 
-# Cached virtual-text IDs for each list
+# Buffers in which text-properties have been added
 #
 #   {
 #       0: {
-#           bufnr_1: [-1, -2, -3],
-#           bufnr_2: [-1],
-#           bufnr_3: [-1, -2],
+#           bufnr_1: true,
+#           bufnr_2: true,
+#           bufnr_3: false,
 #           …
 #       },
 #       1001: {…}
 #   }
-var virt_IDs: dict<dict<list<number>>> = {}
+#
+var buffers_added: dict<dict<bool>> = {}
 
 # Boolean indicating whether virtual text has been added for a list
 #
@@ -220,7 +221,6 @@ def Texthl_add(bufnr: number, group: number, maxlnum: number)
         prop_add(item.lnum, col, {
             type: Get_prop_type(group, 'text', item.type),
             bufnr: bufnr,
-            id: group,
             end_lnum: item.end_lnum > 0 ? item.end_lnum : item.lnum,
             end_col: end_col
         })
@@ -232,12 +232,6 @@ def Virttext_add(bufnr: number, group: number, maxlnum: number)
     const text_align: string = virttext_align[group]
     const prefix: dict<string> = Virttext_prefix()
     const padding: number = config.Getopt('virt_padding')
-    var virtid: number
-
-    # We need to reset virtual-text IDs here because when a buffer is unloaded,
-    # for example, after :edit, the buffer is freed and text-properties are
-    # removed, The old cached virtual-text IDs are not valid anymore.
-    virt_IDs[group][bufnr] = []
 
     for idx in buffers[group][bufnr]
         const item: dict<any> = items[idx]
@@ -247,21 +241,22 @@ def Virttext_add(bufnr: number, group: number, maxlnum: number)
             continue
         endif
 
-        virtid = prop_add(item.lnum, 0, {
+        prop_add(item.lnum, 0, {
             type: Get_prop_type(group, 'virt', item.type),
             bufnr: bufnr,
             text: get(prefix, toupper(item.type), prefix['']) .. item.text->split('\n')[0]->trim(),
             text_align: text_align,
             text_padding_left: text_align == 'below' || text_align == 'above' ? indent(item.lnum) : padding,
         })
-
-        # Save the text-prop ID for later when removing virtual text
-        add(virt_IDs[group][bufnr], virtid)
     endfor
 enddef
 
 # Add text-properties to 'bufnr' using the items stored in 'group'
 def Props_add(bufnr: number, group: number, maxlnum: number)
+    if config.Getopt('virttext') || config.Getopt('texthl')
+        buffers_added[group][bufnr] = true
+    endif
+
     if config.Getopt('virttext')
         Virttext_add(bufnr, group, maxlnum)
     endif
@@ -275,7 +270,6 @@ def Texthl_remove(group: number)
     for bufnr in keys(buffers[group])
         if bufnr->str2nr()->bufexists()
             prop_remove({
-                id: group,
                 bufnr: str2nr(bufnr),
                 types: [
                     $'qf-{group}-text-error',
@@ -284,7 +278,6 @@ def Texthl_remove(group: number)
                     $'qf-{group}-text-note',
                     $'qf-{group}-text-other'
                 ],
-                both: true,
                 all: true
             })
         endif
@@ -293,13 +286,9 @@ def Texthl_remove(group: number)
 enddef
 
 def Virttext_remove(group: number)
-    for bufnr in keys(virt_IDs[group])
-        if !bufnr->str2nr()->bufexists()
-            continue
-        endif
-        for id in virt_IDs[group][bufnr]
+    for bufnr in keys(buffers[group])
+        if bufnr->str2nr()->bufexists()
             prop_remove({
-                id: id,
                 bufnr: str2nr(bufnr),
                 types: [
                     $'qf-{group}-virt-error',
@@ -308,14 +297,12 @@ def Virttext_remove(group: number)
                     $'qf-{group}-virt-note',
                     $'qf-{group}-virt-other'
                 ],
-                both: true,
                 all: true
             })
-        endfor
+        endif
     endfor
     remove(virttext_added, group)
     remove(virttext_align, group)
-    remove(virt_IDs, group)
 enddef
 
 def Props_remove(group: number)
@@ -336,6 +323,7 @@ def Props_remove(group: number)
     # Remove cached data for 'group'
     remove(qfs, group)
     remove(buffers, group)
+    remove(buffers_added, group)
 
     if empty(qfs)
         autocmd_delete([
@@ -383,8 +371,8 @@ def On_bufread()
         return
     endif
 
-    for group in keys(virt_IDs)
-        if has_key(virt_IDs[group], bufnr)
+    for group in keys(buffers)
+        if has_key(buffers[group], bufnr)
             Props_add(bufnr, str2nr(group), line('$', wins[0]))
         endif
     endfor
@@ -402,10 +390,8 @@ enddef
 def On_bufwinenter()
     const bufnr: number = expand('<abuf>')->str2nr()
     const wins: list<number> = win_findbuf(bufnr)
-    for group in keys(virt_IDs)
-        # If no text-property IDs saved for a buffer, virtual text hasn't been
-        # added yet
-        if has_key(virt_IDs[group], bufnr) && empty(virt_IDs[group][bufnr])
+    for group in keys(buffers)
+        if has_key(buffers[group], bufnr) && !get(buffers_added[group], bufnr, false)
             Props_add(bufnr, str2nr(group), line('$', wins[0]))
         endif
     endfor
@@ -461,10 +447,10 @@ export def Place(loclist: bool)
 
     buffers[group] = Group_by_bufnr(xlist.items)
     virttext_align[group] = config.Getopt('virt_align')
-    virt_IDs[group] = {}
+    buffers_added[group] = {}
 
     for buf in keys(buffers[group])
-        virt_IDs[group][buf] = []
+        buffers_added[group][buf] = false
     endfor
 
     # Dictionary with buffers that are displayed in a window
@@ -476,6 +462,7 @@ export def Place(loclist: bool)
         Prop_types_add(group, 'text')
         for [buf: string, wins: list<number>] in items(displayed)
             Texthl_add(str2nr(buf), group, line('$', wins[0]))
+            buffers_added[group][buf] = true
         endfor
         texthl_added[group] = true
     endif
@@ -484,6 +471,7 @@ export def Place(loclist: bool)
         Prop_types_add(group, 'virt')
         for [buf: string, wins: list<number>] in items(displayed)
             Virttext_add(str2nr(buf), group, line('$', wins[0]))
+            buffers_added[group][buf] = true
         endfor
         virttext_added[group] = true
     endif
@@ -571,7 +559,7 @@ export def Debug(): dict<any>
         buffers: deepcopy(buffers),
         signs: deepcopy(signs_added),
         texthl: deepcopy(texthl_added),
-        virt_IDs: deepcopy(virt_IDs),
+        buffers_added: deepcopy(buffers_added),
         virttext: deepcopy(virttext_added),
         virt_align: deepcopy(virttext_align)
     }
