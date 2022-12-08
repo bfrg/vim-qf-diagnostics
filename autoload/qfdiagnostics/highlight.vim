@@ -196,7 +196,7 @@ def Texthl_add(bufnr: number, group: number, maxlnum: number)
         max = bufnr->getbufline(item.lnum)[0]->strlen()
 
         # Sanity checks (should we call prop_add() inside a try/catch? block)
-        if item.col == 0 || max == 0 || item.lnum > maxlnum
+        if item.col == 0 || max == 0 || item.lnum > maxlnum || item.end_lnum > maxlnum
             continue
         endif
 
