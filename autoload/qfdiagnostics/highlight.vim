@@ -1,6 +1,6 @@
 vim9script
 # ==============================================================================
-# Highlight quickfix errors and show error messages in popup window
+# Highlight quickfix locations and show error messages in popup window
 # File:         autoload/qfdiagnostics/highlight.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
