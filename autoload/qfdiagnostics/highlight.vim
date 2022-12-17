@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics/highlight.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Dec 8, 2022
+# Last Change:  Dec 18, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -21,83 +21,68 @@ const signname: dict<string> = {
 
 # Cached quickfix and location lists (for each window), accessed by 0 (quickfix)
 # and window ID (location-list)
-#
-#   {
-#       0: {
-#           id: 2,
-#           changedtick: 4,
-#           items: [ getqflist()->filter() … ]
-#       },
-#       1001: {…}
-#   }
-#
+# {
+#   0: {
+#     id: 2,
+#     changedtick: 4,
+#     items: [ getqflist()->filter() … ]
+#   },
+#   1001: {…}
+# }
 var qfs: dict<dict<any>> = {}
 
 # Quickfix and location-lists grouped by buffer numbers. Each list stores the
 # indexes in the original list, like qfs[0].items
-#
-#   {
-#       0: {
-#           bufnr_1: [0, 1, 2],
-#           bufnr_2: [3],
-#           bufnr_3: [4, 5],
-#           …
-#       },
-#       1001: {…}
-#   }
-#
+# {
+#   0: {
+#     bufnr_1: [0, 1, 2],
+#     bufnr_2: [3],
+#     bufnr_3: [4, 5],
+#   },
+#   …
+# }
 var buffers: dict<dict<list<number>>> = {}
 
 # Boolean indicating whether signs have been placed for a quickfix and/or
 # location list
-#
-#   {
-#       0: true,
-#       1001: false,
-#   }
-#
+# {
+#   0: true,
+#   1001: false,
+# }
 var signs_added: dict<bool> = {}
 
 # Boolean indicating whether text-highlighting has been added for a list
-#
-#   {
-#       0: true,
-#       1001: false,
-#   }
-#
+# {
+#   0: true,
+#   1001: false,
+# }
 var texthl_added: dict<bool> = {}
 
 # Buffers in which text-properties have been added
-#
-#   {
-#       0: {
-#           bufnr_1: true,
-#           bufnr_2: true,
-#           bufnr_3: false,
-#           …
-#       },
-#       1001: {…}
-#   }
-#
+# {
+#   0: {
+#     bufnr_1: true,
+#     bufnr_2: true,
+#     bufnr_3: false,
+#     …
+#   },
+#   …
+# }
 var buffers_added: dict<dict<bool>> = {}
 
 # Boolean indicating whether virtual text has been added for a list
-#
-#   {
-#       0: true,
-#       1001: false,
-#   }
-#
+# {
+#   0: true,
+#   1001: false,
+# }
 var virttext_added: dict<bool> = {}
 
 # virtual-text 'align' option for each list, i.e. it is possible to have
 # different 'align' for quickfix and each location list
-#
-#   {
-#       0: 'right',
-#       1001: 'below',
-#   }
-#
+# {
+#   0: 'right',
+#   1001: 'below',
+# }
 var virttext_align: dict<string> = {}
 
 def Sign_priorities(): dict<number>
