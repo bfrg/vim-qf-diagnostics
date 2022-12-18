@@ -178,7 +178,7 @@ def Texthl_add(bufnr: number, group: number)
 
     for idx in buffers[group][bufnr]
         const item: dict<any> = items[idx]
-        max = bufnr->getbufline(item.lnum)[0]->strlen()
+        max = bufnr->getbufoneline(item.lnum)->strlen()
 
         if item.col == 0 || max == 0
             continue
@@ -187,7 +187,7 @@ def Texthl_add(bufnr: number, group: number)
         col = item.col < max ? item.col : max
         if item.end_col > 0
             end_max = item.end_lnum > 0 && item.end_lnum != item.lnum
-                ? bufnr->getbufline(item.end_lnum)[0]->strlen() + 1
+                ? bufnr->getbufoneline(item.end_lnum)->strlen() + 1
                 : max + 1
             end_col = item.end_col < end_max ? item.end_col : end_max
         else
