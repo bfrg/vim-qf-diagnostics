@@ -58,18 +58,6 @@ var signs_added: dict<bool> = {}
 # }
 var texthl_added: dict<bool> = {}
 
-# Buffers in which text-properties have been added
-# {
-#   0: {
-#     bufnr_1: true,
-#     bufnr_2: true,
-#     bufnr_3: false,
-#     …
-#   },
-#   …
-# }
-var buffers_added: dict<dict<bool>> = {}
-
 # Boolean indicating whether virtual text has been added for a list
 # {
 #   0: true,
@@ -228,10 +216,6 @@ def Virttext_add(bufnr: number, group: number)
 enddef
 
 def Props_add(bufnr: number, group: number)
-    if config.Getopt('virttext') || config.Getopt('texthl')
-        buffers_added[group][bufnr] = true
-    endif
-
     if config.Getopt('virttext')
         Virttext_add(bufnr, group)
     endif
@@ -283,7 +267,6 @@ def Props_remove(group: number)
     # Remove cached data for 'group'
     remove(qfs, group)
     remove(buffers, group)
-    remove(buffers_added, group)
 
     if empty(qfs)
         autocmd_delete([{group: 'qf-diagnostics', event: 'BufReadPost'}])
@@ -378,11 +361,6 @@ export def Place(loclist: bool)
 
     buffers[group] = Group_by_bufnr(xlist.items)
     virttext_align[group] = config.Getopt('virt_align')
-    buffers_added[group] = {}
-
-    for buf in keys(buffers[group])
-        buffers_added[group][buf] = false
-    endfor
 
     const bufsloaded: list<number> = buffers[group]
         ->keys()
@@ -393,7 +371,6 @@ export def Place(loclist: bool)
         Prop_types_add(group, 'text')
         for buf in bufsloaded
             Texthl_add(buf, group)
-            buffers_added[group][buf] = true
         endfor
         texthl_added[group] = true
     endif
@@ -402,7 +379,6 @@ export def Place(loclist: bool)
         Prop_types_add(group, 'virt')
         for buf in bufsloaded
             Virttext_add(buf, group)
-            buffers_added[group][buf] = true
         endfor
         virttext_added[group] = true
     endif
@@ -481,7 +457,6 @@ export def Debug(): dict<any>
         buffers: buffers,
         signs: signs_added,
         texthl: texthl_added,
-        buffers_added: buffers_added,
         virttext: virttext_added,
         virt_align: virttext_align
     })
