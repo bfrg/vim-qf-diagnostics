@@ -169,7 +169,7 @@ def Virttext_added(group: number): bool
     return get(virttext_added, group, false)
 enddef
 
-def Texthl_add(bufnr: number, group: number, maxlnum: number)
+def Texthl_add(bufnr: number, group: number)
     const items: list<dict<any>> = qfs[group].items
     var max: number
     var end_max: number
@@ -180,8 +180,7 @@ def Texthl_add(bufnr: number, group: number, maxlnum: number)
         const item: dict<any> = items[idx]
         max = bufnr->getbufline(item.lnum)[0]->strlen()
 
-        # Sanity checks (should we call prop_add() inside a try/catch? block)
-        if item.col == 0 || max == 0 || item.lnum > maxlnum || item.end_lnum > maxlnum
+        if item.col == 0 || max == 0
             continue
         endif
 
@@ -195,16 +194,19 @@ def Texthl_add(bufnr: number, group: number, maxlnum: number)
             end_col = col + 1
         endif
 
-        prop_add(item.lnum, col, {
-            type: Get_prop_type(group, 'text', item.type),
-            bufnr: bufnr,
-            end_lnum: item.end_lnum > 0 ? item.end_lnum : item.lnum,
-            end_col: end_col
-        })
+        try
+            prop_add(item.lnum, col, {
+                type: Get_prop_type(group, 'text', item.type),
+                bufnr: bufnr,
+                end_lnum: item.end_lnum > 0 ? item.end_lnum : item.lnum,
+                end_col: end_col
+            })
+        catch
+        endtry
     endfor
 enddef
 
-def Virttext_add(bufnr: number, group: number, maxlnum: number)
+def Virttext_add(bufnr: number, group: number)
     const items: list<dict<any>> = qfs[group].items
     const text_align: string = virttext_align[group]
     const prefix: dict<string> = Virttext_prefix()
@@ -212,34 +214,30 @@ def Virttext_add(bufnr: number, group: number, maxlnum: number)
 
     for idx in buffers[group][bufnr]
         const item: dict<any> = items[idx]
-
-        # Sanity checks (should we call prop_add() inside a try/catch? block)
-        if item.lnum > maxlnum
-            continue
-        endif
-
-        prop_add(item.lnum, 0, {
-            type: Get_prop_type(group, 'virt', item.type),
-            bufnr: bufnr,
-            text: get(prefix, toupper(item.type), prefix['']) .. item.text->split('\n')[0]->trim(),
-            text_align: text_align,
-            text_padding_left: text_align == 'below' || text_align == 'above' ? indent(item.lnum) : padding,
-        })
+        try
+            prop_add(item.lnum, 0, {
+                type: Get_prop_type(group, 'virt', item.type),
+                bufnr: bufnr,
+                text: get(prefix, toupper(item.type), prefix['']) .. item.text->split('\n')[0]->trim(),
+                text_align: text_align,
+                text_padding_left: text_align == 'below' || text_align == 'above' ? indent(item.lnum) : padding,
+            })
+        catch
+        endtry
     endfor
 enddef
 
-# Add text-properties to 'bufnr' using the items stored in 'group'
-def Props_add(bufnr: number, group: number, maxlnum: number)
+def Props_add(bufnr: number, group: number)
     if config.Getopt('virttext') || config.Getopt('texthl')
         buffers_added[group][bufnr] = true
     endif
 
     if config.Getopt('virttext')
-        Virttext_add(bufnr, group, maxlnum)
+        Virttext_add(bufnr, group)
     endif
 
     if config.Getopt('texthl')
-        Texthl_add(bufnr, group, maxlnum)
+        Texthl_add(bufnr, group)
     endif
 enddef
 
@@ -288,10 +286,7 @@ def Props_remove(group: number)
     remove(buffers_added, group)
 
     if empty(qfs)
-        autocmd_delete([
-            {group: 'qf-diagnostics', event: 'BufWinEnter'},
-            {group: 'qf-diagnostics', event: 'BufReadPost'}
-        ])
+        autocmd_delete([{group: 'qf-diagnostics', event: 'BufReadPost'}])
     endif
 enddef
 
@@ -320,27 +315,7 @@ def Signs_remove(group: number)
     remove(signs_added, group)
 enddef
 
-# Re-apply text-properties to a buffer that was reloaded with ':edit'. Since we
-# are postponing adding text-properties until the buffer is displayed in a
-# window, we return when the buffer isn't displayed in a window. For example,
-# when we call bufload(bufnr), BufRead is triggered but we don't want to add
-# text-properties until BufWinEnter is triggered. Is this good?
-def On_bufread()
-    const bufnr: number = expand('<abuf>')->str2nr()
-    const wins: list<number> = win_findbuf(bufnr)
-
-    if empty(wins)
-        return
-    endif
-
-    for group in keys(buffers)
-        if has_key(buffers[group], bufnr)
-            Props_add(bufnr, str2nr(group), line('$', wins[0]))
-        endif
-    endfor
-enddef
-
-# We add text-properties to the buffer only after it's displayed in a window
+# Add text-properties to a buffer after it was loaded and reloaded with ':edit'
 #
 # TODO:
 # - Should we check quickfix's 'changedtick', and if it changed, get new
@@ -348,13 +323,11 @@ enddef
 #   new ones?
 # - Check if quickfix list with given quickfix-ID still exists, if it doesn't,
 #   we need to remove ALL text-properties, and don't add new ones
-#
-def On_bufwinenter()
+def On_bufread()
     const bufnr: number = expand('<abuf>')->str2nr()
-    const wins: list<number> = win_findbuf(bufnr)
     for group in keys(buffers)
-        if has_key(buffers[group], bufnr) && !get(buffers_added[group], bufnr, false)
-            Props_add(bufnr, str2nr(group), line('$', wins[0]))
+        if has_key(buffers[group], bufnr)
+            Props_add(bufnr, str2nr(group))
         endif
     endfor
 enddef
@@ -411,15 +384,15 @@ export def Place(loclist: bool)
         buffers_added[group][buf] = false
     endfor
 
-    # Dictionary with buffers that are displayed in a window
-    const displayed: dict<list<number>> = buffers[group]
-        ->mapnew((b: string, _): list<number> => b->str2nr()->win_findbuf())
-        ->filter((_, i: list<number>): bool => !empty(i))
+    const bufsloaded: list<number> = buffers[group]
+        ->keys()
+        ->mapnew((_, i: string): number => str2nr(i))
+        ->filter((_, i: number) => bufloaded(i))
 
     if config.Getopt('texthl')
         Prop_types_add(group, 'text')
-        for [buf: string, wins: list<number>] in items(displayed)
-            Texthl_add(str2nr(buf), group, line('$', wins[0]))
+        for buf in bufsloaded
+            Texthl_add(buf, group)
             buffers_added[group][buf] = true
         endfor
         texthl_added[group] = true
@@ -427,29 +400,20 @@ export def Place(loclist: bool)
 
     if config.Getopt('virttext')
         Prop_types_add(group, 'virt')
-        for [buf: string, wins: list<number>] in items(displayed)
-            Virttext_add(str2nr(buf), group, line('$', wins[0]))
+        for buf in bufsloaded
+            Virttext_add(buf, group)
             buffers_added[group][buf] = true
         endfor
         virttext_added[group] = true
     endif
 
-    autocmd_add([
-        {
-            group: 'qf-diagnostics',
-            event: 'BufWinEnter',
-            pattern: '*',
-            replace: true,
-            cmd: "On_bufwinenter()"
-        },
-        {
-            group: 'qf-diagnostics',
-            event: 'BufReadPost',
-            replace: true,
-            pattern: '*',
-            cmd: "On_bufread()"
-        }
-    ])
+    autocmd_add([{
+        group: 'qf-diagnostics',
+        event: 'BufReadPost',
+        replace: true,
+        pattern: '*',
+        cmd: "On_bufread()"
+    }])
 
     if loclist
         autocmd_add([{
