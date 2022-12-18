@@ -19,29 +19,15 @@ const signname: dict<string> = {
    '': 'qf-other'
 }
 
-# Cached quickfix and location lists (for each window), accessed by 0 (quickfix)
-# and window ID (location-list)
+# Quickfix and location-lists grouped by buffer numbers
 # {
 #   0: {
-#     id: 2,
-#     changedtick: 4,
-#     items: [ getqflist()->filter() … ]
-#   },
-#   1001: {…}
-# }
-var qfs: dict<dict<any>> = {}
-
-# Quickfix and location-lists grouped by buffer numbers. Each list stores the
-# indexes in the original list, like qfs[0].items
-# {
-#   0: {
-#     bufnr_1: [0, 1, 2],
-#     bufnr_2: [3],
-#     bufnr_3: [4, 5],
+#     bufnr_1: [{…}, {…}, …],
+#     bufnr_2: [{…}],
 #   },
 #   …
 # }
-var buffers: dict<dict<list<number>>> = {}
+var qf_items: dict<dict<list<dict<any>>>> = {}
 
 # Boolean indicating whether signs have been placed for a quickfix and/or
 # location list
@@ -113,18 +99,14 @@ def Get_prop_type(group: number, type: string, errortype: string): string
 enddef
 
 # Group quickfix list 'items' by buffer number
-def Group_by_bufnr(items: list<dict<any>>): dict<list<number>>
-    final bufgroups: dict<list<number>> = {}
-    var idx: number = -1
-
+def Group_by_bufnr(items: list<dict<any>>): dict<list<dict<any>>>
+    final bufgroups: dict<list<dict<any>>> = {}
     for i in items
-        ++idx
         if !has_key(bufgroups, i.bufnr)
             bufgroups[i.bufnr] = []
         endif
-        add(bufgroups[i.bufnr], idx)
+        add(bufgroups[i.bufnr], i)
     endfor
-
     return bufgroups
 enddef
 
@@ -158,14 +140,12 @@ def Virttext_added(group: number): bool
 enddef
 
 def Texthl_add(bufnr: number, group: number)
-    const items: list<dict<any>> = qfs[group].items
     var max: number
     var end_max: number
     var col: number
     var end_col: number
 
-    for idx in buffers[group][bufnr]
-        const item: dict<any> = items[idx]
+    for item in qf_items[group][bufnr]
         max = bufnr->getbufoneline(item.lnum)->strlen()
 
         if item.col == 0 || max == 0
@@ -195,13 +175,11 @@ def Texthl_add(bufnr: number, group: number)
 enddef
 
 def Virttext_add(bufnr: number, group: number)
-    const items: list<dict<any>> = qfs[group].items
     const text_align: string = virttext_align[group]
     const prefix: dict<string> = Virttext_prefix()
     const padding: number = config.Getopt('virt_padding')
 
-    for idx in buffers[group][bufnr]
-        const item: dict<any> = items[idx]
+    for item in qf_items[group][bufnr]
         try
             prop_add(item.lnum, 0, {
                 type: Get_prop_type(group, 'virt', item.type),
@@ -226,7 +204,7 @@ def Props_add(bufnr: number, group: number)
 enddef
 
 def Props_remove_list(group: number, type: string)
-    for bufnr in keys(buffers[group])
+    for bufnr in keys(qf_items[group])
         if bufnr->str2nr()->bufexists()
             prop_remove({
                 bufnr: str2nr(bufnr),
@@ -249,7 +227,7 @@ def Props_remove_list(group: number, type: string)
 enddef
 
 def Props_remove(group: number)
-    if !has_key(qfs, group)
+    if !has_key(qf_items, group)
         return
     endif
 
@@ -264,20 +242,18 @@ def Props_remove(group: number)
         remove(texthl_added, group)
     endif
 
-    # Remove cached data for 'group'
-    remove(qfs, group)
-    remove(buffers, group)
+    remove(qf_items, group)
 
-    if empty(qfs)
+    if empty(qf_items)
         autocmd_delete([{group: 'qf-diagnostics', event: 'BufReadPost'}])
     endif
 enddef
 
-def Signs_add(group: number)
+def Signs_add(xlist: list<dict<any>>, group: number)
     const priorities: dict<number> = Sign_priorities()
     const signgroup: string = Sign_group(group)
 
-    qfs[group].items
+    xlist
         ->mapnew((_, i: dict<any>): dict<any> => ({
             lnum: i.lnum,
             buffer: i.bufnr,
@@ -308,8 +284,8 @@ enddef
 #   we need to remove ALL text-properties, and don't add new ones
 def On_bufread()
     const bufnr: number = expand('<abuf>')->str2nr()
-    for group in keys(buffers)
-        if has_key(buffers[group], bufnr)
+    for group in keys(qf_items)
+        if has_key(qf_items[group], bufnr)
             Props_add(bufnr, str2nr(group))
         endif
     endfor
@@ -329,22 +305,18 @@ export def Place(loclist: bool)
     endif
 
     const group: number = Group_id(loclist)
-    final xlist: dict<any> = loclist
-        ? getloclist(0, {items: 0, id: 0, changedtick: 0})
-        : getqflist({items: 0, id: 0, changedtick: 0})
+    var xlist: list<dict<any>> = loclist ? getloclist(0) : getqflist()
 
     # Remove previously placed text-properties and signs
     Signs_remove(group)
     Props_remove(group)
 
     # Remove invalid quickfix items
-    filter(xlist.items, (_, i: dict<any>): bool => !(i.lnum < 1 || !i.valid || i.bufnr < 1 || !bufexists(i.bufnr)))
+    filter(xlist, (_, i: dict<any>): bool => !(i.lnum < 1 || !i.valid || i.bufnr < 1 || !bufexists(i.bufnr)))
 
-    if empty(xlist.items)
+    if empty(xlist)
         return
     endif
-
-    qfs[group] = xlist
 
     if config.Getopt('signs')
         sign_define('qf-error',   config.Getopt('sign_error'))
@@ -352,17 +324,17 @@ export def Place(loclist: bool)
         sign_define('qf-info',    config.Getopt('sign_info'))
         sign_define('qf-note',    config.Getopt('sign_note'))
         sign_define('qf-other',   config.Getopt('sign_other'))
-        Signs_add(group)
+        Signs_add(xlist, group)
     endif
 
     if !config.Getopt('texthl') && !config.Getopt('virttext')
         return
     endif
 
-    buffers[group] = Group_by_bufnr(xlist.items)
+    qf_items[group] = Group_by_bufnr(xlist)
     virttext_align[group] = config.Getopt('virt_align')
 
-    const bufsloaded: list<number> = buffers[group]
+    const bufsloaded: list<number> = qf_items[group]
         ->keys()
         ->mapnew((_, i: string): number => str2nr(i))
         ->filter((_, i: number) => bufloaded(i))
@@ -407,7 +379,7 @@ export def Clear(loclist: bool, bang: bool = false)
     if loclist
         if bang
             var id: number
-            for i in keys(qfs)
+            for i in keys(qf_items)
                 id = str2nr(i)
                 if id != 0
                     Signs_remove(id)
@@ -453,8 +425,7 @@ enddef
 
 export def Debug(): dict<any>
     return deepcopy({
-        qfs: qfs,
-        buffers: buffers,
+        qf_items: qf_items,
         signs: signs_added,
         texthl: texthl_added,
         virttext: virttext_added,
