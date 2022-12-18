@@ -476,13 +476,13 @@ export def Toggle(loclist: bool)
 enddef
 
 export def Debug(): dict<any>
-    return {
-        qfs: deepcopy(qfs),
-        buffers: deepcopy(buffers),
-        signs: deepcopy(signs_added),
-        texthl: deepcopy(texthl_added),
-        buffers_added: deepcopy(buffers_added),
-        virttext: deepcopy(virttext_added),
-        virt_align: deepcopy(virttext_align)
-    }
+    return deepcopy({
+        qfs: qfs,
+        buffers: buffers,
+        signs: signs_added,
+        texthl: texthl_added,
+        buffers_added: buffers_added,
+        virttext: virttext_added,
+        virt_align: virttext_align
+    })
 enddef
