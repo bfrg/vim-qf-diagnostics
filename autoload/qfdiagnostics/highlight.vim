@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics/highlight.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Dec 18, 2022
+# Last Change:  Dec 19, 2022
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -245,7 +245,10 @@ def Props_remove(group: number)
     remove(qf_items, group)
 
     if empty(qf_items)
-        autocmd_delete([{group: 'qf-diagnostics', event: 'BufReadPost'}])
+        autocmd_delete([
+            {group: 'qf-diagnostics', event: 'BufReadPost'},
+            {group: 'qf-diagnostics', event: 'BufUnload'}
+        ])
     endif
 enddef
 
@@ -297,6 +300,27 @@ def On_winclosed()
     const winid: number = expand('<amatch>')->str2nr()
     Signs_remove(winid)
     Props_remove(winid)
+enddef
+
+def On_bufunload()
+    const bufnr: number = expand('<abuf>')->str2nr()
+    for group in keys(qf_items)
+        if has_key(qf_items[group], bufnr)
+            const gr: number = str2nr(group)
+            gr->Sign_group()->sign_unplace({buffer: bufnr})
+            remove(qf_items[group], bufnr)
+            # Remove text-property types and associated data if last buffer
+            if empty(qf_items[group])
+                remove(signs_added, group)
+                Props_remove(gr)
+                autocmd_delete([{
+                    group: 'qf-diagnostics',
+                    event: 'WinClosed',
+                    pattern: group
+                }])
+            endif
+        endif
+    endfor
 enddef
 
 export def Place(loclist: bool)
@@ -355,13 +379,22 @@ export def Place(loclist: bool)
         virttext_added[group] = true
     endif
 
-    autocmd_add([{
-        group: 'qf-diagnostics',
-        event: 'BufReadPost',
-        replace: true,
-        pattern: '*',
-        cmd: "On_bufread()"
-    }])
+    autocmd_add([
+        {
+            group: 'qf-diagnostics',
+            event: 'BufReadPost',
+            replace: true,
+            pattern: '*',
+            cmd: "On_bufread()"
+        },
+        {
+            group: 'qf-diagnostics',
+            event: 'BufUnload',
+            replace: true,
+            pattern: '*',
+            cmd: "On_bufunload()"
+        }
+    ])
 
     if loclist
         autocmd_add([{
