@@ -4,14 +4,9 @@ vim9script
 # File:         plugin/qfdiagnostics.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Dec 8, 2022
+# Last Change:  Dec 24, 2024
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
-
-if get(g:, 'loaded_qfdiagnostics')
-    finish
-endif
-g:loaded_qfdiagnostics = 1
 
 import autoload '../autoload/qfdiagnostics/popup.vim'
 import autoload '../autoload/qfdiagnostics/highlight.vim'
