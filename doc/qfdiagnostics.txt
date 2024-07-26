@@ -222,12 +222,7 @@ are supported:
             Default: ['═', '║', '═', '║', '╔', '╗', '╝', '╚']
 
     popup_create_cb                          *g:qfdiagnostics.popup_create_cb*
-            Callback function called after the popup window is created. The
-            arguments are |window-ID| of the popup window, the |quickfix-ID|
-            of the current quickfix or location list, and a boolean that
-            indicates whether a quickfix or location list is used. See
-            |qf-diagnostics-examples| for an example callback function.
-            Default: (empty function)
+            This option has been removed.
 
     popup_items                                  *g:qfdiagnostics.popup_items*
             Which quickfix items to display in popup window. Valid values are:
@@ -261,29 +256,7 @@ EXAMPLES                                             *qf-diagnostics-examples*
     nnoremap <F7> <Cmd>DiagnosticsToggle<Cr>
     nnoremap <F8> <Cmd>LDiagnosticsToggle<Cr>
 <
-4. If you want to extend the highlighting in the popup window, you can add a
-   callback function which will be invoked when the popup window is created.
-   For example, the following example highlights the warning type of gcc and
-   clang compiler messages in the popup window: >
-    def Callback(winid: number, qfid: number, is_loclist: bool)
-        const title = is_loclist
-            ? getloclist(0, {title: 0, id: qfid}).title
-            : getqflist({title: 0, id: qfid}).title
-
-        if title !~ '^:\=\%(gcc\|g++\|clang\|[gc]\=make\)'
-            return
-        endif
-
-        matchadd('WarningMsg', '\[\zs-W.\{-}\ze]$', 10, -1, {window: winid})
-    enddef
-
-    g:qfdiagnostics = {'popup_create_cb': Callback}
-<
-    This will highlight "-Wunused-parameter" in the popup window for compiler
-    messages like: >
-     warning: unused parameter 'out' [-Wunused-parameter]
-<
-5. Toggle the text-highlightings on and off: >
+4. Toggle the text-highlightings on and off: >
     def Diagnostics_toggle_props()
         g:qfdiagnostics = get(g:, 'qfdiagnostics', {})
         g:qfdiagnostics.texthl = get(g:qfdiagnostics, 'texthl', false)

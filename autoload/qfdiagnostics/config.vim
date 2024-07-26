@@ -4,12 +4,11 @@ vim9script
 # File:         autoload/qfdiagnostics/config.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Dec 8, 2022
+# Last Change:  Jul 27, 2024
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
 const defaults: dict<any> = {
-    popup_create_cb: (_, _, _) => 0,
     popup_scrollup: "\<c-k>",
     popup_scrolldown: "\<c-j>",
     popup_border: [0, 0, 0, 0],

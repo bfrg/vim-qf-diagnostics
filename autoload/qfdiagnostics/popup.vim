@@ -4,7 +4,7 @@ vim9script
 # File:         autoload/qfdiagnostics/popup.vim
 # Author:       bfrg <https://github.com/bfrg>
 # Website:      https://github.com/bfrg/vim-qf-diagnostics
-# Last Change:  Dec 8, 2022
+# Last Change:  Jul 27, 2024
 # License:      Same as Vim itself (see :h license)
 # ==============================================================================
 
@@ -205,7 +205,6 @@ export def Show(loclist: bool): number
     matchadd('QfDiagnosticsWarning', '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {window: popup_id})
     matchadd('QfDiagnosticsInfo',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {window: popup_id})
     matchadd('QfDiagnosticsNote',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {window: popup_id})
-    config.Getopt('popup_create_cb')(popup_id, qf.id, loclist)
 
     return popup_id
 enddef
