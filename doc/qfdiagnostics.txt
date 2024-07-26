@@ -222,7 +222,27 @@ are supported:
             Default: ['═', '║', '═', '║', '╔', '╗', '╝', '╚']
 
     popup_create_cb                          *g:qfdiagnostics.popup_create_cb*
-            This option has been removed.
+            This option has been removed. To set highlightings in the popup,
+            use |g:qfdiagnostics.popup_highlights| below.
+
+    popup_highlights                        *g:qfdiagnostics.popup_highlights*
+            List of dictionaries for setting custom highlightings in the popup
+            window. Each dictionary item can contain the following keys:
+
+            title       apply the highlightings in the popup only to quickfix
+                        lists whose titles match the given pattern
+
+            matchadd    List of dictionaries defining patterns that will be
+                        highlighted. The following keys are supported:
+
+                        highlight   highlight group for matched pattern
+                        pattern     the pattern to be highlighted
+                        priority    assign a priority to match (default: 10)
+
+            syntax      set the 'syntax' option in the popup buffer to the
+                        specified syntax.
+
+            Default: []
 
     popup_items                                  *g:qfdiagnostics.popup_items*
             Which quickfix items to display in popup window. Valid values are:
@@ -256,7 +276,29 @@ EXAMPLES                                             *qf-diagnostics-examples*
     nnoremap <F7> <Cmd>DiagnosticsToggle<Cr>
     nnoremap <F8> <Cmd>LDiagnosticsToggle<Cr>
 <
-4. Toggle the text-highlightings on and off: >
+4. Extend the highlighting in the popup window with the
+   |g:qfdiagnostics.popup_highlight| option. The following example highlights
+   the warning type of gcc and clang compiler messages in the popup window: >
+    g:qfdiagnostics = {
+        popup_highlights: [
+            {
+                title: '^:\=\%(gcc\|g++\|clang\|[gc]\=make\)',
+                matchadd: [
+                    {
+                        highlight: 'WarningMsg',
+                        pattern: '\[\zs-W.\{-}\ze]$',
+                        priority: 20
+                    }
+                ]
+            }
+        ]
+    }
+<
+    This will highlight "-Wunused-parameter" in the popup window for compiler
+    messages like: >
+     warning: unused parameter 'out' [-Wunused-parameter]
+<
+5. Toggle the text-highlightings on and off: >
     def Diagnostics_toggle_props()
         g:qfdiagnostics = get(g:, 'qfdiagnostics', {})
         g:qfdiagnostics.texthl = get(g:qfdiagnostics, 'texthl', false)

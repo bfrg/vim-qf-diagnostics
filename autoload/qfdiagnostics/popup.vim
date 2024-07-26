@@ -110,8 +110,8 @@ enddef
 
 export def Show(loclist: bool): number
     const qf: dict<any> = loclist
-        ? getloclist(0, {id: 0, items: 0})
-        : getqflist({id: 0, items: 0})
+        ? getloclist(0, {id: 0, items: 0, title: 0})
+        : getqflist({id: 0, items: 0, title: 0})
     const xlist: list<any> = qf.items
 
     if empty(xlist)
@@ -205,6 +205,24 @@ export def Show(loclist: bool): number
     matchadd('QfDiagnosticsWarning', '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<warning\>\%(:\| \d\+:\)', 10, -1, {window: popup_id})
     matchadd('QfDiagnosticsInfo',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<info\>\%(:\| \d\+:\)',    10, -1, {window: popup_id})
     matchadd('QfDiagnosticsNote',    '^(\d\+/\d\+) \d\+\%(:\d\+\)\? \zs\<note\>\%(:\| \d\+:\)',    10, -1, {window: popup_id})
+
+    const highlights: list<dict<any>> = config.Getopt('popup_highlights')
+
+    if !empty(highlights)
+        for h in highlights
+            if qf.title =~ get(h, 'title', '')
+                if get(h, 'syntax', '') != ''
+                    setbufvar(winbufnr(popup_id), '&syntax', h.syntax)
+                endif
+
+                for m in get(h, 'matchadd', [])
+                    if has_key(m, 'highlight') && has_key(m, 'pattern')
+                        matchadd(m.highlight, m.pattern, get(m, 'priority', 10), -1, {window: popup_id})
+                    endif
+                endfor
+            endif
+        endfor
+    endif
 
     return popup_id
 enddef

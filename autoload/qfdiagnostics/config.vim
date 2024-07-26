@@ -9,6 +9,7 @@ vim9script
 # ==============================================================================
 
 const defaults: dict<any> = {
+    popup_highlights: [],
     popup_scrollup: "\<c-k>",
     popup_scrolldown: "\<c-j>",
     popup_border: [0, 0, 0, 0],
